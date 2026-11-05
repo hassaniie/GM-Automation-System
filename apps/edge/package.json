@@ -1,0 +1,26 @@
+{
+  "name": "@mg/edge",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Edge server: runs the plant engine on site and serves live state to every screen",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "dev:remote": "tsx watch src/main.ts"
+  },
+  "dependencies": {
+    "@fastify/static": "10.1.10",
+    "@fastify/websocket": "11.3.7",
+    "@mg/contracts": "workspace:*",
+    "@mg/engine": "workspace:*",
+    "@mg/sim": "workspace:*",
+    "@mg/sync": "workspace:*",
+    "fastify": "5.12.8"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.2",
+    "tsx": "4.23.15",
+    "ws": "8.22.1"
+  }
+}

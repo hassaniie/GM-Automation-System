@@ -15,7 +15,10 @@
     "test": "vitest run",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md,yml,yaml}\""
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yml,yaml}\"",
+    "dev:edge": "pnpm --filter @mg/edge dev",
+    "start:edge": "pnpm --filter @mg/web build:edge && pnpm --filter @mg/edge start",
+    "dev:all": "pnpm --parallel --filter @mg/edge --filter @mg/web run dev:remote"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

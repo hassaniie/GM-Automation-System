@@ -28,7 +28,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/test/**', '*.config.{js,ts}', '**/vite.config.js'],
+    // TypeScript checks names itself (typescript-eslint recommends turning this off for .ts).
+    files: ['**/*.{ts,tsx}'],
+    rules: { 'no-undef': 'off' },
+  },
+  {
+    files: ['apps/edge/**', '**/test/**', '*.config.{js,ts}', '**/vite.config.js'],
     languageOptions: { globals: { ...globals.node } },
   },
 );
