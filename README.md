@@ -54,7 +54,10 @@ A pnpm workspace:
 
 | Path | Contents |
 |---|---|
-| `packages/engine` | Deterministic line simulator and Andon rules (`MGE`): stations, carriers, hangers, transfers, alarms, root-cause analysis, scans, offline and return, takt, cycle time, downtime, buzzers, assist calls, shift calendar, targets, corrections, audit. `test/` holds the Vitest checks |
+| `packages/contracts` | Shared TypeScript types: plant events (what devices report), operator commands, engine state and snapshot |
+| `packages/core` | The Andon rules, with no simulator and no browser code: plant model, tracking, scans, takt, cycle time, downtime, three-state Andon, buzzers, calls, shift calendar and targets, offline and return, corrections, alarms, root-cause analysis, audit. Plant events enter through `apply()` |
+| `packages/sim` | The line simulator: carrier movement, transfers, paint-shop feed, simulated teams and responders. It reports to the rules only through plant events |
+| `packages/engine` | Facade: the `MGE` object the screens and scene use, assembled from `core` and `sim`. Its tests are the 42 URD checks |
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |
@@ -68,6 +71,8 @@ A pnpm workspace:
 | `apps/web/src/reports.js` | Reports and Excel/PDF export |
 | `apps/web/src/how.js` | How it works / URD coverage |
 | `docs/` | Plant GA layout drawing the floor plan was traced from; URD clarification questions |
+
+Each simulated second runs: `beginTick` (rules: clock, shift, planned stops) → `settleMovements` (plant: arrivals and transfers) → `accountTime` (rules: cycle-time accounting) → `advance` (plant: simulated work, feeds, new movements) → `endTick` (rules: analysis, alarms, downtime, buzzers). In deployment the plant halves are replaced by events from the PLC, scanners and the FL7 photo-eye; ESLint stops `core` from importing the simulator or the UI.
 
 UI files are plain ES modules using htm templates; new code can be TypeScript. In the browser console, `MGE` (engine) and `__mg` (`RT`, `go`, `setUI`) are available for debugging.
 

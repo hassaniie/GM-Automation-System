@@ -20,6 +20,14 @@ export default tseslint.config(
     },
   },
   {
+    // The rules (core) must run on a server with live devices: no simulator, no UI, no browser.
+    files: ['packages/core/src/**', 'packages/contracts/src/**'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['@mg/sim', '@mg/engine', '@mg/scene', '@mg/web', 'react', 'react-dom', 'three'], message: 'The rules must not depend on the simulator or the UI.' }] }],
+      'no-restricted-globals': ['error', 'window', 'document', 'localStorage', 'sessionStorage'],
+    },
+  },
+  {
     files: ['**/test/**', '*.config.{js,ts}', '**/vite.config.js'],
     languageOptions: { globals: { ...globals.node } },
   },

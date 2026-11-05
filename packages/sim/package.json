@@ -1,0 +1,14 @@
+{
+  "name": "@mg/sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Line simulator: carriers, transfers, paint-shop feed, simulated teams and responders. Feeds @mg/core through plant events.",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@mg/contracts": "workspace:*",
+    "@mg/core": "workspace:*"
+  }
+}

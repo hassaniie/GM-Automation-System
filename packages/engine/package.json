@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Deterministic GA line simulator and Andon rules",
-  "exports": { ".": "./src/index.js" }
+  "description": "Facade: the MGE object (rules from @mg/core + simulator from @mg/sim) used by the web app and scene",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@mg/core": "workspace:*",
+    "@mg/sim": "workspace:*"
+  }
 }

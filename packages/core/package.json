@@ -1,0 +1,13 @@
+{
+  "name": "@mg/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Andon rules: plant model, tracking, takt, cycle time, downtime, calls, buzzers, shifts, offline/return, corrections, audit. No simulation and no DOM.",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@mg/contracts": "workspace:*"
+  }
+}

@@ -63,7 +63,22 @@ importers:
         specifier: 0.18.5
         version: 0.18.5
 
-  packages/engine: {}
+  packages/contracts: {}
+
+  packages/core:
+    dependencies:
+      '@mg/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+
+  packages/engine:
+    dependencies:
+      '@mg/core':
+        specifier: workspace:*
+        version: link:../core
+      '@mg/sim':
+        specifier: workspace:*
+        version: link:../sim
 
   packages/scene:
     dependencies:
@@ -73,6 +88,15 @@ importers:
       three:
         specifier: 0.128.0
         version: 0.128.0
+
+  packages/sim:
+    dependencies:
+      '@mg/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@mg/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
