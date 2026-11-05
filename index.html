@@ -29,6 +29,7 @@
   --brand: #c8102e;
   --ok: #1f9a66; --warn: #c27f05; --crit: #e03535; --esc: #cc1d5b; --hold: #4a62e0; --transit: #0f8ea6; --paused: #6e7b88;
   --sim: #a07b06;
+  --call-sup: #7a4fe0; --call-mnt: #0a7fd6; --andon-ok: #1f9a66;
   --chart-a: #3f7fd0; --chart-b: #c8622f;
   --primary-bg: #0f1215; --primary-fg: #ffffff;
   --font-ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -45,7 +46,7 @@
   --glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
   --glass-edge: rgba(0,0,0,.45);
   --glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
-  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52;
+  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52; --call-sup: #b394ff; --call-mnt: #4fb4ff; --andon-ok: #3fc28a;
   --chart-a: #4f8fd6; --chart-b: #d0743f; --primary-bg: #f2f4f6; --primary-fg: #08090b;
 } }
 :root[data-theme="dark"] {
@@ -57,7 +58,7 @@
   --glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
   --glass-edge: rgba(0,0,0,.45);
   --glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
-  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52;
+  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52; --call-sup: #b394ff; --call-mnt: #4fb4ff; --andon-ok: #3fc28a;
   --chart-a: #4f8fd6; --chart-b: #d0743f; --primary-bg: #f2f4f6; --primary-fg: #08090b;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -704,6 +705,60 @@ svg.plan text { font-family: var(--font-mono); }
 .mix .mbar { height: 6px; background: var(--hair); }
 .mix .mbar i { display: block; height: 100%; background: var(--chart-a); }
 .mix li .mono { text-align: right; }
+
+/* ═════════ Andon (URD draft 2) ═════════ */
+.c-sup { color: var(--call-sup); } .c-mnt { color: var(--call-mnt); }
+.btn.sup { --tone: var(--call-sup); } .btn.mnt { --tone: var(--call-mnt); }
+.btn:is(.sup, .mnt) { color: var(--tone); border-color: color-mix(in srgb, var(--tone) 55%, transparent); background: transparent; }
+.btn:is(.sup, .mnt):hover:not(:disabled) { background: color-mix(in srgb, var(--tone) 12%, transparent); border-color: var(--tone); }
+.btn:is(.sup, .mnt).on { background: var(--tone); border-color: var(--tone); color: #fff; animation: call-glow 1.6s ease-in-out infinite; }
+@keyframes call-glow { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 45%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--tone) 0%, transparent); } }
+.callpad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.callbtn { display: grid; gap: 4px; justify-items: start; text-align: left; height: auto !important; min-height: 76px; padding: 12px 14px !important; }
+.callbtn .cb-top { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
+.callbtn .cb-top .ico { width: 18px; height: 18px; }
+.callbtn .cb-sub { font-size: 12px; opacity: .85; font-family: var(--font-mono); }
+.lamp { display: inline-block; width: 8px; height: 8px; border-radius: 50% !important; flex: none; }
+.lamp.sup { background: var(--call-sup); box-shadow: 0 0 0 2px color-mix(in srgb, var(--call-sup) 30%, transparent); }
+.lamp.mnt { background: var(--call-mnt); box-shadow: 0 0 0 2px color-mix(in srgb, var(--call-mnt) 30%, transparent); }
+.lamp.blink { animation: lamp-blink 1s steps(2, start) infinite; }
+@keyframes lamp-blink { to { visibility: hidden; } }
+.cell .lamps { display: inline-flex; gap: 3px; align-items: center; }
+.cell.near { background: color-mix(in srgb, var(--warn) 12%, var(--fill)); }
+.cell.over { background: color-mix(in srgb, var(--crit) 14%, var(--fill)); }
+.cell.over .ct { color: var(--crit); font-weight: 600; }
+.cell.near .ct { color: var(--warn); }
+.cell .bz { color: var(--crit); animation: lamp-blink .8s steps(2, start) infinite; }
+.lane-h .lstat { font-family: var(--font-mono); font-size: 11px; color: var(--text-2); white-space: nowrap; }
+.lane-h .xp { font-size: 9.5px; letter-spacing: .1em; color: var(--muted); border: 1px dashed var(--hair-2); padding: 0 4px; margin-left: 6px; }
+.tag.t-sup { color: #fff; background: var(--call-sup); border-color: var(--call-sup); }
+.tag.t-mnt { color: #fff; background: var(--call-mnt); border-color: var(--call-mnt); }
+.tag.t-sup .k, .tag.t-mnt .k { color: #fff; }
+.calls-pill { display: inline-flex; align-self: center; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 1px solid var(--hair-2); background: transparent; color: var(--text-2); font: 600 12px/1 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+.calls-pill .n { font-family: var(--font-mono); letter-spacing: 0; min-width: 18px; text-align: center; }
+.calls-pill.hot { color: var(--text); border-color: var(--text-2); }
+.calls-pill .lamp { width: 7px; height: 7px; }
+.andon-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.andon-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.andon-state::before { content: ""; width: 10px; height: 10px; background: currentColor; }
+.callrow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--hair); }
+.callrow + .callrow { margin-top: 6px; }
+.callrow .who { font-size: 12px; color: var(--text-2); }
+.callrow .wait { font-family: var(--font-mono); font-size: 18px; }
+.vsearch { position: relative; }
+.vsearch input { width: 100%; height: 48px; font: 500 18px/1 var(--font-mono); letter-spacing: .04em; padding: 0 14px; background: var(--fill); color: var(--text); border: 1px solid var(--hair-2); }
+.vsearch input:focus { outline: 2px solid var(--text); outline-offset: -1px; }
+.vresults { display: grid; gap: 4px; max-height: 340px; overflow: auto; }
+.vresult { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; text-align: left; padding: 10px 12px; border: 1px solid var(--hair); background: transparent; color: var(--text); cursor: pointer; }
+.vresult:hover, .vresult[aria-selected="true"] { border-color: var(--text); background: var(--fill); }
+.vresult .sub { font-size: 12px; color: var(--text-2); }
+.stimeline { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.stimeline th { text-align: left; font: 600 10.5px/1 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 6px 6px; border-bottom: 1px solid var(--hair); }
+.stimeline td { padding: 6px; border-bottom: 1px solid var(--hair); font-family: var(--font-mono); }
+.stimeline td.l { font-family: var(--font-ui); }
+.stimeline .cbar { display: block; height: 4px; background: var(--hair); position: relative; min-width: 60px; }
+.stimeline .cbar i { position: absolute; left: 0; top: 0; bottom: 0; }
+.stimeline .cbar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); }
 </style>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -2040,14 +2095,14 @@ const Scene3D = (function () {
       bg: 0x0b0e12, floor: 0x12171c, zone: 0x171d24, zoneEdge: 0x3f4a56, grid1: 0x151a20, grid2: 0x1a2027, pad: 0x1c232b, padEdge: 0x4a5562, padEdgeHi: 0xc9d2da,
       steel: 0x8f99a4, steelDark: 0x3a424b, rail: 0x7a8591, column: 0x2a323b, conveyor: 0x2a323b, slat: 0x333c46, equip: 0x3c454f, equipAccent: 0x4f97e0,
       text: '#d3d9df', textDim: '#7d8894', note: '#98a4b0', warnText: '#d6b062', hemi: [0xd8e2ee, 0x1a2027, 0.95], amb: 0.26, key: 1.4, rim: 0.7, fill: 0.5, pools: 1, badge: 0.42, fogNear: 170, fogFar: 330,
-      tone: { muted: 0x5c6670, text: 0xd9dee3, ok: 0x3fc28a, warn: 0xf0a92a, crit: 0xff4d4a, esc: 0xff3d7f, hold: 0x8ea2ff, transit: 0x50c4d8, paused: 0x9aa6b2 },
+      tone: { muted: 0x5c6670, text: 0xd9dee3, ok: 0x3fc28a, warn: 0xf0a92a, crit: 0xff4d4a, esc: 0xff3d7f, hold: 0x8ea2ff, transit: 0x50c4d8, paused: 0x9aa6b2, sup: 0xb394ff, mnt: 0x4fb4ff },
       xray: 0x9fb4c8, install: 0x6fe3ff, aperture: 0x050607,
     },
     light: {
       bg: 0xdfe3e7, floor: 0xd6dbe0, zone: 0xe7eaed, zoneEdge: 0x8f99a3, grid1: 0xd0d5da, grid2: 0xc6ccd2, pad: 0xf6f7f8, padEdge: 0xa9b1b9, padEdgeHi: 0x2b3137,
       steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xf3f5f7, conveyor: 0xc9cfd5, slat: 0xb9c0c7, equip: 0xc5ccd3, equipAccent: 0x1f6fd1,
       text: '#2b3239', textDim: '#7d8892', note: '#5d6974', warnText: '#9a6f12', hemi: [0xffffff, 0xc2c8cf, 0.95], amb: 0.3, key: 1.0, fogNear: 170, fogFar: 330,
-      tone: { muted: 0x9aa3ab, text: 0x2b3239, ok: 0x1f9a66, warn: 0xd08a0b, crit: 0xe23b3b, esc: 0xd01f5e, hold: 0x4a62e0, transit: 0x0f8ea6, paused: 0x7a8794 },
+      tone: { muted: 0x9aa3ab, text: 0x2b3239, ok: 0x1f9a66, warn: 0xd08a0b, crit: 0xe23b3b, esc: 0xd01f5e, hold: 0x4a62e0, transit: 0x0f8ea6, paused: 0x7a8794, sup: 0x7a4fe0, mnt: 0x0a7fd6 },
       xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.38, pools: 0, badge: 0.32,
     },
   };
@@ -2056,7 +2111,7 @@ const Scene3D = (function () {
   let hemi, amb, key, fill, rim, pools, floorBadge;
   const MG_FLOOR_LOGO = 'data:image/png;base64,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';
   let getState, getUI, cb = {};
-  const pads = {}, carrierObjs = {}, carObjs = {}, bufferObjs = [], scanners = {};
+  const pads = {}, carrierObjs = {}, carObjs = {}, bufferObjs = [], scanners = {}, beacons = {};
   const pickables = [];
   const themed = []; // { mat, key, prop }
   const texts = []; // { mesh, text, opts }
@@ -2367,10 +2422,57 @@ const Scene3D = (function () {
       floorText(label, lx, lz, 4.8, { size: 36, weight: 600, colorKey: 'note', letter: 2, w: 640 });
       scanners[id] = { beam, flashT: 0, flashColor: 0xff3b3b };
     };
-    mk('ENTRY', -36, 7.6, -39, 10.4, 'SCANNER 1 · VIN RECEIVE', -38.6, 6.6);
-    mk('LOAD', -6.2, 7.6, -9, 10.4, 'SCANNER 2 · HANGER LOAD', -9.6, 6.6);
-    mk('EXIT', 56.8, 7.8, 54, 10.6, 'SCANNER 3 · LINE-OFF', 52.6, 6.6);
-    mk('ENGINE', -2.6, -12, 0.2, -12, 'E/T SCAN', -6.2, -12.4);
+    mk('ENTRY', -36, 7.6, -39, 10.4, 'SCANNER 1 · LINE-IN', -38.6, 6.6);
+    mk('OFFLINE', -6.2, 7.6, -9, 10.4, 'OFFLINE SCANNER · END OF TRIM', -11.2, 6.6);
+    mk('EOL', 56.8, 7.8, 54, 10.6, 'PHOTO-EYE · LINE-OFF', 52.6, 6.6);
+    // Final line offline scans: two wireless handhelds in charging docks (proposal: FL1–FL3 and FL4–FL7)
+    const dock = (id, x, z, label) => {
+      const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
+      const body = box(0.5, 1.05, 0.34, tm('equip', { metalness: 0.4, roughness: 0.5 }), 0, 0.52, 0, g); const gun = box(0.16, 0.34, 0.12, tm('steelDark'), 0, 1.22, 0, g);
+      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.02), new THREE.MeshBasicMaterial({ color: 0xff3b3b, transparent: true, opacity: 0.4 })); lamp.position.set(0, 0.9, 0.18); g.add(lamp);
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2, 1.2), new THREE.MeshBasicMaterial({ visible: false })); hit.position.set(0, 1, 0); hit.userData = { kind: 'scanner', id }; g.add(hit); pickables.push(hit);
+      [body, gun].forEach((m) => { m.userData = { kind: 'scanner', id }; pickables.push(m); });
+      floorText(label, x - 2.6, z - 1.0, 4.4, { size: 34, weight: 600, colorKey: 'note', letter: 2, w: 640 });
+      scanners[id] = { beam: lamp, flashT: 0, flashColor: 0xff3b3b, base: 0.4 };
+    };
+    dock('HH1', 26.8, 7.4, 'HANDHELD 1 · FL1–FL3');
+    dock('HH2', 44.8, 7.4, 'HANDHELD 2 · FL4–FL7');
+  }
+
+  /* Andon stack light per work station: green / amber / red tiers plus a call
+     lamp on top (violet = supervisor, blue = maintenance). Sound rings on the
+     floor pulse while the station's buzzer is on. */
+  const ringGeo = new THREE.RingGeometry(0.92, 1, 48);
+  function buildBeacons() {
+    STATIONS.forEach((id) => {
+      const P = POS[id]; if (P.kind !== 'work') return;
+      const [W, D] = padSize(id), g = pads[id].g;
+      const pole = new THREE.Group(); pole.position.set(W / 2 + 0.55, 0, -D / 2 + 0.4); g.add(pole);
+      box(0.07, 2.2, 0.07, tm('steelDark'), 0, 1.1, 0, pole);
+      const tier = (y, c) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.2, 14), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.18 })); m.position.y = y; pole.add(m); return m; };
+      const green = tier(2.3, 0x2ecc71), amber = tier(2.52, 0xffb020), red = tier(2.74, 0xff3b30), call = tier(2.98, 0xffffff);
+      call.scale.set(1.15, 1, 1.15);
+      const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+      ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; g.add(ring);
+      beacons[id] = { green, amber, red, call, ring, W, D };
+    });
+  }
+  function updateBeacons(S, now) {
+    const blink = Math.floor(now / 420) % 2 === 0;
+    for (const id of Object.keys(beacons)) {
+      const b = beacons[id], an = E.andonState(S, id), live = an.state !== 'idle', active = E.andonActive(S, id);
+      b.green.material.opacity = live && an.state === 'normal' ? 0.95 : 0.14;
+      b.amber.material.opacity = live && an.state === 'near' ? 0.95 : 0.14;
+      b.red.material.opacity = live && an.state === 'over' ? (S.buzzing[id] != null && !blink ? 0.55 : 0.98) : 0.14;
+      const calls = active ? E.callsAt(S, id) : [];
+      if (calls.length) { const c = calls.length > 1 && blink ? calls[1] : calls[0]; b.call.material.color.setHex(T.tone[c.type === 'SUP' ? 'sup' : 'mnt']); b.call.material.opacity = c.respondedT == null && !blink ? 0.35 : 1; }
+      else { b.call.material.color.setHex(0xffffff); b.call.material.opacity = 0.12; }
+      b.green.parent.visible = active;
+      if (S.buzzing[id] != null) {
+        const u = ((now - (b.t0 || (b.t0 = now))) % 1100) / 1100, sc = Math.max(b.W, b.D) * (0.45 + 0.55 * u);
+        b.ring.scale.set(sc, sc, 1); b.ring.material.opacity = 0.55 * (1 - u); b.ring.material.color.setHex(T.tone.crit);
+      } else { b.ring.material.opacity = 0; b.t0 = 0; }
+    }
   }
 
   /* ── carriers ── */
@@ -2636,7 +2738,7 @@ const Scene3D = (function () {
   function focusAny(sel) {
     if (!sel) return;
     if (sel.kind === 'pos') focusPos(sel.id); else if (sel.kind === 'veh') focusVehicle(sel.id);
-    else if (sel.kind === 'scanner') { const p = sel.id === 'ENTRY' ? [-37, 1, 9] : sel.id === 'EXIT' ? [60, 1, 9.5] : [0, 2, -12]; focusPoint(p[0], p[1], p[2], 26); }
+    else if (sel.kind === 'scanner') { const p = { ENTRY: [-37, 1, 9], OFFLINE: [-8, 1, 9], EOL: [58, 1, 9.5], HH1: [27, 1, 9], HH2: [45, 1, 9] }[sel.id] || [0, 1, 0]; focusPoint(p[0], p[1], p[2], 26); }
   }
 
   /* ── theme ── */
@@ -2668,7 +2770,7 @@ const Scene3D = (function () {
     // cool rim from behind the shop: separates bodies, hangers and rails from the floor in dark mode
     rim = new THREE.DirectionalLight(0xa8c8ff, T.rim); rim.position.set(-20, 26, -70); scene.add(rim);
     CM = carrierMats(); PM = partMats();
-    buildEnvironment(); buildLightPools(); buildFloorBadge(); buildBvBadge(); buildSignage(); buildEquipment(); buildRails(); buildPads(); buildScanners(); buildChevrons();
+    buildEnvironment(); buildLightPools(); buildFloorBadge(); buildBvBadge(); buildSignage(); buildEquipment(); buildRails(); buildPads(); buildScanners(); buildBeacons(); buildChevrons();
     Object.values(getState().carriers).forEach(makeCarrier);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     Object.assign(controls, { enableDamping: true, dampingFactor: 0.09, minDistance: 8, maxDistance: 220, maxPolarAngle: 1.22, minPolarAngle: 0.2, rotateSpeed: 0.55, zoomSpeed: 0.8, panSpeed: 0.8, screenSpacePanning: false, minAzimuthAngle: -1.2, maxAzimuthAngle: 1.3 });
@@ -2786,7 +2888,7 @@ const Scene3D = (function () {
         pose = { x: A.x + (B.x - A.x) * h, z: A.z + (B.z - A.z) * h, yaw: lerpAngle(A.yaw, B.yaw, h), y: A.hang + (B.hang - A.hang) * ease(u) + 0.6 * Math.sin(Math.PI * u) };
       } else if (v.carrierId && carrierObjs[v.carrierId] && carrierObjs[v.carrierId].pose && carrierObjs[v.carrierId].vis) {
         const co = carrierObjs[v.carrierId]; pose = { x: co.vis.x, z: co.vis.z, yaw: co.vis.yaw, y: co.pose.y + (co.pose.rise || 0) };
-      } else if (v.state === 'OFF_LINE' && S.offlineBay.slice(-E.OFFLINE_SLOTS.length).includes(vid)) { const [x, z] = E.OFFLINE_SLOTS[(v.offlineSlot || 0) % E.OFFLINE_SLOTS.length]; pose = { x, z, yaw: 0, y: 0.36 }; }
+      } else if ((v.state === 'OFF_LINE' || v.state === 'RETURN_QUEUED') && S.offlineBay.slice(-E.OFFLINE_SLOTS.length).includes(vid)) { const [x, z] = E.OFFLINE_SLOTS[(v.offlineSlot || 0) % E.OFFLINE_SLOTS.length]; pose = { x, z, yaw: 0, y: 0.36 }; }
       if (!pose) continue;
       seen.add(vid);
       const o = carObjs[vid] || makeCar(v);
@@ -2800,10 +2902,9 @@ const Scene3D = (function () {
     for (const id of Object.keys(carObjs)) if (!seen.has(id)) disposeCar(id);
     // scanners
     const last = S.scans[S.scans.length - 1];
-    if (last && last.id !== lastScanId) { lastScanId = last.id; const sc = scanners[last.scanner]; if (sc) { sc.flashT = now; sc.flashColor = last.ok ? T.tone.ok : T.tone.crit; } }
-    const lastEng = [...S.events].reverse().find((e) => e.pos === 'CL2' && (e.cat === 'scan' || e.cat === 'exception'));
-    if (lastEng && lastEng.id !== scanners.ENGINE.lastId) { scanners.ENGINE.lastId = lastEng.id; scanners.ENGINE.flashT = now; scanners.ENGINE.flashColor = lastEng.cat === 'scan' ? T.tone.ok : T.tone.crit; }
-    for (const sc of Object.values(scanners)) { const k = Math.max(0, 1 - (now - sc.flashT) / 900); sc.beam.material.color.setHex(k > 0 ? sc.flashColor : 0xff3b3b); sc.beam.material.opacity = 0.16 + 0.75 * k; }
+    if (last && last.id !== lastScanId) { lastScanId = last.id; const key = last.scanner === 'OFFLINE' ? (last.pos === 'TL6' ? 'OFFLINE' : ['FL1', 'FL2', 'FL3'].includes(last.pos) ? 'HH1' : 'HH2') : last.scanner; const sc = scanners[key]; if (sc) { sc.flashT = now; sc.flashColor = last.ok ? T.tone.ok : T.tone.crit; } }
+    for (const sc of Object.values(scanners)) { const k = Math.max(0, 1 - (now - sc.flashT) / 900); sc.beam.material.color.setHex(k > 0 ? sc.flashColor : 0xff3b3b); sc.beam.material.opacity = (sc.base != null ? sc.base * 0.5 : 0.16) + 0.75 * k; }
+    updateBeacons(S, now);
     updateChevrons(S, now);
     renderer.render(scene, camera);
     projectAnchors();
@@ -2812,7 +2913,7 @@ const Scene3D = (function () {
     const [kind, id] = k.split(':');
     if (kind === 'pos') { const P = POS[id]; return tmpV.set(P.x, P.hang > 1.5 ? RH + 1.4 : 3.6, P.z); }
     if (kind === 'veh') { const o = carObjs[id]; if (!o || !o.vis) return null; return tmpV.set(o.vis.x, o.vis.y + 2.0, o.vis.z); }
-    if (kind === 'scanner') return id === 'ENTRY' ? tmpV.set(-36, 2.8, 7.6) : id === 'LOAD' ? tmpV.set(-6.2, 2.8, 7.6) : id === 'EXIT' ? tmpV.set(56.8, 2.8, 7.8) : tmpV.set(-2.6, 2.8, -12);
+    if (kind === 'scanner') { const p = { ENTRY: [-36, 2.8, 7.6], OFFLINE: [-6.2, 2.8, 7.6], EOL: [56.8, 2.8, 7.8], HH1: [26.8, 2.2, 7.4], HH2: [44.8, 2.2, 7.4] }[id]; return p ? tmpV.set(p[0], p[1], p[2]) : null; }
     return null;
   }
   function projectAnchors() {
@@ -2863,6 +2964,36 @@ new MutationObserver(() => { const a = document.documentElement.getAttribute('da
 
 /* ── icons (Lucide paths) ── */
 const IC = {
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  buzz: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/>',
+  buzzoff: '<path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
+  calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+  cog: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  grid: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+  tv: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  ret: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>',
+  max: '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  key: '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
+  building: '<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
+  swap: '<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
+  wifi: '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.86a10 10 0 0 1 14 0"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/>',
+  wifioff: '<path d="M12 20h.01"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/><path d="M5 12.86a10 10 0 0 1 5.17-2.69"/><path d="M19 12.86a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+  chev: '<path d="m9 18 6-6-6-6"/>',
+  skip: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/>',
   alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
   fault: '<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
@@ -2901,9 +3032,13 @@ const IC = {
 };
 const Icon = ({ n, size }) => html`<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style=${size ? { width: size, height: size } : null} dangerouslySetInnerHTML=${{ __html: IC[n] }}></svg>`;
 const STATUS_ICON = { BUFFERED: 'pause', EMPTY: 'dashed', INBOUND: 'arrow', AWAIT: 'dashed', EMPTY_CARRIER: 'dashed', WORKING: 'clock', NEAR: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', COMPLETE: 'checkc', WAITING: 'pause', REMOVAL: 'wrench', PAUSED: 'pause', SCAN: 'scan', HANDLING: 'arrow', TRANSFER: 'arrow', PLACING: 'arrow' };
-const LEVEL_TONE = { WARNING: 'warn', OVERDUE: 'crit', ESCALATED: 'esc', FAULT: 'crit', HOLD: 'crit', BLOCKED: 'hold', ASSIST: 'warn', EMERGENCY: 'esc' };
-const LEVEL_ICON = { WARNING: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', BLOCKED: 'pause', ASSIST: 'hand', EMERGENCY: 'siren' };
-const LEVEL_LABEL = { HOLD: 'Quality hold', ASSIST: 'Assistance', EMERGENCY: 'Emergency' };
+const LEVEL_TONE = { WARNING: 'warn', OVERDUE: 'crit', ESCALATED: 'esc', FAULT: 'crit', HOLD: 'crit', BLOCKED: 'hold', ASSIST: 'warn', CALL_SUP: 'sup', CALL_MNT: 'mnt', EMERGENCY: 'esc' };
+const LEVEL_ICON = { WARNING: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', BLOCKED: 'pause', ASSIST: 'hand', CALL_SUP: 'user', CALL_MNT: 'wrench', EMERGENCY: 'siren' };
+const LEVEL_LABEL = { HOLD: 'Quality hold', ASSIST: 'Assistance', CALL_SUP: 'Supervisor call', CALL_MNT: 'Maintenance call', EMERGENCY: 'Emergency' };
+/* Andon: three station states (URD req 12) */
+const ANDON_TONE = { idle: 'muted', normal: 'ok', near: 'warn', over: 'crit' };
+const ANDON_LABEL = { idle: 'No unit', normal: 'Normal', near: 'Close to limit', over: 'Over takt' };
+const CALL_ICON = { SUP: 'user', MNT: 'wrench' };
 const tv = (t) => `var(--${t})`;
 const StatusChip = ({ st }) => html`<span class=${'chip c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code] || 'info'} />${st.label}</span>`;
 const LevelChip = ({ a }) => html`<span class=${'chip c-' + LEVEL_TONE[a.level]}><${Icon} n=${LEVEL_ICON[a.level]} />${LEVEL_LABEL[a.level] || a.level}</span>`;
@@ -2914,12 +3049,27 @@ const MG_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDP
 // light theme uses the hexagon icon with the name set in text (plant's choice, option b).
 const MgMark = () => html`<img class="mg-mark" src=${MG_LOGO} alt="MG" width="30" height="30" />`;
 
-/* ── simulated alarm horn ── */
+/* ── sound: station buzzers (URD req 16–18), call chimes, and the fault horn ──
+   One speaker stands in for many: only buzzers on the line in view sound, which
+   mirrors "audible at its own station without disturbing other stations". */
 const Horn = {
-  ctx: null, last: 0,
+  ctx: null, last: 0, lastBuzz: 0, seenCalls: 0,
   ensure() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { this.ctx = null; } } if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
-  chirp(hi) { if (!this.ctx) return; const t = this.ctx.currentTime; [0, 0.22].forEach((o, i) => { const osc = this.ctx.createOscillator(), g = this.ctx.createGain(); osc.type = 'square'; osc.frequency.value = hi ? (i ? 1180 : 1480) : (i ? 660 : 880); g.gain.setValueAtTime(0.0001, t + o); g.gain.exponentialRampToValueAtTime(0.045, t + o + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.18); osc.connect(g).connect(this.ctx.destination); osc.start(t + o); osc.stop(t + o + 0.2); }); },
-  tick(now) { if (RT.ui.muted || !this.ctx) return; const un = RT.S.alarms.filter((a) => M.alarmUnacked(a) && M.SEV[a.level] >= 3); if (!un.length) return; const esc = un.some((a) => a.level === 'ESCALATED'); if (now - this.last > (esc ? 1300 : 2400)) { this.last = now; this.chirp(esc); } },
+  tone(freq, at, dur, type = 'square', vol = 0.04) { const t = this.ctx.currentTime + at, osc = this.ctx.createOscillator(), g = this.ctx.createGain(); osc.type = type; osc.frequency.value = freq; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); osc.connect(g).connect(this.ctx.destination); osc.start(t); osc.stop(t + dur + 0.02); },
+  chirp(hi) { if (!this.ctx) return; [0, 0.22].forEach((o, i) => this.tone(hi ? (i ? 1180 : 1480) : (i ? 660 : 880), o, 0.18)); },
+  buzz(ids) { if (!this.ctx) return; ids.slice(0, 3).forEach((id, k) => { const f = 520 + (WORK_POS.indexOf(id) % 7) * 34; this.tone(f, k * 0.09, 0.32, 'sawtooth', 0.028); }); },
+  chime(type) { if (!this.ctx) return; const f = type === 'MNT' ? [660, 880] : [784, 1046]; f.forEach((x, i) => this.tone(x, i * 0.16, 0.5, 'sine', 0.06)); },
+  audibleLine(id) { const v = RT.ui.view; return !['TRIM', 'CHASSIS', 'FINAL'].includes(v) || POS[id].area === v; },
+  tick(now) {
+    const S = RT.S, n = S.calls.length;
+    if (RT.ui.muted || !this.ctx) { this.seenCalls = n; return; }
+    if (n > this.seenCalls) { const c = S.calls[n - 1]; if (c.clearedT == null) this.chime(c.type); }
+    this.seenCalls = n;
+    const ringing = Object.keys(S.buzzing).filter((id) => this.audibleLine(id));
+    if (ringing.length && now - this.lastBuzz > 1400) { this.lastBuzz = now; this.buzz(ringing); }
+    const un = S.alarms.filter((a) => M.alarmUnacked(a) && M.SEV[a.level] >= 3 && a.type !== 'DELAY'); if (!un.length) return;
+    const esc = un.some((a) => a.level === 'EMERGENCY'); if (now - this.last > (esc ? 1300 : 2400)) { this.last = now; this.chirp(esc); }
+  },
 };
 window.addEventListener('pointerdown', () => { if (!RT.ui.muted) Horn.ensure(); }, { capture: true });
 
@@ -2956,23 +3106,23 @@ function injectDemoDelay(S) {
   }
 }
 const SCENARIOS = [
-  { n: 1, title: 'Normal production', desc: 'Every station runs to its 10:00 target. After about 2½ minutes of watching, a problem arises on its own at CL2 and you can follow it spread.', setup(S) { calmDown(S); return { view: 'overview', speed: 15, demo: true }; } },
-  { n: 2, title: 'Trim bottleneck at TL4', desc: 'Headliner and glazing at TL4 run past target. Finished bodies at TL3 and TL2 wait behind it.',
-    setup(S) { calmDown(S); waitFresh(S, ['TL4'], 240); const o = occOf(S, 'TL4'); const v = S.vehicles[o.vehicleId]; o.workT = M.targetFor('TL4', v) - 100; o.required = M.targetFor('TL4', v) + 7 * 60; ['TL3', 'TL2'].forEach((id, i) => { const p = occOf(S, id); if (p && p.vehicleId && p.completeT == null) p.required = Math.min(p.required, p.workT + 60 + i * 150); }); M.logEvent(S, 'sim', 'SIMULATION · scenario 2: TL4 work content increased', { pos: 'TL4' }); return { select: { kind: 'pos', id: 'TL4' }, speed: 5 }; } },
-  { n: 3, title: 'Completed but blocked', desc: 'CL1 presses Work done, but CL2 still holds its hanger. Work done is not the same as movement permitted.',
-    setup(S) { calmDown(S); waitFresh(S, ['CL1', 'CL2'], 400); const a = occOf(S, 'CL1'), b = occOf(S, 'CL2'); a.workT = Math.max(a.workT, 7 * 60); a.required = a.workT + 6; b.workT = 4 * 60; b.required = Math.round(M.targetFor('CL2', S.vehicles[b.vehicleId]) * 0.95); return { select: { kind: 'pos', id: 'CL1' }, speed: 5 }; } },
+  { n: 1, title: 'Normal production', desc: 'Every station runs inside its 10:00 takt. After about 2½ minutes of watching, a problem arises on its own at CL2: it passes takt, the buzzer sounds and the hold-up spreads.', setup(S) { calmDown(S); return { view: 'overview', speed: 15, demo: true }; } },
+  { n: 2, title: 'Over takt · buzzer', desc: 'CL3 runs past its takt. The station turns red, its buzzer rings, and it stops by itself when the unit leaves.',
+    setup(S) { calmDown(S); waitFresh(S, ['CL3'], 240); const o = occOf(S, 'CL3'); const v = S.vehicles[o.vehicleId], t = M.targetFor('CL3', v); o.arriveT = S.t - (t - 70) - o.plannedT; o.workT = t - 70; o.required = t + 4 * 60; M.logEvent(S, 'sim', 'SIMULATION · scenario 2: CL3 work content increased', { pos: 'CL3' }); return { select: { kind: 'pos', id: 'CL3' }, speed: 5, view: 'CHASSIS' }; } },
+  { n: 3, title: 'Completed but blocked', desc: 'CL1 finishes its work, but CL2 still holds its hanger. Finished is not the same as free to move, and the downtime is put down to CL2.',
+    setup(S) { calmDown(S); waitFresh(S, ['CL1', 'CL2'], 400); const a = occOf(S, 'CL1'), b = occOf(S, 'CL2'); a.workT = Math.max(a.workT, 7 * 60); a.required = a.workT + 6; b.workT = 4 * 60; b.required = Math.round(M.targetFor('CL2', S.vehicles[b.vehicleId]) * 1.2); return { select: { kind: 'pos', id: 'CL1' }, speed: 5 }; } },
   { n: 4, title: 'Waiting for a hanger', desc: 'FL1 is slow to finish, so all 4 hangers fill up. TL5 is done but has no empty hanger to load onto at TL6.',
     setup(S) { calmDown(S); waitFresh(S, ['FL1'], 120); const o = occOf(S, 'FL1'); o.required = o.workT + 30 * 60; M.logEvent(S, 'sim', 'SIMULATION · scenario 4: wheel fitment at FL1 slowed down', { pos: 'FL1' }); M.runWhile(S, () => { const o = occOf(S, 'TL5'), p = M.permissives(S, 'TL5'); return !(o && o.vehicleId && o.completeT != null && S.t - o.completeT > 30 && p && p.find((c) => c.key === 'dest' && /All 4 hangers/.test(c.detail))); }, 4 * 3600); return { select: { kind: 'pos', id: 'TL5' }, speed: 5, view: 'overview' }; } },
-  { n: 5, title: 'Unit taken off line', desc: 'The unit at CL3 has a fitment issue and is far past its time. In fast mode it is taken off at once and recorded.',
-    setup(S) { calmDown(S); waitFresh(S, ['CL3'], 300); const o = occOf(S, 'CL3'), v = S.vehicles[o.vehicleId], tgt = M.targetFor('CL3', v); o.workT = tgt + S.cfg.escalateAfter + 40; o.required = tgt * 3; M.step(S, 1); M.logEvent(S, 'sim', 'SIMULATION · scenario 5: exhaust fitment issue at CL3', { pos: 'CL3' }); return { select: { kind: 'pos', id: 'CL3' }, speed: 1, dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[1] } }; } },
-  { n: 6, title: 'Hanger fault', desc: 'Hanger at CL4 reports a lift-encoder fault. Travel is inhibited even after the team presses Work done.',
+  { n: 5, title: 'Take a unit offline', desc: 'The unit at FL3 has a fitment issue. Scan its VIN at the station to take it offline; it leaves the counts and the target.',
+    setup(S) { calmDown(S); waitFresh(S, ['FL3'], 300); const o = occOf(S, 'FL3'), v = S.vehicles[o.vehicleId]; M.logEvent(S, 'sim', 'SIMULATION · scenario 5: seat fitment issue at FL3', { pos: 'FL3' }); return { select: { kind: 'pos', id: 'FL3' }, speed: 1, dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[1] } }; } },
+  { n: 6, title: 'Hanger fault', desc: 'Hanger at CL4 reports a lift-encoder fault. Travel is inhibited even though the team has finished.',
     setup(S) { calmDown(S); waitFresh(S, ['CL4'], 300); const o = occOf(S, 'CL4'); o.required = o.workT + 45; M.injectCarrierFault(S, S.pos['CL4'].carrierId); M.logEvent(S, 'sim', `SIMULATION · fault injected on hanger ${S.pos['CL4'].carrierId}`, { pos: 'CL4' }); return { select: { kind: 'pos', id: 'CL4' }, speed: 5 }; } },
-  { n: 7, title: 'Engine / transmission mismatch', desc: 'The E/T scan at CL2 reads the wrong engine for the VIN. CL2 goes on quality hold until it is rescanned.',
-    setup(S) { calmDown(S); M.runWhile(S, () => !(occOf(S, 'CL2') && occOf(S, 'CL2').vehicleId && !S.vehicles[occOf(S, 'CL2').vehicleId].engine && occOf(S, 'CL2').workT < 60), 4 * 3600); const v = S.vehicles[occOf(S, 'CL2').vehicleId]; S.forceMismatch[v.id] = true; S.cfg.qualityFixSec = 6 * 3600; M.runWhile(S, () => !v.engine, 600); return { select: { kind: 'pos', id: 'CL2' }, speed: 5 }; } },
-  { n: 8, title: 'Emergency call', desc: 'The team at CL2 presses Emergency. The Chassis line stops until the call is cleared.',
+  { n: 7, title: 'Supervisor and maintenance calls', desc: 'CL2 calls its supervisor and FL4 calls maintenance. Respond, then clear each call; response and clear times are recorded.',
+    setup(S) { calmDown(S); S.cfg.callRate = 0; M.raiseCall(S, 'CL2', 'SUP', 'Station button'); M.runUntil(S, S.t + 40); M.raiseCall(S, 'FL4', 'MNT', 'Station button'); M.runUntil(S, S.t + 25); return { speed: 1, drawer: 'calls' }; } },
+  { n: 8, title: 'Emergency stop (test)', desc: 'A simulated emergency at CL2 stops the Chassis line until it is cleared. Not an Andon button; it tests the line-stop path.',
     setup(S) { calmDown(S); waitFresh(S, ['CL2'], 300); M.callEmergency(S, 'CL2'); return { select: { kind: 'pos', id: 'CL2' }, speed: 5 }; } },
-  { n: 9, title: 'Line-off scan', desc: 'A finished vehicle is done at FL7. Scan it at Scanner 3 to stop the assembly timer.',
-    setup(S) { calmDown(S); M.runWhile(S, () => !(occOf(S, 'FL6') && occOf(S, 'FL6').vehicleId), 3 * 3600); const vid = occOf(S, 'FL6').vehicleId; S.holdExit[vid] = true; M.runWhile(S, () => !(occOf(S, 'FL7') && occOf(S, 'FL7').vehicleId === vid && occOf(S, 'FL7').completeT != null), 3 * 3600); return { select: { kind: 'pos', id: 'FL7' }, speed: 1, dialog: { type: 'scan', scanner: 'EXIT', vin: S.vehicles[vid].vin } }; } },
+  { n: 9, title: 'Offline and return', desc: 'A unit was taken off at FL4. Send it back: it rejoins at FL4 when the station is free and counts only when it completes.',
+    setup(S) { calmDown(S); waitFresh(S, ['FL4'], 200); const v = S.vehicles[occOf(S, 'FL4').vehicleId]; M.takeOffLine(S, v.id, { reason: M.OFFLINE_REASONS[2], notes: 'Wrong-spec grille fitted; correct part on its way', by: 'Line supervisor', scan: v.vin }); M.runUntil(S, S.t + 60); return { select: { kind: 'veh', id: v.id }, speed: 5 }; } },
   { n: 10, title: 'Invalid scan', desc: 'Scanner 1 reads a VIN that is already on the line. The scan is rejected and nothing changes.',
     setup(S) { calmDown(S); const id = ['TL2', 'TL3', 'CL1', 'FL3'].find((p) => occOf(S, p) && occOf(S, p).vehicleId); return { view: 'TRIM', speed: 1, dialog: { type: 'scan', scanner: 'ENTRY', vin: S.vehicles[occOf(S, id).vehicleId].vin } }; } },
 ];
@@ -2980,16 +3130,16 @@ function loadScenario(n) {
   const sc = SCENARIOS.find((s) => s.n === n);
   const keep = {};
   const S = freshState(11); Object.assign(S.cfg, keep);
-  const r = sc.setup(S) || {}; if (n !== 9) S.holdExit = {};
+  const r = sc.setup(S) || {}; S.holdExit = {};
   M.step(S, 1);
   RT.S = S; RT.acc = 0; RT.scenario = n; RT.speed = r.speed || 5; RT.running = true; RT.demo = r.demo ? { elapsed: 0, fired: false } : null;
-  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: null, report: false, hover: null, view: r.view || RT.ui.view });
+  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, report: false, hover: null, view: r.view || RT.ui.view });
   M.logEvent(S, 'sim', `SIMULATION · scenario ${n}: ${sc.title}`);
   setTimeout(() => { if (r.select) focusSel(r.select); else if (Scene3D.ok) Scene3D.focusView(r.view || 'overview'); }, 30);
 }
 const focusSel = (sel) => { if (Scene3D.ok) Scene3D.focusAny(sel); };
 function select(sel, focus = true) {
-  if (sel && sel.kind === 'scanner') { if (sel.id === 'ENGINE') return select({ kind: 'pos', id: 'CL2' }, focus); if (sel.id === 'LOAD') return select({ kind: 'pos', id: 'TL6' }, focus); setUI({ dialog: { type: 'scan', scanner: sel.id } }); return; }
+  if (sel && sel.kind === 'scanner') { if (sel.id === 'ENTRY') { setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } }); return; } const at = sel.id === 'OFFLINE' ? 'TL6' : sel.id === 'EOL' ? 'FL7' : sel.id === 'HH1' ? 'FL2' : 'FL5'; return select({ kind: 'pos', id: at }, focus); }
   setUI({ selection: sel, hover: null }); if (sel && focus) focusSel(sel);
 }
 function topAlarm(S) { const a = S.alarms.filter((x) => M.alarmActive(x) && x.level !== 'WARNING'); a.sort((x, y) => (M.alarmUnacked(y) - M.alarmUnacked(x)) || (M.SEV[y.level] - M.SEV[x.level]) || (x.raisedT - y.raisedT)); return a[0]; }
@@ -2997,37 +3147,46 @@ function openAlarm(a) { setUI({ drawer: null }); select({ kind: 'pos', id: POS[a
 
 /* ═════════ islands ═════════ */
 function IdIsland() {
-  const S = RT.S, p = M.pace(S);
+  const S = RT.S, p = M.pace(S), sh = S.shift || {};
   return html`<div class="seg id-island">
     <div class="brand"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile</div></div></div>
-    <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro">${S.cfg.shiftName}</span></div>
+    <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro" style=${{ color: S.planned ? 'var(--paused)' : null }}>${S.planned ? (S.planned.kind === 'OFF' ? 'No shift' : S.planned.label) : sh.name}</span></div>
     <span class="sim-tag" title="All data is simulated. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>
-    <div class="shiftbar" title=${`Shift 06:00–14:30 · ${Math.round(p.frac * 100)}% elapsed`}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
+    <div class="shiftbar" title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;
 }
 function StateIsland() {
   const S = RT.S, p = M.pace(S), ls = M.lineStatus(S);
   const wip = S.vehOrder.filter((id) => M.isActive(S.vehicles[id])).length;
+  const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
   return html`<section class="state-island" role="status" aria-live="polite">
     <div class="metric"><span class="micro">Line</span>
       <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button></div>
-    <div class="metric"><span class="micro">Completed / plan</span><span class="v">${p.done}<small>/ ${S.cfg.shiftTarget}</small><small style=${{ color: p.delta < 0 ? 'var(--warn)' : 'var(--ok)' }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
-    <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${(S.cfg.shiftTarget / 8.5).toFixed(1)}</small></span></div>
+    <div class="metric" title="Final line: vehicles completed this shift against the shift target"><span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: p.delta < 0 ? 'var(--warn)' : 'var(--ok)' }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
+    <div class="metric opt"><span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span></div>
+    <div class="metric opt" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v">${fmtDur(p.down)}<small>Final</small></span></div>
+    <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span></div>
     <div class="metric opt"><span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span></div>
   </section>`;
+}
+function CallsPill() {
+  const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
+  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
+    <span class=${'lamp sup' + (sup ? ' blink' : '')} style=${{ opacity: sup ? 1 : 0.25 }}></span><span class=${'lamp mnt' + (mnt ? ' blink' : '')} style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
 }
 function ActIsland() {
   const S = RT.S;
   const active = S.alarms.filter((a) => M.alarmActive(a) && M.SEV[a.level] >= 3), unacked = active.filter(M.alarmUnacked);
   const themeIcon = RT.ui.theme === 'light' ? 'sun' : RT.ui.theme === 'dark' ? 'moon' : 'auto';
   return html`<nav class="seg act-island" aria-label="Actions">
-    <button class="ibtn" title="Scanner 1 · entry scan" aria-label="Entry scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
-    <button class="ibtn" title="Scanner 3 · line-off scan" aria-label="Line-off scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT' } })}><${Icon} n="scanout" /></button>
+    <button class="ibtn" title="Find a vehicle by VIN (/)" aria-label="Find a vehicle by VIN" onClick=${() => setUI({ dialog: { type: 'vin' } })}><${Icon} n="search" /></button>
+    <button class="ibtn" title="Scanner 1 · line-in scan at TL1" aria-label="Line-in scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
     <button class="ibtn opt" title="Shift report" aria-label="Shift report" onClick=${() => setUI({ report: true })}><${Icon} n="chart" /></button>
     <button class="ibtn" title="X-ray build view (X)" aria-label="X-ray build view" aria-pressed=${RT.ui.xray} onClick=${() => setUI({ xray: !RT.ui.xray })}><${Icon} n="xray" /></button>
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
     <button class="ibtn opt" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
     <span class="sep"></span>
+    <${CallsPill} />
     <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button>
     <span class="sep"></span>
     <button class="bv-mark" onClick=${() => setUI({ dialog: { type: 'about' } })} title="Designed & built by Bolt & Volt"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /></button>
@@ -3048,21 +3207,29 @@ function Strip() {
       <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend })}><${Icon} n="info" size=${14} />Key</button>
     </div>
     <div class="lanes">${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} style=${{ '--n': k === 'CHASSIS' ? 6.6 : ids.length }}>
-      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : html`<span class="micro">${k === 'TRIM' ? 'Conveyor · hanger at TL6' : 'Hanger at FL1 · conveyor'}</span>`}</button>
+      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
       <div class="cells ticks">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
     </div>`)}</div>
   </section>`;
 }
+/* lane header numbers: completed / shift target and downtime for that line */
+function LaneStat({ area }) {
+  const p = M.linePace(RT.S, area);
+  return html`<span class="lstat" title=${`${AREAS[area].name}: ${p.done} completed of ${p.target} this shift · downtime ${fmtDur(p.down)}`}>${p.done}/${p.target}${area !== 'TRIM' || RT.S.cfg.trimAndon ? html` · <span style=${{ color: p.down > 0 ? 'var(--crit)' : null }}>↓${fmtDur(p.down)}</span>` : null}</span>`;
+}
 function Cell({ id, sel }) {
   const S = RT.S, st = M.stationStatus(S, id), P = POS[id], sv = M.stationVehicle(S, id), occ = sv && S.pos[sv.posId].occ;
-  const SHORT = { BUFFERED: 'in buffer', EMPTY: '—', INBOUND: 'inbound', AWAIT: 'ready', EMPTY_CARRIER: 'empty', TRANSFER: 'transfer', PLACING: 'placing', HANDLING: 'handling', SCAN: 'scan', FAULT: 'fault', PAUSED: 'stopped', REMOVAL: 'removal' };
+  const SHORT = { BUFFERED: 'in buffer', EMPTY: '—', INBOUND: 'inbound', AWAIT: 'ready', EMPTY_CARRIER: 'empty', TRANSFER: 'transfer', PLACING: 'placing', HANDLING: 'handling', SCAN: 'drive-off', FAULT: 'fault', PAUSED: 'stopped', REMOVAL: 'removal' };
+  const an = P.kind === 'work' ? M.andonState(S, id) : { state: 'idle' }, live = an.state !== 'idle' && sv && sv.posId === id;
   let r = 0, txt = SHORT[st.code] || st.label.toLowerCase();
-  if (sv && P.kind === 'work' && occ) { const tgt = M.targetFor(id, sv.v); r = Math.min(1, occ.workT / tgt); txt = occ.completeT != null ? (st.code === 'WAITING' ? `wait ${fmtDur(occ.waitT)}` : 'done') : occ.workT > tgt ? `+${fmtDur(occ.workT - tgt)}` : fmtDur(occ.workT); }
+  if (live) { r = Math.min(1, an.ratio); txt = an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)}` : fmtDur(an.cycle); if (st.code === 'PAUSED') txt = 'stopped'; }
   else if (sv && !['FAULT', 'TRANSFER', 'SCAN', 'REMOVAL'].includes(st.code)) txt = sv.v.vin.slice(-6);
-  const barC = ['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD'].includes(st.code) ? 'var(--crit)' : st.code === 'NEAR' ? 'var(--warn)' : st.code === 'WAITING' ? 'var(--hold)' : st.code === 'COMPLETE' ? 'var(--ok)' : 'var(--text)';
-  const cls = 'cell' + (['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD'].includes(st.code) ? ' x' : st.code === 'WAITING' ? ' w' : '') + (st.code === 'EMPTY' ? ' idle' : '');
-  return html`<button class=${cls} aria-pressed=${!!sel} onClick=${() => select({ kind: 'pos', id })} title=${`${id} · ${st.label}${sv ? ' · ' + sv.v.vin : ''}`}><span class="cin">
-    <span class="cid"><span>${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span>${['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD', 'WAITING', 'REMOVAL'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span>
+  const tone = live ? ANDON_TONE[an.state] : null, barC = tone === 'ok' ? 'var(--text)' : tone ? tv(tone) : 'var(--hair-2)';
+  const calls = M.callsAt(S, id), buzz = S.buzzing[id] != null;
+  const cls = 'cell' + (live && an.state === 'over' ? ' over' : live && an.state === 'near' ? ' near' : st.code === 'FAULT' ? ' x' : '') + (st.code === 'EMPTY' ? ' idle' : '');
+  const title = `${id} · ${live ? `${ANDON_LABEL[an.state]} · cycle ${fmtDur(an.cycle)} of ${fmtDur(an.takt)} takt` : st.label}${sv ? ' · ' + sv.v.vin : ''}${calls.length ? ' · ' + calls.map((c) => M.CALL_TYPES[c.type].label + ' call').join(', ') : ''}${buzz ? ' · buzzer on' : ''}`;
+  return html`<button class=${cls} aria-pressed=${!!sel} onClick=${() => select({ kind: 'pos', id })} title=${title}><span class="cin">
+    <span class="cid"><span>${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span><span class="lamps">${calls.map((c) => html`<i key=${c.id} class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></i>`)}${buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : ['FAULT', 'HOLD'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span></span>
     <span class="bar"><i style=${{ width: `${(P.kind === 'work' ? r : sv ? 1 : 0) * 100}%`, background: P.kind === 'work' ? barC : 'var(--hair-2)' }}></i></span>
     <span class="ct">${txt}</span>
   </span></button>`;
@@ -3097,16 +3264,25 @@ function SimConsole() {
       <div><div class="micro" style=${{ marginBottom: 6 }}>Scenarios · each restarts the shift at 09:38</div>
         ${SCENARIOS.map((s) => html`<button key=${s.n} class="scn" aria-current=${RT.scenario === s.n} onClick=${() => loadScenario(s.n)}><span class="n">${s.n}</span><span class="t">${s.title}</span><span class="d">${s.desc}</span></button>`)}</div>
       <div class="cfg">
-        <${Tog} k="autoFeed" label="Paint-shop body feed" /><${Tog} k="autoEntryScan" label="Auto scan at Scanner 1" /><${Tog} k="autoExitScan" label="Auto scan at Scanner 3" /><${Tog} k="autoComplete" label="Simulated teams press Work done" />
-        <label for="cfg-warn">Warning at % of target</label><input id="cfg-warn" type="number" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(e) => setC('warnPct', M.clamp(+e.target.value || 85, 50, 99) / 100)} />
+        <${Tog} k="autoFeed" label="Paint-shop body feed" /><${Tog} k="autoEntryScan" label="Auto scan at Scanner 1 (line-in)" /><${Tog} k="autoExitScan" label="End-of-line photo-eye at FL7" /><${Tog} k="autoComplete" label="Teams finish (sensor detects)" />
+        <${Tog} k="autoRespond" label="Simulated responders clear calls" /><${Tog} k="trimAndon" label="Trim Andon preview (req 34)" /><${Tog} k="useSchedule" label="Breaks and shift times stop the line" /><${Tog} k="engineCheck" label="CL2 engine pairing scan (option)" />
+        <label for="cfg-calls">Simulated calls (% of units)</label><input id="cfg-calls" type="number" min="0" max="40" value=${Math.round(C.callRate * 100)} onChange=${(e) => setC('callRate', M.clamp(+e.target.value || 0, 0, 40) / 100)} />
+        <label for="cfg-warn">Close to limit at % of takt</label><input id="cfg-warn" type="number" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(e) => setC('warnPct', M.clamp(+e.target.value || 85, 50, 99) / 100)} />
         <label for="cfg-esc">Escalate overdue after (min)</label><input id="cfg-esc" type="number" min="0.5" max="30" step="0.5" value=${C.escalateAfter / 60} onChange=${(e) => setC('escalateAfter', Math.round(M.clamp(+e.target.value || 3, 0.5, 30) * 60))} />
         <label for="cfg-blk">Blocked alarm after (min)</label><input id="cfg-blk" type="number" min="0.5" max="30" step="0.5" value=${C.blockedAlarmAfter / 60} onChange=${(e) => setC('blockedAlarmAfter', Math.round(M.clamp(+e.target.value || 1.5, 0.5, 30) * 60))} />
         <label for="cfg-rate">Random team delay rate (%)</label><input id="cfg-rate" type="number" min="0" max="30" value=${Math.round(C.delayRate * 100)} onChange=${(e) => setC('delayRate', M.clamp(+e.target.value || 0, 0, 30) / 100)} />
       </div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Simulated line stop</div><div class="actions">${['TRIM', 'CHASSIS', 'FINAL'].map((a) => html`<button key=${a} class="btn sm sim" onClick=${act(() => M.setPaused(S, a, !S.paused[a]))}><${Icon} n=${S.paused[a] ? 'play' : 'pause'} />${S.paused[a] ? 'Restart ' : 'Stop '}${AREAS[a].short}</button>`)}</div></div>
+      <div><div class="micro" style=${{ marginBottom: 8 }}>Time</div><div class="actions"><button class="btn sm sim" title="Fast-forward the simulation to the next shift, break or restart" onClick=${() => skipAhead()}><${Icon} n="skip" />Skip to ${S.planned ? 'restart' : 'next break or shift change'} · ${fmtClock(M.nextBoundary(S, S.t), false)}</button></div></div>
       <p class="note">Adapter: <b>${M.Integration.mode}</b>. Nothing is sent to any PLC, conveyor, scanner or sensor. Permissives shown in the HMI are simulated interlocks.</p>
     </div>` : null}
   </section>`;
+}
+
+/* fast-forward to the next shift boundary (runs the engine; can take a second or two) */
+function skipAhead() {
+  const S = RT.S, to = M.nextBoundary(S, S.t) + 1;
+  M.runUntil(S, to, 40000); RT.acc = 0; bump();
 }
 
 /* ── inspector pieces ── */
@@ -3156,111 +3332,129 @@ function BuildList({ v, only }) {
   })}</ul>`;
 }
 
+/* One open call: who called, how long it has waited, and Respond / Clear for the right responder. */
+function CallRow({ c, compact }) {
+  const S = RT.S, T = M.CALL_TYPES[c.type], waiting = S.t - c.raisedT, canAct = can('respond.' + c.type);
+  return html`<div class="callrow" style=${{ borderColor: `color-mix(in srgb, var(--call-${c.type.toLowerCase()}) 50%, transparent)` }}>
+    <span class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></span>
+    <div style=${{ minWidth: 0 }}><div style=${{ fontWeight: 600 }}>${T.label}${compact ? html` · <button class="linkish mono" onClick=${() => { setUI({ drawer: null }); select({ kind: 'pos', id: c.pos }); }}>${c.pos}</button>` : null}</div>
+      <div class="who">${c.respondedT == null ? `Called ${fmtClock(c.raisedT, false)} · waiting for ${T.label.toLowerCase()}` : `${c.respondedBy} responded after ${fmtDur(c.respondedT - c.raisedT)} · helping ${fmtDur(S.t - c.respondedT)}`}</div></div>
+    <div style=${{ display: 'grid', justifyItems: 'end', gap: 6 }}><span class="wait" style=${{ color: c.respondedT == null && waiting > 180 ? 'var(--crit)' : null }} title="Time since the call">${fmtDur(waiting)}</span>
+      <span class="actions" style=${{ gap: 6 }}>${c.respondedT == null ? html`<button class=${'btn sm ' + c.type.toLowerCase()} disabled=${!canAct} title=${canAct ? 'Help has arrived at the station' : `Only ${T.label.toLowerCase()} users respond to this call`} onClick=${act(() => M.respondCall(S, c.id, userName()))}>Respond</button>` : null}
+        <button class="btn sm" disabled=${!canAct} title=${canAct ? 'Help given · clear the call' : `Only ${T.label.toLowerCase()} users clear this call`} onClick=${act(() => M.clearCall(S, c.id, userName()))}><${Icon} n="check" />Clear</button></span></div>
+  </div>`;
+}
 function StationInspector({ id }) {
   const S = RT.S, P = POS[id], st = M.stationStatus(S, id), sv = M.stationVehicle(S, id);
   const posId = id;
   const p = S.pos[posId], occ = p.occ, v = sv && sv.v, c = p.carrierId && S.carriers[p.carrierId];
   const pm = M.permissives(S, posId);
-  const twins = [id];
-  const alarms = S.alarms.filter((a) => M.alarmActive(a) && twins.includes(a.pos));
-  const events = S.events.filter((e) => twins.includes(e.pos)).slice(-8).reverse();
-  const isWork = P.kind === 'work', tgt = v ? M.targetFor(id, v) : P.target;
-  const r = occ && v && isWork ? occ.workT / tgt : 0, over = occ && v && isWork ? occ.workT - tgt : 0;
-  const tone = st.code === 'COMPLETE' ? 'ok' : st.code === 'WAITING' ? 'hold' : st.tone === 'muted' ? 'text' : st.tone;
-  const setTarget = (d) => { POS[id].target = M.clamp(P.target + d * 60, 5 * 60, 30 * 60); M.logEvent(S, 'sim', `Configuration · ${id} base target set to ${fmtDur(POS[id].target)}`, { pos: id }); bump(); };
+  const alarms = S.alarms.filter((a) => M.alarmActive(a) && a.pos === id && a.type !== 'CALL');
+  const events = S.events.filter((e) => e.pos === id).slice(-8).reverse();
+  const isWork = P.kind === 'work', an = isWork ? M.andonState(S, id) : null, live = an && an.state !== 'idle' && sv && sv.posId === id;
+  const tone = live ? ANDON_TONE[an.state] : 'text';
   const xf = S.xfers.find((q) => q.from === id || q.to === id);
-  const assist = M.callActive(S, 'SUP', id), emerg = M.callActive(S, 'EMERG', id);
-  const stopped = S.paused[P.area];
-  const canDone = !!(v && isWork && occ && occ.vehicleId === v.id && occ.completeT == null && !stopped && !(id === 'CL2' && !(v.engine && v.engine.ok)));
-  const doneWhy = !v || !occ || occ.vehicleId !== v.id ? 'No unit at this station' : occ.completeT != null ? 'Already done' : stopped ? `${AREAS[P.area].short} line is stopped` : id === 'CL2' && !(v.engine && v.engine.ok) ? 'Engine/transmission not paired yet' : '';
+  const emerg = M.callActive(S, 'EMERG', id), calls = M.callsAt(S, id), callsOk = M.callAllowedAt(S, id);
+  const buzzOn = S.buzzing[id] != null, buzzEn = M.buzzerEnabled(S, id), inScope = M.ANDON_AREAS.includes(P.area);
+  const offOk = v && M.isActive(v) && !xf && M.OFFLINE_POS.includes(id);
+  const press = (type) => { if (M.openCall(S, id, type)) return; M.raiseCall(S, id, type, `${userName()} · station button`); bump(); };
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
-      <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${P.renumbered ? ' · renumbered' : ''}${P.idAssumed ? ' · ID assumed' : ''}</div>
+      <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
       <div class="id">${id}</div><div class="sub">${P.op}</div>
-      <div style=${{ marginTop: 10 }}><${StatusChip} st=${st} /></div></div>
+      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
       <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
     <div class="insp-body">
-      ${P.kind === 'work' ? html`<div class="btn-row" role="group" aria-label="Station controls">
-        <button class="btn lg primary" disabled=${!canDone} title=${canDone ? `Work done · unit moves to ${M.XFER_FROM[id] ? M.XFER_FROM[id].to : M.NEXT[id] || 'line-off scan'} when free` : doneWhy} onClick=${act(() => M.manualComplete(S, id))}><${Icon} n="check" />Work done</button>
-        <button class=${'btn lg warn' + (assist ? ' on' : '')} aria-pressed=${assist} title=${assist ? 'Assistance call open · press again when help has arrived' : 'Call a team leader to this station'} onClick=${act(() => { const c = M.openCall(S, id, 'SUP'); c ? M.clearCall(S, c.id, 'Line supervisor') : M.raiseCall(S, id, 'SUP', 'Station button'); })}><${Icon} n="hand" />Assistance</button>
-        <button class=${'btn lg danger' + (emerg ? ' on' : '')} aria-pressed=${emerg} title=${emerg ? `Emergency active · ${AREAS[P.area].short} line stopped · press again to clear` : `Emergency · stops the ${AREAS[P.area].short} line`} onClick=${act(() => (emerg ? M.clearEmergency(S, id) : M.callEmergency(S, id)))}><${Icon} n="siren" />Emergency</button>
-      </div>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
-      ${v && isWork ? html`<div class="timer"><${Ring} r=${r} tone=${tone} /><div>
-        <div class="num" style=${{ color: ['OVERDUE', 'ESCALATED'].includes(st.code) ? tv(st.tone) : 'var(--text)' }}>${fmtDur(occ.workT)}</div>
-        <div class="of">work time · target ${fmtDur(tgt)}${tgt !== P.target ? ` (${v.variant.name} change-point)` : ''}</div>
-        <div class="delta" style=${{ color: over > 0 ? tv(st.tone === 'esc' ? 'esc' : 'crit') : 'var(--text-2)' }}>${occ.completeT != null ? `Finished ${over > 0 ? `+${fmtDur(over)} over` : `${fmtDur(-over)} under`}` : over > 0 ? `+${fmtDur(over)} overdue` : `${fmtDur(-over)} remaining`}</div></div></div>` : null}
+      ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
+        return html`<button key=${t} class=${'btn lg callbtn ' + t.toLowerCase() + (oc ? ' on' : '')} aria-pressed=${!!oc} disabled=${!can('call')} title=${oc ? `${T.label} call open since ${fmtClock(oc.raisedT, false)} · cleared by the responder` : `Call ${T.label.toLowerCase()} to ${id}`} onClick=${() => press(t)}>
+          <span class="cb-top"><${Icon} n=${CALL_ICON[t]} />${T.label}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `calling · ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} here`) : 'Call'}</span></button>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
+      ${calls.length ? html`<div>${calls.map((cl) => html`<${CallRow} key=${cl.id} c=${cl} />`)}</div>` : null}
+      ${live ? html`<div class="timer"><${Ring} r=${an.ratio} tone=${tone === 'ok' ? 'text' : tone} /><div>
+        <div class="num" style=${{ color: an.state === 'over' ? 'var(--crit)' : 'var(--text)' }}>${fmtDur(an.cycle)}</div>
+        <div class="of">cycle time · takt ${fmtDur(an.takt)}</div>
+        <div class="delta" style=${{ color: an.state === 'over' ? 'var(--crit)' : an.state === 'near' ? 'var(--warn)' : 'var(--text-2)' }}>${an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)} over takt` : `${fmtDur(an.takt - an.cycle)} to takt`}${occ && occ.completeT != null && occ.vehicleId ? ' · work finished' : ''}</div>
+        <div class="note" style=${{ marginTop: 4 }}>Work ${fmtDur(occ.workT)}${occ.waitT ? ` · waiting ${fmtDur(occ.waitT)}` : ''}${occ.plannedT ? ` · breaks ${fmtDur(occ.plannedT)} (excluded)` : ''}</div></div></div>` : null}
+      ${isWork ? html`<div class="andon-row" style=${{ padding: '10px 12px', border: '1px solid var(--hair)' }}>
+        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class=${buzzOn ? 'c-crit' : 'c-muted'}><${Icon} n=${buzzEn ? 'buzz' : 'buzzoff'} /></span><span><b>Buzzer</b> <span class="c-muted">· ${!buzzEn ? 'switched off' : buzzOn ? `ringing ${fmtDur(S.t - S.buzzing[id])}` : 'quiet · rings over takt'}</span></span></span>
+        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class="note">${M.stationCount(S, id)} vehicle${M.stationCount(S, id) === 1 ? '' : 's'} here</span><button class="toggle" role="switch" aria-checked=${buzzEn} aria-label=${`Buzzer at ${id}`} disabled=${!can('buzzer')} title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'} onClick=${act(() => M.setBuzzer(S, id, !buzzEn, userName()))}></button></span></div>` : null}
       ${xf ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--transit)' }}><${Icon} n="arrow" />${M.XFER_FROM[xf.from].label}</div><div>${S.vehicles[xf.vehicleId].vin.slice(-6)} moving from ${S.carriers[S.pos[xf.from].carrierId].id} to ${S.carriers[S.pos[xf.to].carrierId].id} · ${fmtDur(Math.max(0, xf.t1 - S.t))} left</div></div>` : null}
       ${v ? html`<dl class="kv">
         <dt>VIN</dt><dd><button class="linkish" onClick=${() => select({ kind: 'veh', id: v.id })}>${v.vin}</button></dd>
-        <dt>Model</dt><dd>${v.variant.name}</dd><dt>Powertrain</dt><dd>${v.variant.ptLabel}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
+        <dt>Model</dt><dd>${v.variant.name}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
         <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>
         ${occ ? html`<dt>Arrived</dt><dd class="mono">${fmtClock(occ.arriveT)}</dd>` : null}
-        ${occ && occ.completeT != null && occ.completeT <= S.t && occ.waitT > 0 ? html`<dt>Waiting for transfer</dt><dd class="mono" style=${{ color: 'var(--hold)' }}>${fmtDur(occ.waitT)}</dd>` : null}
         ${occ && occ.pausedT ? html`<dt>Line-stop time</dt><dd class="mono">${fmtDur(occ.pausedT)}</dd>` : null}
-        <dt>Assembly timer</dt><dd class="mono">${fmtDur(S.t - v.entryT)}</dd>
+        <dt>In the line for</dt><dd class="mono">${fmtDur(S.t - v.entryT)}</dd>
       </dl>` : html`<p class="note">${p.reservedBy ? `${S.carriers[p.reservedBy].kind} ${p.reservedBy} is on its way. The position becomes occupied when arrival is confirmed.` : c ? `${c.kind} ${c.id} is here and empty, ready for the next body.` : 'No carrier present. The position is ready to receive the next one.'}</p>`}
-      ${v && id === 'CL2' && v.engine ? html`<div class=${'callout ' + (v.engine.ok ? '' : 'crit')}><div class="ttl" style=${{ color: v.engine.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n="link" />Engine / transmission ${v.engine.ok ? 'paired' : 'mismatch'}</div>
+      ${v && id === 'CL2' && v.engine ? html`<div class=${'callout ' + (v.engine.ok ? '' : 'crit')}><div class="ttl" style=${{ color: v.engine.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n="link" />Engine / transmission ${v.engine.ok ? 'paired' : 'mismatch'} · option</div>
         <div class="mono" style=${{ fontSize: 12 }}>${v.engine.engineNo} · ${v.engine.transNo}</div>
-        ${v.engine.ok ? html`<div class="note">Scanned ${fmtClock(v.engine.t, false)} and tied to this VIN.</div>` : html`<div class="note">Expected ${v.engine.expect}… for ${v.variant.name}. CL2 cannot press Work done until the correct unit is scanned.</div><div><button class="btn sm ok" onClick=${act(() => M.rescanEngine(S, 'CL2'))}><${Icon} n="scan" />Rescan correct unit</button></div>`}</div>` : null}
-      ${v && st.code === 'ESCALATED' ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Fast mode · consider taking this unit off</div><div>${fmtDur(occ.workT - tgt)} over target and past the escalation rule. Taking it off keeps the line moving; the unit is recorded, not repaired here.</div><div><button class="btn sm danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take off line…</button></div></div>` : null}
-      ${P.hangerPoint ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--text-2)' }}><${Icon} n="hanger" />Hanger point</div><div>${c ? html`Hanger <b class="mono">${c.id}</b> is here${c.vehicleId ? ' carrying this unit' : ' and empty'}.` : p.reservedBy ? html`Hanger <b class="mono">${p.reservedBy}</b> is on its way.` : 'No hanger here right now.'}</div><div class="note">${id === 'TL6' ? 'Bodies are loaded from the Trim conveyor onto a hanger here, and Scanner 2 pairs the VIN to the hanger.' : id === 'FL1' ? 'Bodies are lowered from the hanger onto the Final conveyor here. The empty hanger returns to TL6 on its own rail.' : 'One of the 4 hangers carries the body through this point.'}</div><div style=${{ marginTop: 4 }}><${HangerTracker} /></div></div>` : null}
+        ${v.engine.ok ? null : html`<div><button class="btn sm ok" onClick=${act(() => M.rescanEngine(S, 'CL2'))}><${Icon} n="scan" />Rescan correct unit</button></div>`}</div>` : null}
+      ${live && an.state === 'over' && offOk && occ.completeT == null && occ.workT - an.takt >= S.cfg.escalateAfter ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Consider taking this unit offline</div><div>${fmtDur(an.cycle - an.takt)} over takt. Taking it offline keeps the line moving; it is recorded, not repaired here.</div><div><button class="btn sm danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take offline…</button></div></div>` : null}
+      ${P.hangerPoint ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--text-2)' }}><${Icon} n="hanger" />Hanger point</div><div>${c ? html`Hanger <b class="mono">${c.id}</b> is here${c.vehicleId ? ' carrying this unit' : ' and empty'}.` : p.reservedBy ? html`Hanger <b class="mono">${p.reservedBy}</b> is on its way.` : 'No hanger here right now.'}</div><div class="note">${id === 'TL6' ? 'Bodies are loaded from the Trim conveyor onto a hanger here. TL6 is the end of Trim, where a unit can be taken offline with a scan.' : id === 'FL1' ? 'Bodies are lowered from the hanger onto the Final conveyor here. The empty hanger returns to TL6 on its own rail.' : 'One of the 4 hangers carries the body through this point. Tracking follows the hanger, so no scan is needed here.'}</div><div style=${{ marginTop: 4 }}><${HangerTracker} /></div></div>` : null}
       <${RootCallout} posId=${posId} />
       ${alarms.length ? html`<div class="sec"><div class="micro">Alarms</div>${alarms.map((a) => html`<${AlarmMini} key=${a.id} a=${a} />`)}</div>` : null}
-      ${v && (isWork || P.kind === 'entry') ? html`<div class="sec"><div class="micro"><span>Installed here</span><span>${v.variant.name}</span></div><${BuildList} v=${v} only=${id} /></div>` : null}
+      ${v && isWork ? html`<div class="sec"><div class="micro"><span>Installed here</span><span>${v.variant.name}</span></div><${BuildList} v=${v} only=${id} /></div>` : null}
       ${pm ? html`<div class="sec"><div class="micro">Transfer readiness → ${M.XFER_FROM[posId] ? dispId(M.XFER_FROM[posId].to) + ' carrier' : M.NEXT[posId] ? dispId(M.NEXT[posId]) : 'carrier return'}</div><${Checklist} pm=${pm} /><p class="note">Simulated permissives. In production, motion authority stays with the PLC and safety system.</p></div>` : null}
-      <div class="sec"><div class="micro">Supervisor</div><div class="actions">
-        ${v && M.isActive(v) && !xf ? html`<button class="btn danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take off line…</button>` : null}
-        ${id === 'TL1' ? html`<button class="btn" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1</button>` : null}
-        ${id === 'FL7' && v ? html`<button class=${'btn ' + (occ && occ.completeT != null ? 'primary' : '')} disabled=${!(occ && occ.completeT != null)} onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT', vin: v.vin } })}><${Icon} n="scanout" />Scanner 3 · line-off</button>` : null}
+      <div class="sec"><div class="micro">Unit</div><div class="actions">
+        ${offOk ? html`<button class="btn danger" disabled=${!can('offline')} title=${can('offline') ? 'Scan the VIN here to take the unit offline' : 'Your role cannot take units offline'} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : v && M.isActive(v) && !M.OFFLINE_POS.includes(id) ? html`<span class="note">Units are taken offline only at TL6 (end of Trim) and on the Final line.</span>` : null}
+        ${id === 'TL1' ? html`<button class="btn" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1 · line-in</button>` : null}
+        ${v && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: id } })}><${Icon} n="swap" />Correct position…</button>` : null}
       </div>
       <div class="micro" style=${{ marginTop: 6, color: 'var(--sim)' }}>Simulation only</div><div class="actions">
         ${c && c.fault ? html`<button class="btn sm sim" onClick=${act(() => M.clearFault(S, 'C', c.id))}>Clear ${c.kind.toLowerCase()} fault</button>` : c ? html`<button class="btn sm sim" onClick=${act(() => { M.injectCarrierFault(S, c.id); M.logEvent(S, 'sim', `SIMULATION · fault injected on ${c.id}`, { pos: posId }); })}>Inject ${c.kind.toLowerCase()} fault</button>` : null}
         ${p.fault ? html`<button class="btn sm sim" onClick=${act(() => M.clearFault(S, 'P', posId))}>Clear sensor fault</button>` : html`<button class="btn sm sim" onClick=${act(() => { M.injectSensorFault(S, posId); M.logEvent(S, 'sim', `SIMULATION · sensor fault injected at ${dispId(posId)}`, { pos: posId }); })}>Inject sensor fault</button>`}
+        ${isWork ? html`<button class=${'btn sm sim' + (emerg ? ' on' : '')} onClick=${act(() => (emerg ? M.clearEmergency(S, id) : M.callEmergency(S, id)))}><${Icon} n="siren" />${emerg ? 'Clear emergency stop' : 'Test emergency stop'}</button>` : null}
+        ${isWork && v && occ && occ.completeT == null ? html`<button class="btn sm sim" title="Simulate the team finishing now" onClick=${act(() => M.manualComplete(S, id))}><${Icon} n="check" />Finish work now</button>` : null}
       </div></div>
-      ${isWork ? html`<div class="sec"><div class="micro">Configuration</div><div style=${{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><span>Base target</span>
-        <button class="btn sm icon" aria-label="Decrease target by one minute" onClick=${() => setTarget(-1)}><${Icon} n="minus" /></button><span class="mono" style=${{ minWidth: 50, textAlign: 'center' }}>${fmtDur(P.target)}</span><button class="btn sm icon" aria-label="Increase target by one minute" onClick=${() => setTarget(1)}><${Icon} n="plus" /></button>
-        <span class="note">warning at ${fmtDur(P.target * S.cfg.warnPct)}</span></div></div>` : null}
+      ${isWork ? html`<div class="sec"><div class="micro">Takt</div><div class="andon-row"><span>${AREAS[P.area].name} takt <b class="mono">${fmtDur(S.cfg.takt[P.area])}</b> · close to limit at <span class="mono">${fmtDur(S.cfg.takt[P.area] * S.cfg.warnPct)}</span></span>${can('takt') ? html`<button class="btn sm ghost" onClick=${() => go('admin', 'takt')}><${Icon} n="cog" />Change takt</button>` : null}</div></div>` : null}
       <div class="sec"><div class="micro">Recent activity</div>${events.length ? html`<ul class="timeline">${events.map((e) => html`<li key=${e.id}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul>` : html`<p class="note">No events here yet this shift.</p>`}</div>
     </div></${React.Fragment}>`;
 }
 
-const VSTATE = { IN_PROCESS: ['In process', 'text', 'clock'], AWAITING_LINE_OFF: ['At line-off', 'text', 'scan'], LINED_OFF: ['Lined off', 'ok', 'checkc'], OFF_LINE: ['Taken off line', 'warn', 'exit'] };
+const VSTATE = { IN_PROCESS: ['On line', 'text', 'clock'], AWAITING_LINE_OFF: ['On line · driving off', 'text', 'arrow'], LINED_OFF: ['Completed', 'ok', 'checkc'], OFF_LINE: ['Offlined', 'warn', 'exit'], RETURN_QUEUED: ['Offlined · return queued', 'warn', 'ret'], RETURNING: ['Returning to line', 'transit', 'ret'] };
+/* Vehicle record (URD req 5): where it is, its status, and its full history. */
 function VehicleInspector({ id }) {
   const S = RT.S, v = S.vehicles[id]; if (!v) return null;
   const [lbl, tone, ic] = VSTATE[v.state], c = v.carrierId && S.carriers[v.carrierId], at = c && c.mode === 'POS' ? c.posId : null;
   let tl, tval;
-  if (v.state === 'LINED_OFF') { tl = 'Total assembly time · stopped at Scanner 3'; tval = v.totalDur; }
-  else if (v.state === 'OFF_LINE') { tl = 'In line before take-out · timer stopped'; tval = v.offline.inLine; }
-  else { tl = `Assembly timer · Scanner 1 at ${fmtClock(v.entryT, false)}`; tval = S.t - v.entryT; }
-  const route = M.STATIONS.map((sid) => { const ids = [sid]; const cur = at && ids.includes(at); const done = ids.some((x) => v.done[x]) || v.segments.some((s) => ids.includes(s.pos) && s.end === 'departed'); const cr = ids.some((x) => v.credited[x]); return { sid, cls: cur ? 'cur' : cr && !done ? 'credit' : done ? 'done' : '' }; });
-  const segs = v.segments.filter((s) => POS[s.pos].kind === 'work').slice(-14);
+  if (v.state === 'LINED_OFF') { tl = 'Total time in the line · line-in to completion'; tval = v.totalDur; }
+  else if (v.state === 'OFF_LINE' || v.state === 'RETURN_QUEUED') { tl = `Offline for · since ${fmtClock(v.offline.t, false)}`; tval = S.t - v.offline.t; }
+  else { tl = `In the line · line-in at ${fmtClock(v.entryT, false)}`; tval = S.t - v.entryT; }
+  const route = M.STATIONS.map((sid) => { const cur = at === sid; const done = !!v.done[sid] || v.segments.some((s) => s.pos === sid && s.end === 'departed'); return { sid, cls: cur ? 'cur' : done ? 'done' : '' }; });
+  const segs = v.segments.filter((s) => POS[s.pos].kind === 'work');
   const bs = M.buildState(S, v), items = M.buildFor(v), installed = items.filter((b) => (b.key === 'doors' ? bs.doors : bs[b.key]) >= 1).length;
+  const ret = M.canReturn(S, v.id);
+  const rows = segs.map((sg) => { const occ = !sg.end && S.pos[sg.pos].occ && S.pos[sg.pos].occ.vehicleId === v.id ? S.pos[sg.pos].occ : null; const cyc = occ ? M.occCycle(S, occ) : sg.cycle != null ? sg.cycle : (sg.departT || S.t) - sg.arriveT; return { ...sg, cyc, live: !!occ }; });
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
-      <div class="micro">Vehicle</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
-      <div class="sub">${v.variant.name} · ${v.variant.ptLabel}</div>
+      <div class="micro">Vehicle record</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
+      <div class="sub">${v.variant.name} · ${v.variant.ptLabel} · <${PaintChip} p=${v.paint} /></div>
       <div style=${{ marginTop: 10 }}><span class=${'chip c-' + tone}><${Icon} n=${ic} />${lbl}</span></div></div>
       <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
     <div class="insp-body">
       <div class="sec"><div class="micro">${tl}</div><div class="num" style=${{ fontSize: 44 }}>${fmtDur(tval)}</div></div>
-      <dl class="kv"><dt>Location</dt><dd>${at ? html`<${PosLink} id=${at} />` : M.locationLabel(S, v)}</dd>${at ? html`<dt>Operation</dt><dd>${POS[at].op}</dd>` : null}
-        <dt>Model</dt><dd>MG ${v.variant.model}</dd><dt>Variant</dt><dd>${v.variant.trim}</dd><dt>Powertrain</dt><dd>${v.variant.ptLabel}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
-        <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>${v.engine ? html`<dt>Engine</dt><dd class="mono" style=${{ color: v.engine.ok ? null : 'var(--crit)' }}>${v.engine.engineNo}</dd><dt>Transmission</dt><dd class="mono">${v.engine.transNo}</dd>` : null}
-        <dt>Scanner 1</dt><dd class="mono">${fmtClock(v.entryT)}${v.source === 'SIM_AUTO' ? ' · sim' : ''}</dd>${v.lineOffT ? html`<dt>Scanner 3</dt><dd class="mono">${fmtClock(v.lineOffT)}</dd>` : null}</dl>
+      <dl class="kv"><dt>Where</dt><dd>${at ? html`<${PosLink} id=${at} /> <span class="c-muted">· ${AREAS[POS[at].area].name}</span>` : M.locationLabel(S, v)}</dd>
+        <dt>Line-in</dt><dd class="mono">${fmtClock(v.entryT)} · Scanner 1 at TL1${v.source === 'SIM_AUTO' ? ' (sim)' : ''}</dd>
+        ${v.lineOffT ? html`<dt>Completed</dt><dd class="mono">${fmtClock(v.lineOffT)} · photo-eye at FL7</dd>` : null}
+        ${v.offlines.length ? html`<dt>Offline</dt><dd>${v.offlines.length}× · last at <span class="mono">${v.offline.pos}</span>, ${fmtClock(v.offline.t, false)}</dd>` : null}
+        <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd></dl>
       <div class="sec"><div class="micro">Route</div><div class="route" aria-label="Route progress">${route.map((x, i) => html`<${React.Fragment} key=${x.sid}>${i === 6 || i === 11 ? html`<span class="g"></span>` : null}<span class=${'s ' + x.cls} title=${x.sid}></span></${React.Fragment}>`)}</div></div>
-      ${v.offline ? html`<div class="callout warn"><div class="ttl" style=${{ color: 'var(--warn)' }}><${Icon} n="exit" />Taken off line · recorded</div><div>${v.offline.reason}${v.offline.notes ? ` — ${v.offline.notes}` : ''}</div>
-        <dl class="kv" style=${{ marginTop: 4 }}><dt>Taken from</dt><dd class="mono">${dispId(v.offline.pos)}</dd><dt>Time</dt><dd class="mono">${fmtClock(v.offline.t)}</dd>${v.offline.over ? html`<dt>Over target at station</dt><dd class="mono" style=${{ color: 'var(--crit)' }}>+${fmtDur(v.offline.over)}</dd>` : null}<dt>Build at take-out</dt><dd class="mono">${v.offline.built} components</dd><dt>Responsible</dt><dd class="mono">${dispId(v.offline.responsible)}</dd><dt>Authorized by</dt><dd>${v.offline.by || 'Supervisor'}</dd></dl>
-        <div class="note">Not counted as a completed vehicle and not re-entered.</div></div>` : null}
+      ${v.offlines.map((o, i) => { const r = v.returns.find((x) => x.offlineT === o.t); return html`<div key=${i} class="callout warn"><div class="ttl" style=${{ color: 'var(--warn)' }}><${Icon} n="exit" />Taken offline at ${o.pos} · ${fmtClock(o.t, false)}</div><div>${o.reason}${o.notes ? ` — ${o.notes}` : ''}</div>
+        <dl class="kv" style=${{ marginTop: 4 }}><dt>Station</dt><dd class="mono">${o.pos} · ${AREAS[o.area].name}</dd><dt>Cycle at station</dt><dd class="mono">${fmtDur(o.cycle || 0)}</dd><dt>Build</dt><dd class="mono">${o.built} components</dd><dt>By</dt><dd>${o.by || '—'}${o.scanned ? ' · VIN scanned' : ' · correction'}</dd>
+        ${r ? html`<dt>Returned</dt><dd class="mono">${fmtClock(r.t, false)} at ${r.pos} · ${fmtDur(r.t - o.t)} offline · ${r.by}</dd>` : null}</dl>
+        ${!r ? html`<div class="note">Removed from station counts; not counted towards the target unless it returns and completes.</div>` : null}</div>`; })}
       <div class="sec"><div class="micro">Actions</div><div class="actions">
-        ${M.isActive(v) && at ? html`<button class="btn danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take off line…</button>` : null}
-        ${M.isActive(v) && !at ? html`<span class="note">A unit can be taken off once it arrives at a position.</span>` : null}
-        ${v.state === 'AWAITING_LINE_OFF' ? html`<button class="btn primary" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT', vin: v.vin } })}><${Icon} n="scanout" />Exit scan</button>` : null}
-        ${v.state === 'OFF_LINE' || v.state === 'LINED_OFF' ? html`<span class="note">No actions: this record is closed.</span>` : null}
+        ${M.isActive(v) && at && M.OFFLINE_POS.includes(at) ? html`<button class="btn danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : null}
+        ${M.isActive(v) && at && !M.OFFLINE_POS.includes(at) ? html`<span class="note">Offline points: TL6 and FL1–FL7.</span>` : null}
+        ${v.state === 'OFF_LINE' ? html`<button class="btn primary" disabled=${!can('offline') || !ret.ok} title=${ret.ok ? `Rejoin at ${ret.pos} when it is free` : ret.reason} onClick=${() => setUI({ dialog: { type: 'return', vehicleId: v.id } })}><${Icon} n="ret" />Return to line at ${v.offline.pos}…</button>` : null}
+        ${v.state === 'RETURN_QUEUED' ? html`<span class="note">Waiting for ${v.returnReq.pos} to be free. It rejoins automatically.</span>` : null}
+        ${M.isActive(v) && at && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: at, vin: v.vin } })}><${Icon} n="swap" />Correct position…</button>` : null}
+        ${v.state === 'LINED_OFF' ? html`<span class="note">Completed. This record is closed.</span>` : null}
       </div></div>
+      ${rows.length ? html`<div class="sec"><div class="micro"><span>Time at each station</span><span>cycle vs takt</span></div><div style=${{ overflowX: 'auto' }}><table class="stimeline"><thead><tr><th>Station</th><th>Arrived</th><th>Cycle</th><th></th><th>Left</th></tr></thead><tbody>
+        ${rows.map((r, i) => { const over = r.cyc > r.target, w = Math.min(1, r.cyc / (r.target * 1.5)); return html`<tr key=${i}><td>${r.pos}${r.corrected ? ' ·c' : ''}</td><td class="c-muted">${fmtClock(r.arriveT, false)}</td><td style=${{ color: over ? 'var(--crit)' : null }}>${fmtDur(r.cyc)}${r.live ? ' ●' : ''}</td><td><span class="cbar" title=${`takt ${fmtDur(r.target)}`}><i style=${{ width: `${w * 100}%`, background: over ? 'var(--crit)' : r.cyc >= r.target * S.cfg.warnPct ? 'var(--warn)' : 'var(--ok)' }}></i><b style=${{ left: `${(1 / 1.5) * 100}%` }}></b></span></td><td class="l c-muted">${r.end === 'departed' ? fmtClock(r.departT, false) : r.end === 'taken off line' ? 'offline' : r.end === 'corrected' ? 'corrected' : r.live ? 'here now' : '—'}</td></tr>`; })}</tbody></table></div></div>` : null}
       <div class="sec"><div class="micro"><span>Build</span><span>${installed} / ${items.length} components</span></div><${BuildList} v=${v} /></div>
-      ${segs.length ? html`<div class="sec"><div class="micro">Position timing</div><div style=${{ overflowX: 'auto' }}><table class="data"><thead><tr><th>Pos</th><th>Work</th><th>Target</th><th>Waiting</th></tr></thead><tbody>
-        ${segs.map((s, i) => { const live = !s.end && S.pos[s.pos].occ && S.pos[s.pos].occ.vehicleId === v.id ? S.pos[s.pos].occ : null; const w = live ? live.workT : s.work; return html`<tr key=${i}><td class="mono">${s.pos}${s.credited ? ' ·cr' : ''}</td><td class="mono" style=${{ color: w > s.target ? 'var(--crit)' : null }}>${fmtDur(w)}${s.interrupted ? ' ✕' : ''}</td><td class="mono c-muted">${fmtDur(s.target)}</td><td class="mono">${fmtDur(live ? live.waitT : s.wait)}</td></tr>`; })}</tbody></table></div></div>` : null}
-      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-12).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
+      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-14).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
     </div></${React.Fragment}>`;
 }
 function Inspector() {
@@ -3273,18 +3467,19 @@ function Inspector() {
 /* ── anchored tags ── */
 function Anchors() {
   const S = RT.S, sel = RT.ui.selection, tags = [], byPos = {};
-  S.alarms.forEach((a) => { if (!M.alarmActive(a) || a.level === 'WARNING' || !POS[a.pos]) return; const sid = dispId(a.pos); if (!byPos[sid] || M.SEV[a.level] > M.SEV[byPos[sid].level]) byPos[sid] = a; });
-  Object.entries(byPos).forEach(([sid, a]) => {
+  S.alarms.forEach((a) => { if (!M.alarmActive(a) || a.level === 'WARNING' || !POS[a.pos]) return; const sid = a.type === 'CALL' ? `${a.pos}#${a.callType}` : dispId(a.pos); if (!byPos[sid] || M.SEV[a.level] > M.SEV[byPos[sid].level]) byPos[sid] = a; });
+  Object.entries(byPos).forEach(([key, a]) => {
+    const sid = dispId(a.pos);
     const occ = S.pos[a.pos].occ, v = occ && occ.vehicleId && S.vehicles[occ.vehicleId];
     let txt;
     if (a.type === 'DELAY') txt = html`<span class="mono k">${sid}</span><span>${a.level === 'ESCALATED' ? 'ESCALATED' : 'OVERDUE'}</span><span class="mono">+${fmtDur(occ && v ? occ.workT - M.targetFor(a.pos, v) : 0)}</span>`;
     else if (a.type === 'FAULT') txt = html`<span class="mono k">${sid}</span><span>${a.msg.split(' · ')[0]}</span>`;
     else if (a.type === 'QUALITY') txt = html`<span class="mono k">${sid}</span><span>QUALITY HOLD · E/T mismatch</span>`;
-    else if (a.type === 'ASSIST') txt = html`<span class="mono k">${sid}</span><span>ASSISTANCE</span>`;
+    else if (a.type === 'CALL') { const c = S.calls.find((x) => x.id === a.callId); txt = html`<span class="mono k">${sid}</span><span>${a.callType === 'SUP' ? 'SUPERVISOR' : 'MAINTENANCE'}</span><span class="mono">${c ? fmtDur(S.t - c.raisedT) : ''}</span>`; }
     else if (a.type === 'EMERGENCY') txt = html`<span class="mono k">${sid}</span><span>EMERGENCY · LINE STOPPED</span>`;
     else txt = html`<span class="mono k">${sid}</span><span>waiting${a.root ? html` · held by <span class="mono k">${dispId(a.root)}</span>` : ''}</span>`;
-    const cls = a.level === 'ESCALATED' || a.level === 'EMERGENCY' ? 't-esc' : a.level === 'BLOCKED' ? 't-hold' : a.level === 'ASSIST' ? 't-warn' : 't-crit';
-    tags.push(html`<div key=${'a' + sid} class="anchor" data-anchor=${'pos:' + sid}><div class=${'tag ' + cls} role="button" tabIndex="0" onClick=${() => select({ kind: 'pos', id: sid })} onKeyDown=${(e) => e.key === 'Enter' && select({ kind: 'pos', id: sid })}><${Icon} n=${LEVEL_ICON[a.level]} />${txt}</div></div>`);
+    const cls = a.level === 'ESCALATED' || a.level === 'EMERGENCY' ? 't-esc' : a.level === 'BLOCKED' ? 't-hold' : a.level === 'CALL_SUP' ? 't-sup' : a.level === 'CALL_MNT' ? 't-mnt' : 't-crit';
+    tags.push(html`<div key=${'a' + key} class="anchor" data-anchor=${'pos:' + sid} style=${a.type === 'CALL' ? { marginTop: a.callType === 'SUP' ? -30 : -60 } : null}><div class=${'tag ' + cls} role="button" tabIndex="0" onClick=${() => select({ kind: 'pos', id: sid })} onKeyDown=${(e) => e.key === 'Enter' && select({ kind: 'pos', id: sid })}><${Icon} n=${LEVEL_ICON[a.level]} />${txt}</div></div>`);
   });
   if (sel && sel.kind === 'pos' && !byPos[sel.id]) tags.push(html`<div key="sel" class="anchor" data-anchor=${'pos:' + sel.id}><div class="tag"><span class="mono k">${sel.id}</span></div></div>`);
   if (sel && sel.kind === 'veh' && S.vehicles[sel.id]) tags.push(html`<div key="selv" class="anchor" data-anchor=${'veh:' + sel.id}><div class="tag"><span class="mono k">${S.vehicles[sel.id].vin.slice(-6)}</span></div></div>`);
@@ -3297,82 +3492,145 @@ function HoverCard() {
     const P = POS[hv.id], st = M.stationStatus(S, hv.id), sv = M.stationVehicle(S, hv.id), occ = sv && S.pos[sv.posId].occ;
     body = html`<div style=${{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}><span class="mono" style=${{ fontSize: 16, fontWeight: 600 }}>${hv.id}</span><${StatusChip} st=${st} /></div>
       <dl>${sv ? html`<dt>VIN</dt><dd class="mono">${shortVin(sv.v.vin)}</dd>` : html`<dt>Vehicle</dt><dd>none</dd>`}
-      ${sv && P.kind === 'work' && occ ? html`<dt>Elapsed</dt><dd class="mono">${fmtDur(occ.workT)} / ${fmtDur(M.targetFor(hv.id, sv.v))}</dd>` : null}
+      ${sv && P.kind === 'work' && occ && sv.posId === hv.id ? html`<dt>Cycle / takt</dt><dd class="mono">${fmtDur(M.occCycle(S, occ))} / ${fmtDur(M.targetFor(hv.id, sv.v))}</dd>` : null}
+      ${M.callsAt(S, hv.id).map((c) => html`<dt key=${c.id}>${M.CALL_TYPES[c.type].label}</dt><dd class="mono">${fmtDur(S.t - c.raisedT)}${c.respondedT != null ? ' · responded' : ''}</dd>`)}
       ${occ && occ.completeT != null && occ.waitT > 0 ? html`<dt>Waiting</dt><dd class="mono">${fmtDur(occ.waitT)}</dd>` : null}<dt>Team</dt><dd>${P.team}</dd></dl>`;
   } else if (hv.kind === 'veh') {
     const v = S.vehicles[hv.id]; if (!v) return null;
     body = html`<div style=${{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span class="mono" style=${{ fontSize: 16, fontWeight: 600 }}>${v.vin.slice(-6)}</span><span class="c-muted" style=${{ fontSize: 12 }}>${v.variant.name}</span></div>
       <dl><dt>Location</dt><dd>${M.locationLabel(S, v)}</dd><dt>Assembly</dt><dd class="mono">${fmtDur((v.lineOffT || S.t) - v.entryT)}</dd><dt>Carrier</dt><dd class="mono">${v.carrierId || '—'}</dd></dl>`;
-  } else if (hv.kind === 'scanner') body = html`<div class="mono" style=${{ fontWeight: 600 }}>${hv.id === 'ENTRY' ? 'Scanner 1 · VIN receive' : hv.id === 'LOAD' ? 'Scanner 2 · hanger load' : hv.id === 'EXIT' ? 'Scanner 3 · line-off' : 'E/T scanner · CH-02'}</div><p class="note" style=${{ marginTop: 6 }}>${hv.id === 'ENGINE' ? 'Pairs engine and transmission serials to the VIN.' : hv.id === 'LOAD' ? 'Pairs the VIN to its hanger automatically at TL6.' : 'Click to scan.'}</p>`;
+  } else if (hv.kind === 'scanner') { const SC = { ENTRY: ['Scanner 1 · line-in at TL1', 'Every body is scanned here. Click to scan.'], OFFLINE: ['Offline scanner · TL6, end of Trim', 'Scans a unit taken offline at the end of Trim.'], HH1: ['Handheld offline scanner · Final (FL1–FL3)', 'Wireless; docked at FL2. Scans a unit taken offline on the Final line.'], HH2: ['Handheld offline scanner · Final (FL4–FL7)', 'Wireless; docked at FL5. Scans a unit taken offline on the Final line.'], EOL: ['End-of-line photo-eye · FL7', 'Detects the car driving off the line. No scan: the VIN comes from tracking.'] }[hv.id] || [hv.id, ''];
+    body = html`<div class="mono" style=${{ fontWeight: 600 }}>${SC[0]}</div><p class="note" style=${{ marginTop: 6 }}>${SC[1]}</p>`; }
   return html`<div class="glass hovercard ticks" id="hovercard" style=${{ transform: `translate(${Math.min(hv.x + 16, window.innerWidth - 310)}px, ${hv.y + 16}px)` }}>${body}</div>`;
 }
 function Legend() {
   const row = (sw, txt) => html`<div class="row"><span class="sw" style=${{ background: sw }}></span><span>${txt}</span></div>`;
   return html`<div class="glass legend-pop ticks" role="dialog" aria-label="Key">
     <div class="micro">Reading the floor</div>
-    ${row('var(--text)', 'Timer bar along each position: work time against target')}
-    ${row('var(--warn)', 'Near target')}${row('var(--crit)', 'Overdue, fault or quality hold · pulsing tint and tag')}${row('var(--esc)', 'Escalated delay')}
-    ${row('var(--ok)', 'Work complete, transfer permitted')}${row('var(--hold)', 'Work complete, waiting for transfer')}
+    ${row('var(--andon-ok)', 'Normal · cycle time inside takt (stack light green)')}
+    ${row('var(--warn)', 'Close to limit · past ' + Math.round(RT.S.cfg.warnPct * 100) + '% of takt')}${row('var(--crit)', 'Over takt · buzzer rings until the unit leaves')}
+    ${row('var(--call-sup)', 'Supervisor call · violet lamp, blinks until someone responds')}${row('var(--call-mnt)', 'Maintenance call · blue lamp, blinks until someone responds')}
+    ${row('var(--hold)', 'Work complete, waiting for transfer')}
     ${row('repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 10px)', 'Chevrons point from waiting bodies to the position holding them')}
     ${row('var(--transit)', 'Bright parts on a car are being installed right now')}
     <p class="note">X-ray (X) makes the body glass so interior and underbody parts are visible. Every state also shows as text with an icon.</p>
-    <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
-    <button class="btn sm" onClick=${() => setUI({ dialog: { type: 'about' }, legend: false })}><${Icon} n="info" />Layout, assumptions & PLC integration</button>
+    <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>/</b> find VIN · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
+    <button class="btn sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />How it works · URD coverage</button>
   </div>`;
 }
 
 /* ── dialogs ── */
+/* Scanner 1 at TL1: line-in (URD req 1). The only routine scan on the line. */
 function ScanDialog({ d }) {
-  const S = RT.S, entry = d.scanner === 'ENTRY';
+  const S = RT.S;
   const [vin, setVin] = useState(d.vin || ''), [res, setRes] = useState(null), [scanning, setScanning] = useState(false), inp = useRef(null);
   useEffect(() => { inp.current && inp.current.focus(); }, []);
   const head = M.bufferHead(S), headBody = head >= 0 ? S.bodyBuffer[head] : null;
-  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { const v = vin.trim().toUpperCase(); const r = entry ? M.entryScan(S, v, 'MANUAL') : M.exitScan(S, v, 'MANUAL'); if (r.ok && !entry && r.vehicleId) delete S.holdExit[r.vehicleId]; setRes(r); setScanning(false); bump(); }, 650); };
-  const E0 = S.pos['TL1'], lo = S.pos.FL7, loV = lo.occ && lo.occ.vehicleId && lo.occ.completeT != null && S.vehicles[lo.occ.vehicleId];
+  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { const r = M.entryScan(S, vin.trim().toUpperCase(), 'MANUAL'); setRes(r); setScanning(false); bump(); }, 650); };
+  const E0 = S.pos['TL1'];
   const activeV = S.vehOrder.map((id) => S.vehicles[id]).find((v) => v.state === 'IN_PROCESS' && v.carrierId && S.carriers[v.carrierId].posId && POS[S.carriers[v.carrierId].posId].kind === 'work');
   const entryState = !E0.carrierId ? (E0.reservedBy ? `skid ${E0.reservedBy} arriving` : 'no skid present') : E0.occ.vehicleId ? `occupied by ${S.vehicles[E0.occ.vehicleId].vin.slice(-6)}` : E0.occ.pendingBody ? 'body being placed' : `empty skid ${E0.carrierId} ready`;
   const garble = () => { const g = headBody ? headBody.label : 'LSJA34661TP248999'; return g.slice(0, 8) + (g[8] === '7' ? '3' : '7') + g.slice(9); };
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="scan-h">
-    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">${entry ? 'Scanner 1 · TL1 VIN receive' : 'Scanner 3 · FL7 line-off'}</div><h3 id="scan-h">${entry ? 'Register a body entering assembly' : 'Register normal line-off'}</h3></div><span class="sim-tag">SIMULATED</span><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Scanner 1 · TL1 · line-in</div><h3 id="scan-h">Register a body entering the line</h3></div><span class="sim-tag">SIMULATED</span><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">
       <div class=${'scanwin' + (scanning ? ' scanning' : '')}><div class="barcode"></div><div class="laser"></div></div>
-      <div class="field"><label for="vin-in">VIN · 17 characters</label><input id="vin-in" ref=${inp} class="vin-input" aria-invalid=${res && !res.ok ? "true" : "false"} data-state=${res ? (res.ok ? "ok" : "bad") : ""} maxLength="17" spellCheck="false" autoComplete="off" value=${vin} onInput=${(e) => { setVin(e.target.value.toUpperCase()); setRes(null); }} onKeyDown=${(e) => e.key === 'Enter' && vin && !scanning && doScan()} /></div>
-      <div class="actions">${entry ? html`
+      <div class="field"><label for="vin-in">VIN · 17 characters</label><input id="vin-in" ref=${inp} class="vin-input" aria-invalid=${res && !res.ok ? 'true' : 'false'} data-state=${res ? (res.ok ? 'ok' : 'bad') : ''} maxLength="17" spellCheck="false" autoComplete="off" value=${vin} onInput=${(e) => { setVin(e.target.value.toUpperCase()); setRes(null); }} onKeyDown=${(e) => e.key === 'Enter' && vin && !scanning && doScan()} /></div>
+      <div class="actions">
         ${headBody ? html`<button class="btn sm sim" onClick=${() => { setVin(headBody.label); setRes(null); }}>Label on next body</button>` : null}
         ${activeV ? html`<button class="btn sm sim" onClick=${() => { setVin(activeV.vin); setRes(null); }}>VIN already on line</button>` : null}
-        <button class="btn sm sim" onClick=${() => { setVin(garble()); setRes(null); }}>Misread label</button>` : html`
-        ${loV ? html`<button class="btn sm sim" onClick=${() => { setVin(loV.vin); setRes(null); }}>Vehicle at line-off</button>` : null}
-        <button class="btn sm sim" onClick=${() => { const b = 'LSJA34660TP999999'; setVin(b.slice(0, 8) + M.vinCheckDigit(b) + b.slice(9)); setRes(null); }}>Unknown VIN</button>
-        ${activeV ? html`<button class="btn sm sim" onClick=${() => { setVin(activeV.vin); setRes(null); }}>VIN still mid-line</button>` : null}`}</div>
-      <p class="note">${entry ? html`TL1: <b>${entryState}</b>. Paint-shop buffer: <b>${S.bodyBuffer.filter(Boolean).length} of 6</b> bodies.${S.cfg.autoEntryScan ? ' Auto scan is on, so the simulator also scans bodies when TL1 is free.' : ''}` : html`FL7: <b>${loV ? `${loV.vin} done, waiting ${fmtDur(lo.occ.waitT)}` : 'no finished vehicle waiting'}</b>.`}</p>
+        <button class="btn sm sim" onClick=${() => { setVin(garble()); setRes(null); }}>Misread label</button></div>
+      <p class="note">TL1: <b>${entryState}</b>. Paint-shop buffer: <b>${S.bodyBuffer.filter(Boolean).length} of 6</b> bodies.${S.cfg.autoEntryScan ? ' Auto scan is on, so the simulator also scans bodies at the planned pace.' : ''} After this scan the VIN is tracked from station to station without further scans.</p>
       ${res ? html`<div class=${'result ' + (res.ok ? 'ok' : 'bad')} role="alert"><div class="ttl" style=${{ color: res.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n=${res.ok ? 'checkc' : 'xc'} />${res.ok ? 'Accepted' : 'Rejected'}</div><div>${res.reason}</div>
-        <ul>${res.ok ? (entry ? [html`<li key="a">Body taken from the buffer and placed on the Trim conveyor at TL1</li>`, html`<li key="b">Assembly timer started ${fmtClock(res.t)}</li>`] : [html`<li key="a">Assembly timer stopped · ${fmtDur(res.dur)}</li>`, html`<li key="b">Completed count updated · vehicle released to storage</li>`]) : [html`<li key="c">No production record was created or changed</li>`, html`<li key="d">Logged as an exception</li>`]}</ul></div>` : null}
+        <ul>${res.ok ? [html`<li key="a">Body taken from the buffer and placed on the Trim conveyor at TL1</li>`, html`<li key="b">Line-in recorded ${fmtClock(res.t)}</li>`] : [html`<li key="c">No production record was created or changed</li>`, html`<li key="d">Logged as an exception</li>`]}</ul></div>` : null}
     </div>
     <div class="dialog-foot">${res && res.ok && res.vehicleId ? html`<button class="btn" onClick=${() => { setUI({ dialog: null }); select({ kind: 'veh', id: res.vehicleId }); }}>Show vehicle</button>` : null}<button class="btn" onClick=${() => setUI({ dialog: null })}>Done</button><button class="btn primary" aria-busy=${scanning ? 'true' : 'false'} disabled=${!vin && !scanning} onClick=${() => !scanning && doScan()}><${Icon} n="scan" />${scanning ? 'Scanning…' : 'Scan'}</button></div>
   </div></div>`;
 }
+/* Taking a unit offline (URD req 2–3, 6): scan the VIN at the station; the station is recorded. */
 function OffLineDialog({ d }) {
   const S = RT.S, v = S.vehicles[d.vehicleId];
-  const chk = v ? M.canTakeOffLine(S, v.id) : { ok: false }, at = chk.ok ? chk.posId : null, c = v && v.carrierId && S.carriers[v.carrierId];
-  const occ = at && S.pos[at].occ, tgt = at && v ? M.targetFor(at, v) : 0, over = at && POS[at].kind === 'work' && occ && occ.completeT == null ? occ.workT - tgt : 0;
-  const [reason, setReason] = useState(d.reason || (over > 0 ? M.OFFLINE_REASONS[0] : M.OFFLINE_REASONS[1])), [resp, setResp] = useState(at ? dispId(at) : 'TL1'), [notes, setNotes] = useState(''), [by, setBy] = useState('Line supervisor · Shift A'), [ok, setOk] = useState(false), [err, setErr] = useState(null);
+  const chk = v ? M.canTakeOffLine(S, v.id) : { ok: false }, at = chk.ok ? chk.posId : null;
+  const occ = at && S.pos[at].occ, an = at ? M.andonState(S, at) : null;
+  const [reason, setReason] = useState(d.reason || (an && an.state === 'over' ? M.OFFLINE_REASONS[0] : M.OFFLINE_REASONS[1])), [notes, setNotes] = useState(''), [scan, setScan] = useState(''), [scanning, setScanning] = useState(false), [ok, setOk] = useState(false), [err, setErr] = useState(null);
   if (!v) return null;
-  const submit = () => { const r = M.takeOffLine(S, v.id, { reason, notes, responsible: resp, by }); if (!r.ok) { setErr(r.reason); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const scanner = at === 'TL6' ? 'Offline scanner at TL6 (end of Trim)' : at && ['FL1', 'FL2', 'FL3'].includes(at) ? 'Handheld scanner 1 (FL1–FL3)' : 'Handheld scanner 2 (FL4–FL7)';
+  const doScan = () => { setScanning(true); setTimeout(() => { setScan(v.vin); setScanning(false); }, 550); };
+  const submit = () => { const r = M.takeOffLine(S, v.id, { reason, notes, by: userName(), scan }); if (!r.ok) { setErr(r.reason); bump(); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const scanOk = scan && scan.trim().toUpperCase() === v.vin;
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="off-h">
-    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Authorized process event · fast mode</div><h3 id="off-h">Take unit off the line</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">${at || '—'} · ${scanner}</div><h3 id="off-h">Take unit offline</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">
-      <dl class="kv"><dt>VIN</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Variant</dt><dd>${v.variant.name}</dd><dt>Position</dt><dd class="mono">${at ? dispId(at) : M.locationLabel(S, v)}</dd><dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>
-        ${at && POS[at].kind === 'work' && occ ? html`<dt>Time at station</dt><dd class="mono" style=${{ color: over > 0 ? 'var(--crit)' : null }}>${fmtDur(occ.workT)} / ${fmtDur(tgt)}${over > 0 ? ` (+${fmtDur(over)})` : ''}</dd>` : null}</dl>
+      <dl class="kv"><dt>Tracking shows</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Variant</dt><dd>${v.variant.name}</dd><dt>Station</dt><dd class="mono">${at || M.locationLabel(S, v)}</dd>
+        ${an && an.state !== 'idle' ? html`<dt>Cycle at station</dt><dd class="mono" style=${{ color: an.state === 'over' ? 'var(--crit)' : null }}>${fmtDur(an.cycle)} / ${fmtDur(an.takt)}</dd>` : null}</dl>
       ${!at ? html`<div class="result bad">${chk.reason}</div>` : null}
-      <div class="field"><label for="off-reason">Reason</label><select id="off-reason" value=${reason} onChange=${(e) => setReason(e.target.value)}>${M.OFFLINE_REASONS.map((r) => html`<option key=${r}>${r}</option>`)}</select></div>
-      <div class="field"><label for="off-resp">Station where the issue occurred</label><select id="off-resp" value=${resp} onChange=${(e) => setResp(e.target.value)}>${STATIONS.map((r) => html`<option key=${r} value=${r}>${r} · ${POS[r].team}</option>`)}</select></div>
-      <div class="field"><label for="off-notes">Notes for the record</label><textarea id="off-notes" rows="2" value=${notes} onInput=${(e) => setNotes(e.target.value)} placeholder="e.g. Exhaust hanger bracket misaligned, would not seat"></textarea></div>
-      <div class="field"><label for="off-by">Authorized by</label><input id="off-by" value=${by} onInput=${(e) => setBy(e.target.value)} /></div>
-      <label class="confirm-row" for="off-ok"><input id="off-ok" type="checkbox" checked=${ok} onChange=${(e) => setOk(e.target.checked)} /><span>The unit leaves the line now. Its timing stops, it is recorded as off-line with its build state, and it will <b>not</b> count as a completed line-off. Its carrier continues empty.</span></label>
+      <div class="field"><label for="off-scan">1 · Scan the VIN on the unit</label><div style=${{ display: 'flex', gap: 8 }}><input id="off-scan" class="vin-input" style=${{ flex: 1 }} data-state=${scan ? (scanOk ? 'ok' : 'bad') : ''} maxLength="17" spellCheck="false" autoComplete="off" value=${scan} placeholder="Scan or type" onInput=${(e) => { setScan(e.target.value.toUpperCase()); setErr(null); }} /><button class="btn" aria-busy=${scanning ? 'true' : 'false'} onClick=${doScan}><${Icon} n="scan" />${scanning ? 'Scanning…' : 'Scan label'}</button></div>
+        ${scan && !scanOk && scan.length === 17 ? html`<div class="note" style=${{ color: 'var(--crit)' }}>This VIN does not match the unit tracked at ${at}. Check the unit, or correct its position first.</div>` : null}</div>
+      <div class="field"><label for="off-reason">2 · Reason</label><select id="off-reason" value=${reason} onChange=${(e) => setReason(e.target.value)}>${M.OFFLINE_REASONS.map((r) => html`<option key=${r}>${r}</option>`)}</select></div>
+      <div class="field"><label for="off-notes">Notes for the record</label><textarea id="off-notes" rows="2" value=${notes} onInput=${(e) => setNotes(e.target.value)} placeholder="e.g. Grille clip broken, would not seat"></textarea></div>
+      <label class="confirm-row" for="off-ok"><input id="off-ok" type="checkbox" checked=${ok} onChange=${(e) => setOk(e.target.checked)} /><span>The unit leaves the line now. It is removed from station counts and will <b>not</b> count towards the target unless it returns and completes. Recorded by <b>${userName()}</b>.</span></label>
       ${err ? html`<div class="result bad">${err}</div>` : null}
     </div>
-    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn danger" disabled=${!ok || !at} onClick=${submit}><${Icon} n="exit" />Take off line</button></div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn danger" disabled=${!ok || !at || !scan} onClick=${submit}><${Icon} n="exit" />Take offline</button></div>
   </div></div>`;
+}
+/* Return to line (URD §6): rejoin at the station it left. */
+function ReturnDialog({ d }) {
+  const S = RT.S, v = S.vehicles[d.vehicleId], [note, setNote] = useState(''), [err, setErr] = useState(null);
+  if (!v || !v.offline) return null;
+  const pos = v.offline.pos, slot = M.stationCount(S, pos);
+  const submit = () => { const r = M.returnToLine(S, v.id, userName(), note); if (!r.ok) { setErr(r.reason); return; } bump(); setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="ret-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Offline since ${fmtClock(v.offline.t, false)} · ${fmtDur(S.t - v.offline.t)}</div><h3 id="ret-h">Return ${v.vin.slice(-6)} to the line</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <dl class="kv"><dt>VIN</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Taken off at</dt><dd class="mono">${pos}</dd><dt>Reason</dt><dd>${v.offline.reason}</dd><dt>${pos} now</dt><dd>${slot ? 'occupied · it waits for the station to be free' : 'free · it can rejoin straight away'}</dd></dl>
+      <div class="field"><label for="ret-note">What was done</label><textarea id="ret-note" rows="2" value=${note} onInput=${(e) => setNote(e.target.value)} placeholder="e.g. Correct grille fitted offline; recheck at FL4"></textarea></div>
+      <p class="note">It rejoins at <b>${pos}</b>, where work restarts. It counts towards the target only when it completes the line. Both visits stay in its history.</p>
+      ${err ? html`<div class="result bad">${err}</div>` : null}
+    </div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn primary" onClick=${submit}><${Icon} n="ret" />Return to ${pos}</button></div>
+  </div></div>`;
+}
+/* Manual position correction (URD req 7): authorised users only; every change is audited. */
+function CorrectDialog({ d }) {
+  const S = RT.S, here = S.pos[d.pos] && S.pos[d.pos].occ, cur = here && here.vehicleId && S.vehicles[here.vehicleId];
+  const [mode, setMode] = useState('move'), [vin, setVin] = useState(d.vin || (cur ? cur.vin : '')), [to, setTo] = useState(''), [reason, setReason] = useState(''), [res, setRes] = useState(null);
+  const active = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => M.isActive(v) && v.carrierId && S.carriers[v.carrierId].mode === 'POS');
+  const targets = WORK_POS.filter((id) => S.pos[id].carrierId && id !== (cur && cur.posId));
+  const submit = () => { const r = mode === 'move' ? M.correctPosition(S, vin, to, userName(), reason) : M.clearGhost(S, d.pos, userName(), reason); setRes(r); bump(); if (r.ok) setTimeout(() => setUI({ dialog: null }), 900); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="cor-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Authorised · audited</div><h3 id="cor-h">Correct vehicle position</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <div class="tabs" role="tablist" style=${{ margin: 0 }}>${[['move', 'Move or swap a VIN'], ['ghost', `Unit not at ${d.pos}`]].map(([k, l]) => html`<button key=${k} role="tab" aria-selected=${mode === k} onClick=${() => { setMode(k); setRes(null); }}>${l}</button>`)}</div>
+      ${mode === 'move' ? html`
+        <div class="field"><label for="cor-vin">VIN that is out of step</label><select id="cor-vin" value=${vin} onChange=${(e) => setVin(e.target.value)}>${active.map((v) => html`<option key=${v.id} value=${v.vin}>${v.vin.slice(-6)} · recorded at ${S.carriers[v.carrierId].posId}</option>`)}</select></div>
+        <div class="field"><label for="cor-to">Where it really is</label><select id="cor-to" value=${to} onChange=${(e) => setTo(e.target.value)}><option value="">Choose a station…</option>${targets.map((id) => { const o = S.pos[id].occ, ov = o && o.vehicleId && S.vehicles[o.vehicleId]; return html`<option key=${id} value=${id}>${id}${ov ? ` · holds ${ov.vin.slice(-6)} (will swap)` : ' · empty carrier'}</option>`; })}</select></div>
+        <p class="note">If another unit is recorded at that station, the two are swapped. Only stations with a carrier standing at them can be chosen.</p>`
+      : html`<p class="note">${cur ? html`Tracking shows <b class="mono">${cur.vin.slice(-6)}</b> at ${d.pos}. If it is not physically there, it is recorded offline as “not found at station” so the counts are right. It can be returned later.` : `No unit is recorded at ${d.pos}.`}</p>`}
+      <div class="field"><label for="cor-why">Reason (required, kept in the audit log)</label><input id="cor-why" value=${reason} onInput=${(e) => setReason(e.target.value)} placeholder="e.g. Units swapped by hand at FL3/FL4" /></div>
+      ${res ? html`<div class=${'result ' + (res.ok ? 'ok' : 'bad')}>${res.ok ? (mode === 'move' ? `Corrected${res.swapped ? ` · swapped with ${res.swapped.slice(-6)}` : ''}. Logged in the audit trail.` : 'Recorded offline. Logged in the audit trail.') : res.reason}</div>` : null}
+    </div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn primary" disabled=${!reason.trim() || (mode === 'move' && !to)} onClick=${submit}><${Icon} n="swap" />Apply correction</button></div>
+  </div></div>`;
+}
+/* VIN lookup (URD req 5): type part of a VIN and open its record. */
+function VinSearchDialog() {
+  const S = RT.S, [q, setQ] = useState(''), [i, setI] = useState(0), inp = useRef(null);
+  useEffect(() => { inp.current && inp.current.focus(); }, []);
+  const Q = q.trim().toUpperCase();
+  const all = S.vehOrder.map((id) => S.vehicles[id]);
+  const hits = (Q ? all.filter((v) => v.vin.includes(Q)) : all.slice().reverse()).slice(0, 30);
+  const open = (v) => { setUI({ dialog: null }); if (RT.route.page !== 'floor') go('floor'); select({ kind: 'veh', id: v.id }, M.isActive(v)); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="vs-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Vehicle lookup</div><h3 id="vs-h">Find a vehicle by VIN</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <div class="vsearch"><input ref=${inp} value=${q} placeholder="Full VIN or the last digits, e.g. 248271" aria-label="VIN" spellCheck="false" autoComplete="off"
+        onInput=${(e) => { setQ(e.target.value); setI(0); }} onKeyDown=${(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setI(Math.min(hits.length - 1, i + 1)); } else if (e.key === 'ArrowUp') { e.preventDefault(); setI(Math.max(0, i - 1)); } else if (e.key === 'Enter' && hits[i]) open(hits[i]); }} /></div>
+      <div class="vresults" role="listbox">${hits.length ? hits.map((v, k) => { const [lbl, tone] = VSTATE[v.state]; return html`<button key=${v.id} class="vresult" role="option" aria-selected=${k === i} onClick=${() => open(v)}>
+        <span><${VinText} vin=${v.vin} /></span><span class=${'chip c-' + tone}>${lbl}</span>
+        <span class="sub">${v.variant.name} · ${M.locationLabel(S, v)}</span><span class="sub mono">in ${fmtClock(v.entryT, false)}${v.lineOffT ? ` · done ${fmtClock(v.lineOffT, false)}` : ''}</span></button>`; }) : html`<div class="empty">No vehicle with “${Q}” in its VIN in this session.</div>`}</div>
+      <p class="note">Searches every vehicle registered at Scanner 1 in this session: on the line, offlined and completed.</p>
+    </div></div></div>`;
 }
 function AboutDialog() {
   const li = (t, i) => html`<li key=${i}>${t}</li>`;
@@ -3382,22 +3640,22 @@ function AboutDialog() {
     <div class="dialog-body" style=${{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 22, fontSize: 13, lineHeight: 1.55 }}>
       <div><div class="micro">Line flow (confirmed by the plant)</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
         'Trim TL1–TL5 on a floor conveyor (moved by hand today). Scanner 1 receives the VIN at TL1.',
-        'TL6 is a Trim work point and the hanger load point. Scanner 2 pairs the VIN to the hanger.',
+        'TL6 is a Trim work point, the hanger load point and the end of Trim, where a unit can be taken offline with a scan.',
         'Exactly 4 hangers: TL6 → CL1 → CL2 → CL3 → Buffer → CL4 → FL1. The buffer is normally empty and holds a loaded hanger when CL4 is busy.',
         'FL1 is a Final work point on the hanger; the body is then lowered onto the Final conveyor FL2–FL7. Empty hangers return FL1 → TL6 on a separate rail.',
-        'FL7 is the final inspection and line-off point with Scanner 3.',
-        'Each unit moves on its own as soon as its team presses Work done and the next point is free.',
-        'Every station has three buttons: Work done, Assistance call and Emergency call. Emergency stops that line until cleared.',
+        'FL7 is the final inspection point. An end-of-line photo-eye detects completion; there is no scan.',
+        'Units move on their own when the station finishes and the next point is free. Position is tracked without extra scans.',
+        'Every Chassis and Final station has two call buttons, Supervisor and Maintenance, and a buzzer that rings over takt.',
       ].map(li)}</ul></div>
       <div><div class="micro">Assumptions (labelled, configurable)</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
         'Which part goes on at which point, and the target times, follow the plant split but are assumed.',
-        'Engine/transmission scan at CL2 comes from the GA drawing.',
-        'Conveyor speeds, hanger travel times, return-rail route and the 32-vehicle plan are assumed.',
+        'The CL2 engine/transmission scan from the GA drawing is an option, off by default (outside the URD).',
+        'Conveyor speeds, hanger travel times, return-rail route, shift times, breaks and the 30-vehicle shift target are assumed.',
         'Units with problems are taken off the line and recorded; the off-line hold area location is assumed.',
       ].map(li)}</ul></div>
       <div><div class="micro">Needed for real PLC integration</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
-        'PLC tag list or event interface: carrier arrival/position confirmation, presence sensors, permissive and interlock states, fault codes, station Work done / Assistance / Emergency signals.',
-        'Scanner models and protocols for Scanners 1–3 and the CL2 E/T scanner; MES source for VIN, variant and engine data.',
+        'PLC tag list or event interface: carrier arrival/position confirmation, presence sensors, station call buttons, buzzer outputs, fault codes.',
+        'Scanner models and protocols for Scanner 1 and the offline scanners; MES source for VIN and variant data.',
         'Team work-complete signal per position and approved targets per variant.',
         'Controls safety review: this HMI shows permissives and records requests only. Motion authorization stays in the PLC and safety system.',
       ].map(li)}</ul></div>
@@ -3409,23 +3667,28 @@ function AboutDialog() {
 /* ── alarm drawer ── */
 function AlarmDrawer() {
   const S = RT.S, tab = RT.ui.drawer;
-  const active = S.alarms.filter(M.alarmActive), un = active.filter((a) => a.ackT == null), ak = active.filter((a) => a.ackT != null);
-  const resolved = S.alarms.filter((a) => !M.alarmActive(a) && a.level !== 'WARNING').slice(-60).reverse();
+  const active = S.alarms.filter((a) => M.alarmActive(a) && a.type !== 'CALL'), un = active.filter((a) => a.ackT == null), ak = active.filter((a) => a.ackT != null);
+  const openCalls = S.calls.filter((c) => c.clearedT == null).sort((a, b) => a.raisedT - b.raisedT), doneCalls = S.calls.filter((c) => c.clearedT != null).slice(-25).reverse();
+  const resolved = S.alarms.filter((a) => !M.alarmActive(a) && a.level !== 'WARNING' && a.type !== 'CALL').slice(-60).reverse();
   const sortA = (l) => l.slice().sort((a, b) => M.SEV[b.level] - M.SEV[a.level] || a.raisedT - b.raisedT);
   const list = tab === 'active' ? sortA(un) : tab === 'acked' ? sortA(ak) : tab === 'resolved' ? resolved : null;
-  const off = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => v.state === 'OFF_LINE').reverse();
-  const filters = [['all', 'All'], ['exception', 'Exceptions'], ['alarm', 'Alarms'], ['scan', 'Scans'], ['offline', 'Off-line'], ['move', 'Movement'], ['sim', 'Simulation']];
+  const off = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => ['OFF_LINE', 'RETURN_QUEUED', 'RETURNING'].includes(v.state)).reverse();
+  const filters = [['all', 'All'], ['call', 'Calls'], ['andon', 'Buzzers'], ['alarm', 'Alarms'], ['exception', 'Exceptions'], ['scan', 'Scans'], ['offline', 'Offline'], ['config', 'Changes'], ['shift', 'Shifts'], ['move', 'Movement'], ['sim', 'Simulation']];
   const evs = tab === 'log' ? S.events.filter((e) => RT.ui.logFilter === 'all' || e.cat === RT.ui.logFilter || (RT.ui.logFilter === 'move' && e.cat === 'work')).slice(-200).reverse() : [];
   return html`<aside class="glass drawer ticks in" aria-label="Alarms and events">
     <div class="head"><div style=${{ flex: 1 }}><div class="micro">Exceptions</div><div style=${{ fontWeight: 600, fontSize: 18 }}>Alarms & events</div></div>
       ${tab === 'active' && un.some((a) => a.level !== 'WARNING') ? html`<button class="btn sm warn" onClick=${act(() => un.filter((a) => a.level !== 'WARNING').forEach((a) => M.ackAlarm(S, a.id)))}><${Icon} n="check" />Acknowledge all</button>` : null}
       <button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ drawer: null })}><${Icon} n="x" /></button></div>
-    <div class="tabs" role="tablist">${[['active', 'Active', un.length], ['acked', 'Acknowledged', ak.length], ['resolved', 'Resolved', resolved.length], ['offline', 'Off-line units', off.length], ['log', 'Event log', null]].map(([k, l, n]) => html`<button key=${k} role="tab" aria-selected=${tab === k} onClick=${() => setUI({ drawer: k })}>${l}${n != null ? html`<span class="n">${n}</span>` : null}</button>`)}</div>
-    ${tab === 'offline' ? html`<div class="alist">${off.length ? off.map((v) => html`<div key=${v.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': 'var(--warn)' }} onClick=${() => { setUI({ drawer: null }); select({ kind: 'veh', id: v.id }); }} onKeyDown=${(e) => e.key === 'Enter' && (setUI({ drawer: null }), select({ kind: 'veh', id: v.id }))}>
-        <div class="top"><span class="chip c-warn"><${Icon} n="exit" />Off-line</span><span class="mono" style=${{ fontWeight: 600 }}>${dispId(v.offline.pos)}</span><span class="mono c-muted">${shortVin(v.vin)}</span></div>
+    <div class="tabs" role="tablist">${[['calls', 'Calls', openCalls.length], ['active', 'Alarms', un.length], ['acked', 'Acknowledged', ak.length], ['resolved', 'Resolved', resolved.length], ['offline', 'Offline', off.length], ['log', 'Log', null]].map(([k, l, n]) => html`<button key=${k} role="tab" aria-selected=${tab === k} onClick=${() => setUI({ drawer: k })}>${l}${n != null ? html`<span class="n">${n}</span>` : null}</button>`)}</div>
+    ${tab === 'calls' ? html`<div class="alist" style=${{ padding: 12 }}>
+        ${openCalls.length ? openCalls.map((c) => html`<${CallRow} key=${c.id} c=${c} compact />`) : html`<div class="empty">No open calls. Calls appear here the moment a station presses Supervisor or Maintenance.</div>`}
+        ${doneCalls.length ? html`<div class="micro" style=${{ margin: '16px 0 6px' }}>Recently cleared</div><table class="data"><thead><tr><th>Station</th><th>Call</th><th>Raised</th><th>Response</th><th>Total</th><th>By</th></tr></thead><tbody>${doneCalls.map((c) => html`<tr key=${c.id}><td class="mono">${c.pos}</td><td><span class=${'c-' + c.type.toLowerCase()}>${M.CALL_TYPES[c.type].label}</span></td><td class="mono">${fmtClock(c.raisedT, false)}</td><td class="mono">${fmtDur(M.callResponse(c))}</td><td class="mono">${fmtDur(M.callDuration(c))}</td><td style=${{ textAlign: 'left' }}>${(c.clearedBy || '').split(' · ')[0]}</td></tr>`)}</tbody></table>` : null}</div>`
+    : tab === 'offline' ? html`<div class="alist">${off.length ? off.map((v) => html`<div key=${v.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': 'var(--warn)' }} onClick=${() => { setUI({ drawer: null }); select({ kind: 'veh', id: v.id }); }} onKeyDown=${(e) => e.key === 'Enter' && (setUI({ drawer: null }), select({ kind: 'veh', id: v.id }))}>
+        <div class="top"><span class="chip c-warn"><${Icon} n=${v.state === 'OFF_LINE' ? 'exit' : 'ret'} />${v.state === 'OFF_LINE' ? 'Offline' : 'Returning'}</span><span class="mono" style=${{ fontWeight: 600 }}>${dispId(v.offline.pos)}</span><span class="mono c-muted">${shortVin(v.vin)}</span></div>
         <div>${v.offline.reason}${v.offline.notes ? ` — ${v.offline.notes}` : ''}</div>
         <div class="meta"><span class="mono">${fmtClock(v.offline.t, false)}</span><span>${v.variant.name}</span><span class="mono">built ${v.offline.built}</span>${v.offline.over ? html`<span class="mono" style=${{ color: 'var(--crit)' }}>+${fmtDur(v.offline.over)} over</span>` : null}<span>${v.offline.by || 'Supervisor'}</span></div>
-      </div>`) : html`<div class="empty">No units taken off the line this shift.</div>`}</div>`
+        ${v.state === 'OFF_LINE' && can('offline') ? html`<div class="actions"><button class="btn sm" onClick=${(e) => { e.stopPropagation(); setUI({ dialog: { type: 'return', vehicleId: v.id } }); }}><${Icon} n="ret" />Return to ${v.offline.pos}…</button></div>` : null}
+      </div>`) : html`<div class="empty">No units are offline.</div>`}</div>`
     : list ? html`<div class="alist">${list.length ? list.map((a) => html`<div key=${a.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': tv(LEVEL_TONE[a.level]) }} onClick=${() => openAlarm(a)} onKeyDown=${(e) => e.key === 'Enter' && openAlarm(a)}>
         <div class="top"><${LevelChip} a=${a} /><span class="mono" style=${{ fontWeight: 600 }}>${dispId(a.pos)}</span>${a.vin ? html`<span class="mono c-muted">${shortVin(a.vin)}</span>` : null}</div>
         <div>${a.msg}</div>
@@ -3516,18 +3779,33 @@ function Report() {
 const pad = (n) => String(n).padStart(2, '0');
 const PaintChip = ({ p }) => html`<span class="paint"><i style=${{ background: p.hex }}></i>${p.name}</span>`;
 
-/* Line-off moment: a short card when a unit passes Scanner 3 at FL7. */
+/* Line-off moment: a short card when a unit passes the end-of-line photo-eye at FL7. */
 function LineOffCard() {
   const lo = RT.ui.lineoff; if (!lo) return null;
   const c = lo.rec;
   return html`<div class="glass lineoff ticks" role="status" aria-live="polite">
     <div class="lo-mark"><${MgMark} /></div>
-    <div><div class="micro lo-k">Line-off · Scanner 3 · FL7</div><div class="lo-name">${c.name}</div>
+    <div><div class="micro lo-k">Completed · photo-eye · FL7${c.returned ? ' · returned unit' : ''}</div><div class="lo-name">${c.name}</div>
       <div class="lo-meta"><${PaintChip} p=${M.PAINTS.find((x) => x.name === c.paint) || { name: c.paint, hex: '#888' }} /><span class="mono">${c.vin}</span></div></div>
     <div class="lo-stat"><span class="micro">Build time</span><span class="num">${fmtDur(c.dur)}</span></div>
-    <div class="lo-stat"><span class="micro">Today</span><span class="num">${c.n}<small> / ${RT.S.cfg.shiftTarget}</small></span></div>
+    <div class="lo-stat"><span class="micro">This shift</span><span class="num">${c.n}<small> / ${RT.S.shift && RT.S.shift.targets ? RT.S.shift.targets.FINAL : '—'}</small></span></div>
   </div>`;
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   App shell: signed-in user and permissions, screen router, root and boot.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── who is using the app (replaced by the sign-in module) ── */
+const Auth = { user: { name: 'Line supervisor', role: 'admin' } };
+function can() { return true; }
+function userName() { return Auth.user ? Auth.user.name : 'System'; }
+
+/* ── screens: #/floor, #/dash, #/display/<line>, #/reports, #/admin/<tab>, #/how ── */
+RT.route = { page: 'floor', sub: null };
+function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
+function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
+window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null }); });
 
 /* ── root ── */
 function App() {
@@ -3544,20 +3822,24 @@ function App() {
       const dt = Math.min(0.25, (now - last) / 1000); last = now;
       if (RT.running && RT.demo && !RT.demo.fired && (RT.demo.elapsed += dt) >= DEMO_AFTER) { RT.demo.fired = true; injectDemoDelay(RT.S); }
       if (RT.running) { RT.acc += dt * RT.speed; let n = 0; while (RT.acc >= 1 && n < 400) { M.step(RT.S, 1); RT.acc -= 1; n++; } }
-      if (!RT.ui.view2D) Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
+      const floor = RT.route.page === 'floor';
+      if (floor && !RT.ui.view2D) Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
       Horn.tick(now);
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
-      if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
+      if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined && floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
       if (RT.ui.lineoff && now - RT.ui.lineoff.at > 6500) setUI({ lineoff: null });
-      if (now - lastPaint > (RT.ui.view2D ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
+      if (now - lastPaint > (RT.ui.view2D || !floor ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
     const l = () => force(); RT.listeners.add(l);
     const key = (e) => {
+      if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.report) setUI({ report: false }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); }
-      else if (e.key === '0') { setUI({ selection: null, view: 'overview' }); Scene3D.focusView('overview'); }
+      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.report) setUI({ report: false }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
+      if (e.key === '/') { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
+      if (RT.route.page !== 'floor') return;
+      if (e.key === '0') { setUI({ selection: null, view: 'overview' }); Scene3D.focusView('overview'); }
       else if (e.key === '1' || e.key === '2' || e.key === '3') { const v = ['TRIM', 'CHASSIS', 'FINAL'][+e.key - 1]; setUI({ view: v, selection: null }); Scene3D.focusView(v); }
       else if (e.key === 'a' || e.key === 'A') { const t = topAlarm(RT.S); if (t) openAlarm(t); }
       else if (e.key === 'x' || e.key === 'X') setUI({ xray: !RT.ui.xray });
@@ -3579,12 +3861,16 @@ function App() {
     ${RT.ui.report ? html`<${Report} />` : null}
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
     ${d && d.type === 'offline' ? html`<${OffLineDialog} key=${d.vehicleId} d=${d} />` : null}
+    ${d && d.type === 'return' ? html`<${ReturnDialog} key=${d.vehicleId} d=${d} />` : null}
+    ${d && d.type === 'correct' ? html`<${CorrectDialog} key=${d.pos} d=${d} />` : null}
+    ${d && d.type === 'vin' ? html`<${VinSearchDialog} />` : null}
     ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}
   </main>`;
 }
 (function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
+  RT.route = parseHash();
   RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
   M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
   const start = () => ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`);

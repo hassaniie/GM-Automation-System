@@ -38,6 +38,36 @@ new MutationObserver(() => { const a = document.documentElement.getAttribute('da
 
 /* ── icons (Lucide paths) ── */
 const IC = {
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  buzz: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/>',
+  buzzoff: '<path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
+  calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+  cog: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  grid: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+  tv: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  ret: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>',
+  max: '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  key: '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
+  building: '<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
+  swap: '<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
+  wifi: '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.86a10 10 0 0 1 14 0"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/>',
+  wifioff: '<path d="M12 20h.01"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/><path d="M5 12.86a10 10 0 0 1 5.17-2.69"/><path d="M19 12.86a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+  chev: '<path d="m9 18 6-6-6-6"/>',
+  skip: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/>',
   alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
   fault: '<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
@@ -76,9 +106,13 @@ const IC = {
 };
 const Icon = ({ n, size }) => html`<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style=${size ? { width: size, height: size } : null} dangerouslySetInnerHTML=${{ __html: IC[n] }}></svg>`;
 const STATUS_ICON = { BUFFERED: 'pause', EMPTY: 'dashed', INBOUND: 'arrow', AWAIT: 'dashed', EMPTY_CARRIER: 'dashed', WORKING: 'clock', NEAR: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', COMPLETE: 'checkc', WAITING: 'pause', REMOVAL: 'wrench', PAUSED: 'pause', SCAN: 'scan', HANDLING: 'arrow', TRANSFER: 'arrow', PLACING: 'arrow' };
-const LEVEL_TONE = { WARNING: 'warn', OVERDUE: 'crit', ESCALATED: 'esc', FAULT: 'crit', HOLD: 'crit', BLOCKED: 'hold', ASSIST: 'warn', EMERGENCY: 'esc' };
-const LEVEL_ICON = { WARNING: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', BLOCKED: 'pause', ASSIST: 'hand', EMERGENCY: 'siren' };
-const LEVEL_LABEL = { HOLD: 'Quality hold', ASSIST: 'Assistance', EMERGENCY: 'Emergency' };
+const LEVEL_TONE = { WARNING: 'warn', OVERDUE: 'crit', ESCALATED: 'esc', FAULT: 'crit', HOLD: 'crit', BLOCKED: 'hold', ASSIST: 'warn', CALL_SUP: 'sup', CALL_MNT: 'mnt', EMERGENCY: 'esc' };
+const LEVEL_ICON = { WARNING: 'hour', OVERDUE: 'alert', ESCALATED: 'alert', FAULT: 'fault', HOLD: 'fault', BLOCKED: 'pause', ASSIST: 'hand', CALL_SUP: 'user', CALL_MNT: 'wrench', EMERGENCY: 'siren' };
+const LEVEL_LABEL = { HOLD: 'Quality hold', ASSIST: 'Assistance', CALL_SUP: 'Supervisor call', CALL_MNT: 'Maintenance call', EMERGENCY: 'Emergency' };
+/* Andon: three station states (URD req 12) */
+const ANDON_TONE = { idle: 'muted', normal: 'ok', near: 'warn', over: 'crit' };
+const ANDON_LABEL = { idle: 'No unit', normal: 'Normal', near: 'Close to limit', over: 'Over takt' };
+const CALL_ICON = { SUP: 'user', MNT: 'wrench' };
 const tv = (t) => `var(--${t})`;
 const StatusChip = ({ st }) => html`<span class=${'chip c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code] || 'info'} />${st.label}</span>`;
 const LevelChip = ({ a }) => html`<span class=${'chip c-' + LEVEL_TONE[a.level]}><${Icon} n=${LEVEL_ICON[a.level]} />${LEVEL_LABEL[a.level] || a.level}</span>`;
@@ -89,12 +123,27 @@ const MG_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDP
 // light theme uses the hexagon icon with the name set in text (plant's choice, option b).
 const MgMark = () => html`<img class="mg-mark" src=${MG_LOGO} alt="MG" width="30" height="30" />`;
 
-/* ── simulated alarm horn ── */
+/* ── sound: station buzzers (URD req 16–18), call chimes, and the fault horn ──
+   One speaker stands in for many: only buzzers on the line in view sound, which
+   mirrors "audible at its own station without disturbing other stations". */
 const Horn = {
-  ctx: null, last: 0,
+  ctx: null, last: 0, lastBuzz: 0, seenCalls: 0,
   ensure() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { this.ctx = null; } } if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
-  chirp(hi) { if (!this.ctx) return; const t = this.ctx.currentTime; [0, 0.22].forEach((o, i) => { const osc = this.ctx.createOscillator(), g = this.ctx.createGain(); osc.type = 'square'; osc.frequency.value = hi ? (i ? 1180 : 1480) : (i ? 660 : 880); g.gain.setValueAtTime(0.0001, t + o); g.gain.exponentialRampToValueAtTime(0.045, t + o + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.18); osc.connect(g).connect(this.ctx.destination); osc.start(t + o); osc.stop(t + o + 0.2); }); },
-  tick(now) { if (RT.ui.muted || !this.ctx) return; const un = RT.S.alarms.filter((a) => M.alarmUnacked(a) && M.SEV[a.level] >= 3); if (!un.length) return; const esc = un.some((a) => a.level === 'ESCALATED'); if (now - this.last > (esc ? 1300 : 2400)) { this.last = now; this.chirp(esc); } },
+  tone(freq, at, dur, type = 'square', vol = 0.04) { const t = this.ctx.currentTime + at, osc = this.ctx.createOscillator(), g = this.ctx.createGain(); osc.type = type; osc.frequency.value = freq; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); osc.connect(g).connect(this.ctx.destination); osc.start(t); osc.stop(t + dur + 0.02); },
+  chirp(hi) { if (!this.ctx) return; [0, 0.22].forEach((o, i) => this.tone(hi ? (i ? 1180 : 1480) : (i ? 660 : 880), o, 0.18)); },
+  buzz(ids) { if (!this.ctx) return; ids.slice(0, 3).forEach((id, k) => { const f = 520 + (WORK_POS.indexOf(id) % 7) * 34; this.tone(f, k * 0.09, 0.32, 'sawtooth', 0.028); }); },
+  chime(type) { if (!this.ctx) return; const f = type === 'MNT' ? [660, 880] : [784, 1046]; f.forEach((x, i) => this.tone(x, i * 0.16, 0.5, 'sine', 0.06)); },
+  audibleLine(id) { const v = RT.ui.view; return !['TRIM', 'CHASSIS', 'FINAL'].includes(v) || POS[id].area === v; },
+  tick(now) {
+    const S = RT.S, n = S.calls.length;
+    if (RT.ui.muted || !this.ctx) { this.seenCalls = n; return; }
+    if (n > this.seenCalls) { const c = S.calls[n - 1]; if (c.clearedT == null) this.chime(c.type); }
+    this.seenCalls = n;
+    const ringing = Object.keys(S.buzzing).filter((id) => this.audibleLine(id));
+    if (ringing.length && now - this.lastBuzz > 1400) { this.lastBuzz = now; this.buzz(ringing); }
+    const un = S.alarms.filter((a) => M.alarmUnacked(a) && M.SEV[a.level] >= 3 && a.type !== 'DELAY'); if (!un.length) return;
+    const esc = un.some((a) => a.level === 'EMERGENCY'); if (now - this.last > (esc ? 1300 : 2400)) { this.last = now; this.chirp(esc); }
+  },
 };
 window.addEventListener('pointerdown', () => { if (!RT.ui.muted) Horn.ensure(); }, { capture: true });
 
@@ -131,23 +180,23 @@ function injectDemoDelay(S) {
   }
 }
 const SCENARIOS = [
-  { n: 1, title: 'Normal production', desc: 'Every station runs to its 10:00 target. After about 2½ minutes of watching, a problem arises on its own at CL2 and you can follow it spread.', setup(S) { calmDown(S); return { view: 'overview', speed: 15, demo: true }; } },
-  { n: 2, title: 'Trim bottleneck at TL4', desc: 'Headliner and glazing at TL4 run past target. Finished bodies at TL3 and TL2 wait behind it.',
-    setup(S) { calmDown(S); waitFresh(S, ['TL4'], 240); const o = occOf(S, 'TL4'); const v = S.vehicles[o.vehicleId]; o.workT = M.targetFor('TL4', v) - 100; o.required = M.targetFor('TL4', v) + 7 * 60; ['TL3', 'TL2'].forEach((id, i) => { const p = occOf(S, id); if (p && p.vehicleId && p.completeT == null) p.required = Math.min(p.required, p.workT + 60 + i * 150); }); M.logEvent(S, 'sim', 'SIMULATION · scenario 2: TL4 work content increased', { pos: 'TL4' }); return { select: { kind: 'pos', id: 'TL4' }, speed: 5 }; } },
-  { n: 3, title: 'Completed but blocked', desc: 'CL1 presses Work done, but CL2 still holds its hanger. Work done is not the same as movement permitted.',
-    setup(S) { calmDown(S); waitFresh(S, ['CL1', 'CL2'], 400); const a = occOf(S, 'CL1'), b = occOf(S, 'CL2'); a.workT = Math.max(a.workT, 7 * 60); a.required = a.workT + 6; b.workT = 4 * 60; b.required = Math.round(M.targetFor('CL2', S.vehicles[b.vehicleId]) * 0.95); return { select: { kind: 'pos', id: 'CL1' }, speed: 5 }; } },
+  { n: 1, title: 'Normal production', desc: 'Every station runs inside its 10:00 takt. After about 2½ minutes of watching, a problem arises on its own at CL2: it passes takt, the buzzer sounds and the hold-up spreads.', setup(S) { calmDown(S); return { view: 'overview', speed: 15, demo: true }; } },
+  { n: 2, title: 'Over takt · buzzer', desc: 'CL3 runs past its takt. The station turns red, its buzzer rings, and it stops by itself when the unit leaves.',
+    setup(S) { calmDown(S); waitFresh(S, ['CL3'], 240); const o = occOf(S, 'CL3'); const v = S.vehicles[o.vehicleId], t = M.targetFor('CL3', v); o.arriveT = S.t - (t - 70) - o.plannedT; o.workT = t - 70; o.required = t + 4 * 60; M.logEvent(S, 'sim', 'SIMULATION · scenario 2: CL3 work content increased', { pos: 'CL3' }); return { select: { kind: 'pos', id: 'CL3' }, speed: 5, view: 'CHASSIS' }; } },
+  { n: 3, title: 'Completed but blocked', desc: 'CL1 finishes its work, but CL2 still holds its hanger. Finished is not the same as free to move, and the downtime is put down to CL2.',
+    setup(S) { calmDown(S); waitFresh(S, ['CL1', 'CL2'], 400); const a = occOf(S, 'CL1'), b = occOf(S, 'CL2'); a.workT = Math.max(a.workT, 7 * 60); a.required = a.workT + 6; b.workT = 4 * 60; b.required = Math.round(M.targetFor('CL2', S.vehicles[b.vehicleId]) * 1.2); return { select: { kind: 'pos', id: 'CL1' }, speed: 5 }; } },
   { n: 4, title: 'Waiting for a hanger', desc: 'FL1 is slow to finish, so all 4 hangers fill up. TL5 is done but has no empty hanger to load onto at TL6.',
     setup(S) { calmDown(S); waitFresh(S, ['FL1'], 120); const o = occOf(S, 'FL1'); o.required = o.workT + 30 * 60; M.logEvent(S, 'sim', 'SIMULATION · scenario 4: wheel fitment at FL1 slowed down', { pos: 'FL1' }); M.runWhile(S, () => { const o = occOf(S, 'TL5'), p = M.permissives(S, 'TL5'); return !(o && o.vehicleId && o.completeT != null && S.t - o.completeT > 30 && p && p.find((c) => c.key === 'dest' && /All 4 hangers/.test(c.detail))); }, 4 * 3600); return { select: { kind: 'pos', id: 'TL5' }, speed: 5, view: 'overview' }; } },
-  { n: 5, title: 'Unit taken off line', desc: 'The unit at CL3 has a fitment issue and is far past its time. In fast mode it is taken off at once and recorded.',
-    setup(S) { calmDown(S); waitFresh(S, ['CL3'], 300); const o = occOf(S, 'CL3'), v = S.vehicles[o.vehicleId], tgt = M.targetFor('CL3', v); o.workT = tgt + S.cfg.escalateAfter + 40; o.required = tgt * 3; M.step(S, 1); M.logEvent(S, 'sim', 'SIMULATION · scenario 5: exhaust fitment issue at CL3', { pos: 'CL3' }); return { select: { kind: 'pos', id: 'CL3' }, speed: 1, dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[1] } }; } },
-  { n: 6, title: 'Hanger fault', desc: 'Hanger at CL4 reports a lift-encoder fault. Travel is inhibited even after the team presses Work done.',
+  { n: 5, title: 'Take a unit offline', desc: 'The unit at FL3 has a fitment issue. Scan its VIN at the station to take it offline; it leaves the counts and the target.',
+    setup(S) { calmDown(S); waitFresh(S, ['FL3'], 300); const o = occOf(S, 'FL3'), v = S.vehicles[o.vehicleId]; M.logEvent(S, 'sim', 'SIMULATION · scenario 5: seat fitment issue at FL3', { pos: 'FL3' }); return { select: { kind: 'pos', id: 'FL3' }, speed: 1, dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[1] } }; } },
+  { n: 6, title: 'Hanger fault', desc: 'Hanger at CL4 reports a lift-encoder fault. Travel is inhibited even though the team has finished.',
     setup(S) { calmDown(S); waitFresh(S, ['CL4'], 300); const o = occOf(S, 'CL4'); o.required = o.workT + 45; M.injectCarrierFault(S, S.pos['CL4'].carrierId); M.logEvent(S, 'sim', `SIMULATION · fault injected on hanger ${S.pos['CL4'].carrierId}`, { pos: 'CL4' }); return { select: { kind: 'pos', id: 'CL4' }, speed: 5 }; } },
-  { n: 7, title: 'Engine / transmission mismatch', desc: 'The E/T scan at CL2 reads the wrong engine for the VIN. CL2 goes on quality hold until it is rescanned.',
-    setup(S) { calmDown(S); M.runWhile(S, () => !(occOf(S, 'CL2') && occOf(S, 'CL2').vehicleId && !S.vehicles[occOf(S, 'CL2').vehicleId].engine && occOf(S, 'CL2').workT < 60), 4 * 3600); const v = S.vehicles[occOf(S, 'CL2').vehicleId]; S.forceMismatch[v.id] = true; S.cfg.qualityFixSec = 6 * 3600; M.runWhile(S, () => !v.engine, 600); return { select: { kind: 'pos', id: 'CL2' }, speed: 5 }; } },
-  { n: 8, title: 'Emergency call', desc: 'The team at CL2 presses Emergency. The Chassis line stops until the call is cleared.',
+  { n: 7, title: 'Supervisor and maintenance calls', desc: 'CL2 calls its supervisor and FL4 calls maintenance. Respond, then clear each call; response and clear times are recorded.',
+    setup(S) { calmDown(S); S.cfg.callRate = 0; M.raiseCall(S, 'CL2', 'SUP', 'Station button'); M.runUntil(S, S.t + 40); M.raiseCall(S, 'FL4', 'MNT', 'Station button'); M.runUntil(S, S.t + 25); return { speed: 1, drawer: 'calls' }; } },
+  { n: 8, title: 'Emergency stop (test)', desc: 'A simulated emergency at CL2 stops the Chassis line until it is cleared. Not an Andon button; it tests the line-stop path.',
     setup(S) { calmDown(S); waitFresh(S, ['CL2'], 300); M.callEmergency(S, 'CL2'); return { select: { kind: 'pos', id: 'CL2' }, speed: 5 }; } },
-  { n: 9, title: 'Line-off scan', desc: 'A finished vehicle is done at FL7. Scan it at Scanner 3 to stop the assembly timer.',
-    setup(S) { calmDown(S); M.runWhile(S, () => !(occOf(S, 'FL6') && occOf(S, 'FL6').vehicleId), 3 * 3600); const vid = occOf(S, 'FL6').vehicleId; S.holdExit[vid] = true; M.runWhile(S, () => !(occOf(S, 'FL7') && occOf(S, 'FL7').vehicleId === vid && occOf(S, 'FL7').completeT != null), 3 * 3600); return { select: { kind: 'pos', id: 'FL7' }, speed: 1, dialog: { type: 'scan', scanner: 'EXIT', vin: S.vehicles[vid].vin } }; } },
+  { n: 9, title: 'Offline and return', desc: 'A unit was taken off at FL4. Send it back: it rejoins at FL4 when the station is free and counts only when it completes.',
+    setup(S) { calmDown(S); waitFresh(S, ['FL4'], 200); const v = S.vehicles[occOf(S, 'FL4').vehicleId]; M.takeOffLine(S, v.id, { reason: M.OFFLINE_REASONS[2], notes: 'Wrong-spec grille fitted; correct part on its way', by: 'Line supervisor', scan: v.vin }); M.runUntil(S, S.t + 60); return { select: { kind: 'veh', id: v.id }, speed: 5 }; } },
   { n: 10, title: 'Invalid scan', desc: 'Scanner 1 reads a VIN that is already on the line. The scan is rejected and nothing changes.',
     setup(S) { calmDown(S); const id = ['TL2', 'TL3', 'CL1', 'FL3'].find((p) => occOf(S, p) && occOf(S, p).vehicleId); return { view: 'TRIM', speed: 1, dialog: { type: 'scan', scanner: 'ENTRY', vin: S.vehicles[occOf(S, id).vehicleId].vin } }; } },
 ];
@@ -155,16 +204,16 @@ function loadScenario(n) {
   const sc = SCENARIOS.find((s) => s.n === n);
   const keep = {};
   const S = freshState(11); Object.assign(S.cfg, keep);
-  const r = sc.setup(S) || {}; if (n !== 9) S.holdExit = {};
+  const r = sc.setup(S) || {}; S.holdExit = {};
   M.step(S, 1);
   RT.S = S; RT.acc = 0; RT.scenario = n; RT.speed = r.speed || 5; RT.running = true; RT.demo = r.demo ? { elapsed: 0, fired: false } : null;
-  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: null, report: false, hover: null, view: r.view || RT.ui.view });
+  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, report: false, hover: null, view: r.view || RT.ui.view });
   M.logEvent(S, 'sim', `SIMULATION · scenario ${n}: ${sc.title}`);
   setTimeout(() => { if (r.select) focusSel(r.select); else if (Scene3D.ok) Scene3D.focusView(r.view || 'overview'); }, 30);
 }
 const focusSel = (sel) => { if (Scene3D.ok) Scene3D.focusAny(sel); };
 function select(sel, focus = true) {
-  if (sel && sel.kind === 'scanner') { if (sel.id === 'ENGINE') return select({ kind: 'pos', id: 'CL2' }, focus); if (sel.id === 'LOAD') return select({ kind: 'pos', id: 'TL6' }, focus); setUI({ dialog: { type: 'scan', scanner: sel.id } }); return; }
+  if (sel && sel.kind === 'scanner') { if (sel.id === 'ENTRY') { setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } }); return; } const at = sel.id === 'OFFLINE' ? 'TL6' : sel.id === 'EOL' ? 'FL7' : sel.id === 'HH1' ? 'FL2' : 'FL5'; return select({ kind: 'pos', id: at }, focus); }
   setUI({ selection: sel, hover: null }); if (sel && focus) focusSel(sel);
 }
 function topAlarm(S) { const a = S.alarms.filter((x) => M.alarmActive(x) && x.level !== 'WARNING'); a.sort((x, y) => (M.alarmUnacked(y) - M.alarmUnacked(x)) || (M.SEV[y.level] - M.SEV[x.level]) || (x.raisedT - y.raisedT)); return a[0]; }
@@ -172,37 +221,46 @@ function openAlarm(a) { setUI({ drawer: null }); select({ kind: 'pos', id: POS[a
 
 /* ═════════ islands ═════════ */
 function IdIsland() {
-  const S = RT.S, p = M.pace(S);
+  const S = RT.S, p = M.pace(S), sh = S.shift || {};
   return html`<div class="seg id-island">
     <div class="brand"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile</div></div></div>
-    <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro">${S.cfg.shiftName}</span></div>
+    <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro" style=${{ color: S.planned ? 'var(--paused)' : null }}>${S.planned ? (S.planned.kind === 'OFF' ? 'No shift' : S.planned.label) : sh.name}</span></div>
     <span class="sim-tag" title="All data is simulated. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>
-    <div class="shiftbar" title=${`Shift 06:00–14:30 · ${Math.round(p.frac * 100)}% elapsed`}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
+    <div class="shiftbar" title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;
 }
 function StateIsland() {
   const S = RT.S, p = M.pace(S), ls = M.lineStatus(S);
   const wip = S.vehOrder.filter((id) => M.isActive(S.vehicles[id])).length;
+  const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
   return html`<section class="state-island" role="status" aria-live="polite">
     <div class="metric"><span class="micro">Line</span>
       <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button></div>
-    <div class="metric"><span class="micro">Completed / plan</span><span class="v">${p.done}<small>/ ${S.cfg.shiftTarget}</small><small style=${{ color: p.delta < 0 ? 'var(--warn)' : 'var(--ok)' }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
-    <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${(S.cfg.shiftTarget / 8.5).toFixed(1)}</small></span></div>
+    <div class="metric" title="Final line: vehicles completed this shift against the shift target"><span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: p.delta < 0 ? 'var(--warn)' : 'var(--ok)' }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
+    <div class="metric opt"><span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span></div>
+    <div class="metric opt" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v">${fmtDur(p.down)}<small>Final</small></span></div>
+    <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span></div>
     <div class="metric opt"><span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span></div>
   </section>`;
+}
+function CallsPill() {
+  const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
+  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
+    <span class=${'lamp sup' + (sup ? ' blink' : '')} style=${{ opacity: sup ? 1 : 0.25 }}></span><span class=${'lamp mnt' + (mnt ? ' blink' : '')} style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
 }
 function ActIsland() {
   const S = RT.S;
   const active = S.alarms.filter((a) => M.alarmActive(a) && M.SEV[a.level] >= 3), unacked = active.filter(M.alarmUnacked);
   const themeIcon = RT.ui.theme === 'light' ? 'sun' : RT.ui.theme === 'dark' ? 'moon' : 'auto';
   return html`<nav class="seg act-island" aria-label="Actions">
-    <button class="ibtn" title="Scanner 1 · entry scan" aria-label="Entry scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
-    <button class="ibtn" title="Scanner 3 · line-off scan" aria-label="Line-off scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT' } })}><${Icon} n="scanout" /></button>
+    <button class="ibtn" title="Find a vehicle by VIN (/)" aria-label="Find a vehicle by VIN" onClick=${() => setUI({ dialog: { type: 'vin' } })}><${Icon} n="search" /></button>
+    <button class="ibtn" title="Scanner 1 · line-in scan at TL1" aria-label="Line-in scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
     <button class="ibtn opt" title="Shift report" aria-label="Shift report" onClick=${() => setUI({ report: true })}><${Icon} n="chart" /></button>
     <button class="ibtn" title="X-ray build view (X)" aria-label="X-ray build view" aria-pressed=${RT.ui.xray} onClick=${() => setUI({ xray: !RT.ui.xray })}><${Icon} n="xray" /></button>
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
     <button class="ibtn opt" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
     <span class="sep"></span>
+    <${CallsPill} />
     <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button>
     <span class="sep"></span>
     <button class="bv-mark" onClick=${() => setUI({ dialog: { type: 'about' } })} title="Designed & built by Bolt & Volt"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /></button>
@@ -223,21 +281,29 @@ function Strip() {
       <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend })}><${Icon} n="info" size=${14} />Key</button>
     </div>
     <div class="lanes">${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} style=${{ '--n': k === 'CHASSIS' ? 6.6 : ids.length }}>
-      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : html`<span class="micro">${k === 'TRIM' ? 'Conveyor · hanger at TL6' : 'Hanger at FL1 · conveyor'}</span>`}</button>
+      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
       <div class="cells ticks">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
     </div>`)}</div>
   </section>`;
 }
+/* lane header numbers: completed / shift target and downtime for that line */
+function LaneStat({ area }) {
+  const p = M.linePace(RT.S, area);
+  return html`<span class="lstat" title=${`${AREAS[area].name}: ${p.done} completed of ${p.target} this shift · downtime ${fmtDur(p.down)}`}>${p.done}/${p.target}${area !== 'TRIM' || RT.S.cfg.trimAndon ? html` · <span style=${{ color: p.down > 0 ? 'var(--crit)' : null }}>↓${fmtDur(p.down)}</span>` : null}</span>`;
+}
 function Cell({ id, sel }) {
   const S = RT.S, st = M.stationStatus(S, id), P = POS[id], sv = M.stationVehicle(S, id), occ = sv && S.pos[sv.posId].occ;
-  const SHORT = { BUFFERED: 'in buffer', EMPTY: '—', INBOUND: 'inbound', AWAIT: 'ready', EMPTY_CARRIER: 'empty', TRANSFER: 'transfer', PLACING: 'placing', HANDLING: 'handling', SCAN: 'scan', FAULT: 'fault', PAUSED: 'stopped', REMOVAL: 'removal' };
+  const SHORT = { BUFFERED: 'in buffer', EMPTY: '—', INBOUND: 'inbound', AWAIT: 'ready', EMPTY_CARRIER: 'empty', TRANSFER: 'transfer', PLACING: 'placing', HANDLING: 'handling', SCAN: 'drive-off', FAULT: 'fault', PAUSED: 'stopped', REMOVAL: 'removal' };
+  const an = P.kind === 'work' ? M.andonState(S, id) : { state: 'idle' }, live = an.state !== 'idle' && sv && sv.posId === id;
   let r = 0, txt = SHORT[st.code] || st.label.toLowerCase();
-  if (sv && P.kind === 'work' && occ) { const tgt = M.targetFor(id, sv.v); r = Math.min(1, occ.workT / tgt); txt = occ.completeT != null ? (st.code === 'WAITING' ? `wait ${fmtDur(occ.waitT)}` : 'done') : occ.workT > tgt ? `+${fmtDur(occ.workT - tgt)}` : fmtDur(occ.workT); }
+  if (live) { r = Math.min(1, an.ratio); txt = an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)}` : fmtDur(an.cycle); if (st.code === 'PAUSED') txt = 'stopped'; }
   else if (sv && !['FAULT', 'TRANSFER', 'SCAN', 'REMOVAL'].includes(st.code)) txt = sv.v.vin.slice(-6);
-  const barC = ['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD'].includes(st.code) ? 'var(--crit)' : st.code === 'NEAR' ? 'var(--warn)' : st.code === 'WAITING' ? 'var(--hold)' : st.code === 'COMPLETE' ? 'var(--ok)' : 'var(--text)';
-  const cls = 'cell' + (['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD'].includes(st.code) ? ' x' : st.code === 'WAITING' ? ' w' : '') + (st.code === 'EMPTY' ? ' idle' : '');
-  return html`<button class=${cls} aria-pressed=${!!sel} onClick=${() => select({ kind: 'pos', id })} title=${`${id} · ${st.label}${sv ? ' · ' + sv.v.vin : ''}`}><span class="cin">
-    <span class="cid"><span>${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span>${['OVERDUE', 'ESCALATED', 'FAULT', 'HOLD', 'WAITING', 'REMOVAL'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span>
+  const tone = live ? ANDON_TONE[an.state] : null, barC = tone === 'ok' ? 'var(--text)' : tone ? tv(tone) : 'var(--hair-2)';
+  const calls = M.callsAt(S, id), buzz = S.buzzing[id] != null;
+  const cls = 'cell' + (live && an.state === 'over' ? ' over' : live && an.state === 'near' ? ' near' : st.code === 'FAULT' ? ' x' : '') + (st.code === 'EMPTY' ? ' idle' : '');
+  const title = `${id} · ${live ? `${ANDON_LABEL[an.state]} · cycle ${fmtDur(an.cycle)} of ${fmtDur(an.takt)} takt` : st.label}${sv ? ' · ' + sv.v.vin : ''}${calls.length ? ' · ' + calls.map((c) => M.CALL_TYPES[c.type].label + ' call').join(', ') : ''}${buzz ? ' · buzzer on' : ''}`;
+  return html`<button class=${cls} aria-pressed=${!!sel} onClick=${() => select({ kind: 'pos', id })} title=${title}><span class="cin">
+    <span class="cid"><span>${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span><span class="lamps">${calls.map((c) => html`<i key=${c.id} class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></i>`)}${buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : ['FAULT', 'HOLD'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span></span>
     <span class="bar"><i style=${{ width: `${(P.kind === 'work' ? r : sv ? 1 : 0) * 100}%`, background: P.kind === 'work' ? barC : 'var(--hair-2)' }}></i></span>
     <span class="ct">${txt}</span>
   </span></button>`;
@@ -272,16 +338,25 @@ function SimConsole() {
       <div><div class="micro" style=${{ marginBottom: 6 }}>Scenarios · each restarts the shift at 09:38</div>
         ${SCENARIOS.map((s) => html`<button key=${s.n} class="scn" aria-current=${RT.scenario === s.n} onClick=${() => loadScenario(s.n)}><span class="n">${s.n}</span><span class="t">${s.title}</span><span class="d">${s.desc}</span></button>`)}</div>
       <div class="cfg">
-        <${Tog} k="autoFeed" label="Paint-shop body feed" /><${Tog} k="autoEntryScan" label="Auto scan at Scanner 1" /><${Tog} k="autoExitScan" label="Auto scan at Scanner 3" /><${Tog} k="autoComplete" label="Simulated teams press Work done" />
-        <label for="cfg-warn">Warning at % of target</label><input id="cfg-warn" type="number" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(e) => setC('warnPct', M.clamp(+e.target.value || 85, 50, 99) / 100)} />
+        <${Tog} k="autoFeed" label="Paint-shop body feed" /><${Tog} k="autoEntryScan" label="Auto scan at Scanner 1 (line-in)" /><${Tog} k="autoExitScan" label="End-of-line photo-eye at FL7" /><${Tog} k="autoComplete" label="Teams finish (sensor detects)" />
+        <${Tog} k="autoRespond" label="Simulated responders clear calls" /><${Tog} k="trimAndon" label="Trim Andon preview (req 34)" /><${Tog} k="useSchedule" label="Breaks and shift times stop the line" /><${Tog} k="engineCheck" label="CL2 engine pairing scan (option)" />
+        <label for="cfg-calls">Simulated calls (% of units)</label><input id="cfg-calls" type="number" min="0" max="40" value=${Math.round(C.callRate * 100)} onChange=${(e) => setC('callRate', M.clamp(+e.target.value || 0, 0, 40) / 100)} />
+        <label for="cfg-warn">Close to limit at % of takt</label><input id="cfg-warn" type="number" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(e) => setC('warnPct', M.clamp(+e.target.value || 85, 50, 99) / 100)} />
         <label for="cfg-esc">Escalate overdue after (min)</label><input id="cfg-esc" type="number" min="0.5" max="30" step="0.5" value=${C.escalateAfter / 60} onChange=${(e) => setC('escalateAfter', Math.round(M.clamp(+e.target.value || 3, 0.5, 30) * 60))} />
         <label for="cfg-blk">Blocked alarm after (min)</label><input id="cfg-blk" type="number" min="0.5" max="30" step="0.5" value=${C.blockedAlarmAfter / 60} onChange=${(e) => setC('blockedAlarmAfter', Math.round(M.clamp(+e.target.value || 1.5, 0.5, 30) * 60))} />
         <label for="cfg-rate">Random team delay rate (%)</label><input id="cfg-rate" type="number" min="0" max="30" value=${Math.round(C.delayRate * 100)} onChange=${(e) => setC('delayRate', M.clamp(+e.target.value || 0, 0, 30) / 100)} />
       </div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Simulated line stop</div><div class="actions">${['TRIM', 'CHASSIS', 'FINAL'].map((a) => html`<button key=${a} class="btn sm sim" onClick=${act(() => M.setPaused(S, a, !S.paused[a]))}><${Icon} n=${S.paused[a] ? 'play' : 'pause'} />${S.paused[a] ? 'Restart ' : 'Stop '}${AREAS[a].short}</button>`)}</div></div>
+      <div><div class="micro" style=${{ marginBottom: 8 }}>Time</div><div class="actions"><button class="btn sm sim" title="Fast-forward the simulation to the next shift, break or restart" onClick=${() => skipAhead()}><${Icon} n="skip" />Skip to ${S.planned ? 'restart' : 'next break or shift change'} · ${fmtClock(M.nextBoundary(S, S.t), false)}</button></div></div>
       <p class="note">Adapter: <b>${M.Integration.mode}</b>. Nothing is sent to any PLC, conveyor, scanner or sensor. Permissives shown in the HMI are simulated interlocks.</p>
     </div>` : null}
   </section>`;
+}
+
+/* fast-forward to the next shift boundary (runs the engine; can take a second or two) */
+function skipAhead() {
+  const S = RT.S, to = M.nextBoundary(S, S.t) + 1;
+  M.runUntil(S, to, 40000); RT.acc = 0; bump();
 }
 
 /* ── inspector pieces ── */
@@ -331,111 +406,129 @@ function BuildList({ v, only }) {
   })}</ul>`;
 }
 
+/* One open call: who called, how long it has waited, and Respond / Clear for the right responder. */
+function CallRow({ c, compact }) {
+  const S = RT.S, T = M.CALL_TYPES[c.type], waiting = S.t - c.raisedT, canAct = can('respond.' + c.type);
+  return html`<div class="callrow" style=${{ borderColor: `color-mix(in srgb, var(--call-${c.type.toLowerCase()}) 50%, transparent)` }}>
+    <span class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></span>
+    <div style=${{ minWidth: 0 }}><div style=${{ fontWeight: 600 }}>${T.label}${compact ? html` · <button class="linkish mono" onClick=${() => { setUI({ drawer: null }); select({ kind: 'pos', id: c.pos }); }}>${c.pos}</button>` : null}</div>
+      <div class="who">${c.respondedT == null ? `Called ${fmtClock(c.raisedT, false)} · waiting for ${T.label.toLowerCase()}` : `${c.respondedBy} responded after ${fmtDur(c.respondedT - c.raisedT)} · helping ${fmtDur(S.t - c.respondedT)}`}</div></div>
+    <div style=${{ display: 'grid', justifyItems: 'end', gap: 6 }}><span class="wait" style=${{ color: c.respondedT == null && waiting > 180 ? 'var(--crit)' : null }} title="Time since the call">${fmtDur(waiting)}</span>
+      <span class="actions" style=${{ gap: 6 }}>${c.respondedT == null ? html`<button class=${'btn sm ' + c.type.toLowerCase()} disabled=${!canAct} title=${canAct ? 'Help has arrived at the station' : `Only ${T.label.toLowerCase()} users respond to this call`} onClick=${act(() => M.respondCall(S, c.id, userName()))}>Respond</button>` : null}
+        <button class="btn sm" disabled=${!canAct} title=${canAct ? 'Help given · clear the call' : `Only ${T.label.toLowerCase()} users clear this call`} onClick=${act(() => M.clearCall(S, c.id, userName()))}><${Icon} n="check" />Clear</button></span></div>
+  </div>`;
+}
 function StationInspector({ id }) {
   const S = RT.S, P = POS[id], st = M.stationStatus(S, id), sv = M.stationVehicle(S, id);
   const posId = id;
   const p = S.pos[posId], occ = p.occ, v = sv && sv.v, c = p.carrierId && S.carriers[p.carrierId];
   const pm = M.permissives(S, posId);
-  const twins = [id];
-  const alarms = S.alarms.filter((a) => M.alarmActive(a) && twins.includes(a.pos));
-  const events = S.events.filter((e) => twins.includes(e.pos)).slice(-8).reverse();
-  const isWork = P.kind === 'work', tgt = v ? M.targetFor(id, v) : P.target;
-  const r = occ && v && isWork ? occ.workT / tgt : 0, over = occ && v && isWork ? occ.workT - tgt : 0;
-  const tone = st.code === 'COMPLETE' ? 'ok' : st.code === 'WAITING' ? 'hold' : st.tone === 'muted' ? 'text' : st.tone;
-  const setTarget = (d) => { POS[id].target = M.clamp(P.target + d * 60, 5 * 60, 30 * 60); M.logEvent(S, 'sim', `Configuration · ${id} base target set to ${fmtDur(POS[id].target)}`, { pos: id }); bump(); };
+  const alarms = S.alarms.filter((a) => M.alarmActive(a) && a.pos === id && a.type !== 'CALL');
+  const events = S.events.filter((e) => e.pos === id).slice(-8).reverse();
+  const isWork = P.kind === 'work', an = isWork ? M.andonState(S, id) : null, live = an && an.state !== 'idle' && sv && sv.posId === id;
+  const tone = live ? ANDON_TONE[an.state] : 'text';
   const xf = S.xfers.find((q) => q.from === id || q.to === id);
-  const assist = M.callActive(S, 'SUP', id), emerg = M.callActive(S, 'EMERG', id);
-  const stopped = S.paused[P.area];
-  const canDone = !!(v && isWork && occ && occ.vehicleId === v.id && occ.completeT == null && !stopped && !(id === 'CL2' && !(v.engine && v.engine.ok)));
-  const doneWhy = !v || !occ || occ.vehicleId !== v.id ? 'No unit at this station' : occ.completeT != null ? 'Already done' : stopped ? `${AREAS[P.area].short} line is stopped` : id === 'CL2' && !(v.engine && v.engine.ok) ? 'Engine/transmission not paired yet' : '';
+  const emerg = M.callActive(S, 'EMERG', id), calls = M.callsAt(S, id), callsOk = M.callAllowedAt(S, id);
+  const buzzOn = S.buzzing[id] != null, buzzEn = M.buzzerEnabled(S, id), inScope = M.ANDON_AREAS.includes(P.area);
+  const offOk = v && M.isActive(v) && !xf && M.OFFLINE_POS.includes(id);
+  const press = (type) => { if (M.openCall(S, id, type)) return; M.raiseCall(S, id, type, `${userName()} · station button`); bump(); };
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
-      <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${P.renumbered ? ' · renumbered' : ''}${P.idAssumed ? ' · ID assumed' : ''}</div>
+      <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
       <div class="id">${id}</div><div class="sub">${P.op}</div>
-      <div style=${{ marginTop: 10 }}><${StatusChip} st=${st} /></div></div>
+      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
       <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
     <div class="insp-body">
-      ${P.kind === 'work' ? html`<div class="btn-row" role="group" aria-label="Station controls">
-        <button class="btn lg primary" disabled=${!canDone} title=${canDone ? `Work done · unit moves to ${M.XFER_FROM[id] ? M.XFER_FROM[id].to : M.NEXT[id] || 'line-off scan'} when free` : doneWhy} onClick=${act(() => M.manualComplete(S, id))}><${Icon} n="check" />Work done</button>
-        <button class=${'btn lg warn' + (assist ? ' on' : '')} aria-pressed=${assist} title=${assist ? 'Assistance call open · press again when help has arrived' : 'Call a team leader to this station'} onClick=${act(() => { const c = M.openCall(S, id, 'SUP'); c ? M.clearCall(S, c.id, 'Line supervisor') : M.raiseCall(S, id, 'SUP', 'Station button'); })}><${Icon} n="hand" />Assistance</button>
-        <button class=${'btn lg danger' + (emerg ? ' on' : '')} aria-pressed=${emerg} title=${emerg ? `Emergency active · ${AREAS[P.area].short} line stopped · press again to clear` : `Emergency · stops the ${AREAS[P.area].short} line`} onClick=${act(() => (emerg ? M.clearEmergency(S, id) : M.callEmergency(S, id)))}><${Icon} n="siren" />Emergency</button>
-      </div>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
-      ${v && isWork ? html`<div class="timer"><${Ring} r=${r} tone=${tone} /><div>
-        <div class="num" style=${{ color: ['OVERDUE', 'ESCALATED'].includes(st.code) ? tv(st.tone) : 'var(--text)' }}>${fmtDur(occ.workT)}</div>
-        <div class="of">work time · target ${fmtDur(tgt)}${tgt !== P.target ? ` (${v.variant.name} change-point)` : ''}</div>
-        <div class="delta" style=${{ color: over > 0 ? tv(st.tone === 'esc' ? 'esc' : 'crit') : 'var(--text-2)' }}>${occ.completeT != null ? `Finished ${over > 0 ? `+${fmtDur(over)} over` : `${fmtDur(-over)} under`}` : over > 0 ? `+${fmtDur(over)} overdue` : `${fmtDur(-over)} remaining`}</div></div></div>` : null}
+      ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
+        return html`<button key=${t} class=${'btn lg callbtn ' + t.toLowerCase() + (oc ? ' on' : '')} aria-pressed=${!!oc} disabled=${!can('call')} title=${oc ? `${T.label} call open since ${fmtClock(oc.raisedT, false)} · cleared by the responder` : `Call ${T.label.toLowerCase()} to ${id}`} onClick=${() => press(t)}>
+          <span class="cb-top"><${Icon} n=${CALL_ICON[t]} />${T.label}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `calling · ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} here`) : 'Call'}</span></button>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
+      ${calls.length ? html`<div>${calls.map((cl) => html`<${CallRow} key=${cl.id} c=${cl} />`)}</div>` : null}
+      ${live ? html`<div class="timer"><${Ring} r=${an.ratio} tone=${tone === 'ok' ? 'text' : tone} /><div>
+        <div class="num" style=${{ color: an.state === 'over' ? 'var(--crit)' : 'var(--text)' }}>${fmtDur(an.cycle)}</div>
+        <div class="of">cycle time · takt ${fmtDur(an.takt)}</div>
+        <div class="delta" style=${{ color: an.state === 'over' ? 'var(--crit)' : an.state === 'near' ? 'var(--warn)' : 'var(--text-2)' }}>${an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)} over takt` : `${fmtDur(an.takt - an.cycle)} to takt`}${occ && occ.completeT != null && occ.vehicleId ? ' · work finished' : ''}</div>
+        <div class="note" style=${{ marginTop: 4 }}>Work ${fmtDur(occ.workT)}${occ.waitT ? ` · waiting ${fmtDur(occ.waitT)}` : ''}${occ.plannedT ? ` · breaks ${fmtDur(occ.plannedT)} (excluded)` : ''}</div></div></div>` : null}
+      ${isWork ? html`<div class="andon-row" style=${{ padding: '10px 12px', border: '1px solid var(--hair)' }}>
+        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class=${buzzOn ? 'c-crit' : 'c-muted'}><${Icon} n=${buzzEn ? 'buzz' : 'buzzoff'} /></span><span><b>Buzzer</b> <span class="c-muted">· ${!buzzEn ? 'switched off' : buzzOn ? `ringing ${fmtDur(S.t - S.buzzing[id])}` : 'quiet · rings over takt'}</span></span></span>
+        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class="note">${M.stationCount(S, id)} vehicle${M.stationCount(S, id) === 1 ? '' : 's'} here</span><button class="toggle" role="switch" aria-checked=${buzzEn} aria-label=${`Buzzer at ${id}`} disabled=${!can('buzzer')} title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'} onClick=${act(() => M.setBuzzer(S, id, !buzzEn, userName()))}></button></span></div>` : null}
       ${xf ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--transit)' }}><${Icon} n="arrow" />${M.XFER_FROM[xf.from].label}</div><div>${S.vehicles[xf.vehicleId].vin.slice(-6)} moving from ${S.carriers[S.pos[xf.from].carrierId].id} to ${S.carriers[S.pos[xf.to].carrierId].id} · ${fmtDur(Math.max(0, xf.t1 - S.t))} left</div></div>` : null}
       ${v ? html`<dl class="kv">
         <dt>VIN</dt><dd><button class="linkish" onClick=${() => select({ kind: 'veh', id: v.id })}>${v.vin}</button></dd>
-        <dt>Model</dt><dd>${v.variant.name}</dd><dt>Powertrain</dt><dd>${v.variant.ptLabel}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
+        <dt>Model</dt><dd>${v.variant.name}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
         <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>
         ${occ ? html`<dt>Arrived</dt><dd class="mono">${fmtClock(occ.arriveT)}</dd>` : null}
-        ${occ && occ.completeT != null && occ.completeT <= S.t && occ.waitT > 0 ? html`<dt>Waiting for transfer</dt><dd class="mono" style=${{ color: 'var(--hold)' }}>${fmtDur(occ.waitT)}</dd>` : null}
         ${occ && occ.pausedT ? html`<dt>Line-stop time</dt><dd class="mono">${fmtDur(occ.pausedT)}</dd>` : null}
-        <dt>Assembly timer</dt><dd class="mono">${fmtDur(S.t - v.entryT)}</dd>
+        <dt>In the line for</dt><dd class="mono">${fmtDur(S.t - v.entryT)}</dd>
       </dl>` : html`<p class="note">${p.reservedBy ? `${S.carriers[p.reservedBy].kind} ${p.reservedBy} is on its way. The position becomes occupied when arrival is confirmed.` : c ? `${c.kind} ${c.id} is here and empty, ready for the next body.` : 'No carrier present. The position is ready to receive the next one.'}</p>`}
-      ${v && id === 'CL2' && v.engine ? html`<div class=${'callout ' + (v.engine.ok ? '' : 'crit')}><div class="ttl" style=${{ color: v.engine.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n="link" />Engine / transmission ${v.engine.ok ? 'paired' : 'mismatch'}</div>
+      ${v && id === 'CL2' && v.engine ? html`<div class=${'callout ' + (v.engine.ok ? '' : 'crit')}><div class="ttl" style=${{ color: v.engine.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n="link" />Engine / transmission ${v.engine.ok ? 'paired' : 'mismatch'} · option</div>
         <div class="mono" style=${{ fontSize: 12 }}>${v.engine.engineNo} · ${v.engine.transNo}</div>
-        ${v.engine.ok ? html`<div class="note">Scanned ${fmtClock(v.engine.t, false)} and tied to this VIN.</div>` : html`<div class="note">Expected ${v.engine.expect}… for ${v.variant.name}. CL2 cannot press Work done until the correct unit is scanned.</div><div><button class="btn sm ok" onClick=${act(() => M.rescanEngine(S, 'CL2'))}><${Icon} n="scan" />Rescan correct unit</button></div>`}</div>` : null}
-      ${v && st.code === 'ESCALATED' ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Fast mode · consider taking this unit off</div><div>${fmtDur(occ.workT - tgt)} over target and past the escalation rule. Taking it off keeps the line moving; the unit is recorded, not repaired here.</div><div><button class="btn sm danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take off line…</button></div></div>` : null}
-      ${P.hangerPoint ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--text-2)' }}><${Icon} n="hanger" />Hanger point</div><div>${c ? html`Hanger <b class="mono">${c.id}</b> is here${c.vehicleId ? ' carrying this unit' : ' and empty'}.` : p.reservedBy ? html`Hanger <b class="mono">${p.reservedBy}</b> is on its way.` : 'No hanger here right now.'}</div><div class="note">${id === 'TL6' ? 'Bodies are loaded from the Trim conveyor onto a hanger here, and Scanner 2 pairs the VIN to the hanger.' : id === 'FL1' ? 'Bodies are lowered from the hanger onto the Final conveyor here. The empty hanger returns to TL6 on its own rail.' : 'One of the 4 hangers carries the body through this point.'}</div><div style=${{ marginTop: 4 }}><${HangerTracker} /></div></div>` : null}
+        ${v.engine.ok ? null : html`<div><button class="btn sm ok" onClick=${act(() => M.rescanEngine(S, 'CL2'))}><${Icon} n="scan" />Rescan correct unit</button></div>`}</div>` : null}
+      ${live && an.state === 'over' && offOk && occ.completeT == null && occ.workT - an.takt >= S.cfg.escalateAfter ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Consider taking this unit offline</div><div>${fmtDur(an.cycle - an.takt)} over takt. Taking it offline keeps the line moving; it is recorded, not repaired here.</div><div><button class="btn sm danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take offline…</button></div></div>` : null}
+      ${P.hangerPoint ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--text-2)' }}><${Icon} n="hanger" />Hanger point</div><div>${c ? html`Hanger <b class="mono">${c.id}</b> is here${c.vehicleId ? ' carrying this unit' : ' and empty'}.` : p.reservedBy ? html`Hanger <b class="mono">${p.reservedBy}</b> is on its way.` : 'No hanger here right now.'}</div><div class="note">${id === 'TL6' ? 'Bodies are loaded from the Trim conveyor onto a hanger here. TL6 is the end of Trim, where a unit can be taken offline with a scan.' : id === 'FL1' ? 'Bodies are lowered from the hanger onto the Final conveyor here. The empty hanger returns to TL6 on its own rail.' : 'One of the 4 hangers carries the body through this point. Tracking follows the hanger, so no scan is needed here.'}</div><div style=${{ marginTop: 4 }}><${HangerTracker} /></div></div>` : null}
       <${RootCallout} posId=${posId} />
       ${alarms.length ? html`<div class="sec"><div class="micro">Alarms</div>${alarms.map((a) => html`<${AlarmMini} key=${a.id} a=${a} />`)}</div>` : null}
-      ${v && (isWork || P.kind === 'entry') ? html`<div class="sec"><div class="micro"><span>Installed here</span><span>${v.variant.name}</span></div><${BuildList} v=${v} only=${id} /></div>` : null}
+      ${v && isWork ? html`<div class="sec"><div class="micro"><span>Installed here</span><span>${v.variant.name}</span></div><${BuildList} v=${v} only=${id} /></div>` : null}
       ${pm ? html`<div class="sec"><div class="micro">Transfer readiness → ${M.XFER_FROM[posId] ? dispId(M.XFER_FROM[posId].to) + ' carrier' : M.NEXT[posId] ? dispId(M.NEXT[posId]) : 'carrier return'}</div><${Checklist} pm=${pm} /><p class="note">Simulated permissives. In production, motion authority stays with the PLC and safety system.</p></div>` : null}
-      <div class="sec"><div class="micro">Supervisor</div><div class="actions">
-        ${v && M.isActive(v) && !xf ? html`<button class="btn danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take off line…</button>` : null}
-        ${id === 'TL1' ? html`<button class="btn" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1</button>` : null}
-        ${id === 'FL7' && v ? html`<button class=${'btn ' + (occ && occ.completeT != null ? 'primary' : '')} disabled=${!(occ && occ.completeT != null)} onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT', vin: v.vin } })}><${Icon} n="scanout" />Scanner 3 · line-off</button>` : null}
+      <div class="sec"><div class="micro">Unit</div><div class="actions">
+        ${offOk ? html`<button class="btn danger" disabled=${!can('offline')} title=${can('offline') ? 'Scan the VIN here to take the unit offline' : 'Your role cannot take units offline'} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : v && M.isActive(v) && !M.OFFLINE_POS.includes(id) ? html`<span class="note">Units are taken offline only at TL6 (end of Trim) and on the Final line.</span>` : null}
+        ${id === 'TL1' ? html`<button class="btn" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1 · line-in</button>` : null}
+        ${v && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: id } })}><${Icon} n="swap" />Correct position…</button>` : null}
       </div>
       <div class="micro" style=${{ marginTop: 6, color: 'var(--sim)' }}>Simulation only</div><div class="actions">
         ${c && c.fault ? html`<button class="btn sm sim" onClick=${act(() => M.clearFault(S, 'C', c.id))}>Clear ${c.kind.toLowerCase()} fault</button>` : c ? html`<button class="btn sm sim" onClick=${act(() => { M.injectCarrierFault(S, c.id); M.logEvent(S, 'sim', `SIMULATION · fault injected on ${c.id}`, { pos: posId }); })}>Inject ${c.kind.toLowerCase()} fault</button>` : null}
         ${p.fault ? html`<button class="btn sm sim" onClick=${act(() => M.clearFault(S, 'P', posId))}>Clear sensor fault</button>` : html`<button class="btn sm sim" onClick=${act(() => { M.injectSensorFault(S, posId); M.logEvent(S, 'sim', `SIMULATION · sensor fault injected at ${dispId(posId)}`, { pos: posId }); })}>Inject sensor fault</button>`}
+        ${isWork ? html`<button class=${'btn sm sim' + (emerg ? ' on' : '')} onClick=${act(() => (emerg ? M.clearEmergency(S, id) : M.callEmergency(S, id)))}><${Icon} n="siren" />${emerg ? 'Clear emergency stop' : 'Test emergency stop'}</button>` : null}
+        ${isWork && v && occ && occ.completeT == null ? html`<button class="btn sm sim" title="Simulate the team finishing now" onClick=${act(() => M.manualComplete(S, id))}><${Icon} n="check" />Finish work now</button>` : null}
       </div></div>
-      ${isWork ? html`<div class="sec"><div class="micro">Configuration</div><div style=${{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><span>Base target</span>
-        <button class="btn sm icon" aria-label="Decrease target by one minute" onClick=${() => setTarget(-1)}><${Icon} n="minus" /></button><span class="mono" style=${{ minWidth: 50, textAlign: 'center' }}>${fmtDur(P.target)}</span><button class="btn sm icon" aria-label="Increase target by one minute" onClick=${() => setTarget(1)}><${Icon} n="plus" /></button>
-        <span class="note">warning at ${fmtDur(P.target * S.cfg.warnPct)}</span></div></div>` : null}
+      ${isWork ? html`<div class="sec"><div class="micro">Takt</div><div class="andon-row"><span>${AREAS[P.area].name} takt <b class="mono">${fmtDur(S.cfg.takt[P.area])}</b> · close to limit at <span class="mono">${fmtDur(S.cfg.takt[P.area] * S.cfg.warnPct)}</span></span>${can('takt') ? html`<button class="btn sm ghost" onClick=${() => go('admin', 'takt')}><${Icon} n="cog" />Change takt</button>` : null}</div></div>` : null}
       <div class="sec"><div class="micro">Recent activity</div>${events.length ? html`<ul class="timeline">${events.map((e) => html`<li key=${e.id}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul>` : html`<p class="note">No events here yet this shift.</p>`}</div>
     </div></${React.Fragment}>`;
 }
 
-const VSTATE = { IN_PROCESS: ['In process', 'text', 'clock'], AWAITING_LINE_OFF: ['At line-off', 'text', 'scan'], LINED_OFF: ['Lined off', 'ok', 'checkc'], OFF_LINE: ['Taken off line', 'warn', 'exit'] };
+const VSTATE = { IN_PROCESS: ['On line', 'text', 'clock'], AWAITING_LINE_OFF: ['On line · driving off', 'text', 'arrow'], LINED_OFF: ['Completed', 'ok', 'checkc'], OFF_LINE: ['Offlined', 'warn', 'exit'], RETURN_QUEUED: ['Offlined · return queued', 'warn', 'ret'], RETURNING: ['Returning to line', 'transit', 'ret'] };
+/* Vehicle record (URD req 5): where it is, its status, and its full history. */
 function VehicleInspector({ id }) {
   const S = RT.S, v = S.vehicles[id]; if (!v) return null;
   const [lbl, tone, ic] = VSTATE[v.state], c = v.carrierId && S.carriers[v.carrierId], at = c && c.mode === 'POS' ? c.posId : null;
   let tl, tval;
-  if (v.state === 'LINED_OFF') { tl = 'Total assembly time · stopped at Scanner 3'; tval = v.totalDur; }
-  else if (v.state === 'OFF_LINE') { tl = 'In line before take-out · timer stopped'; tval = v.offline.inLine; }
-  else { tl = `Assembly timer · Scanner 1 at ${fmtClock(v.entryT, false)}`; tval = S.t - v.entryT; }
-  const route = M.STATIONS.map((sid) => { const ids = [sid]; const cur = at && ids.includes(at); const done = ids.some((x) => v.done[x]) || v.segments.some((s) => ids.includes(s.pos) && s.end === 'departed'); const cr = ids.some((x) => v.credited[x]); return { sid, cls: cur ? 'cur' : cr && !done ? 'credit' : done ? 'done' : '' }; });
-  const segs = v.segments.filter((s) => POS[s.pos].kind === 'work').slice(-14);
+  if (v.state === 'LINED_OFF') { tl = 'Total time in the line · line-in to completion'; tval = v.totalDur; }
+  else if (v.state === 'OFF_LINE' || v.state === 'RETURN_QUEUED') { tl = `Offline for · since ${fmtClock(v.offline.t, false)}`; tval = S.t - v.offline.t; }
+  else { tl = `In the line · line-in at ${fmtClock(v.entryT, false)}`; tval = S.t - v.entryT; }
+  const route = M.STATIONS.map((sid) => { const cur = at === sid; const done = !!v.done[sid] || v.segments.some((s) => s.pos === sid && s.end === 'departed'); return { sid, cls: cur ? 'cur' : done ? 'done' : '' }; });
+  const segs = v.segments.filter((s) => POS[s.pos].kind === 'work');
   const bs = M.buildState(S, v), items = M.buildFor(v), installed = items.filter((b) => (b.key === 'doors' ? bs.doors : bs[b.key]) >= 1).length;
+  const ret = M.canReturn(S, v.id);
+  const rows = segs.map((sg) => { const occ = !sg.end && S.pos[sg.pos].occ && S.pos[sg.pos].occ.vehicleId === v.id ? S.pos[sg.pos].occ : null; const cyc = occ ? M.occCycle(S, occ) : sg.cycle != null ? sg.cycle : (sg.departT || S.t) - sg.arriveT; return { ...sg, cyc, live: !!occ }; });
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
-      <div class="micro">Vehicle</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
-      <div class="sub">${v.variant.name} · ${v.variant.ptLabel}</div>
+      <div class="micro">Vehicle record</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
+      <div class="sub">${v.variant.name} · ${v.variant.ptLabel} · <${PaintChip} p=${v.paint} /></div>
       <div style=${{ marginTop: 10 }}><span class=${'chip c-' + tone}><${Icon} n=${ic} />${lbl}</span></div></div>
       <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
     <div class="insp-body">
       <div class="sec"><div class="micro">${tl}</div><div class="num" style=${{ fontSize: 44 }}>${fmtDur(tval)}</div></div>
-      <dl class="kv"><dt>Location</dt><dd>${at ? html`<${PosLink} id=${at} />` : M.locationLabel(S, v)}</dd>${at ? html`<dt>Operation</dt><dd>${POS[at].op}</dd>` : null}
-        <dt>Model</dt><dd>MG ${v.variant.model}</dd><dt>Variant</dt><dd>${v.variant.trim}</dd><dt>Powertrain</dt><dd>${v.variant.ptLabel}</dd><dt>Paint</dt><dd><${PaintChip} p=${v.paint} /></dd>
-        <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>${v.engine ? html`<dt>Engine</dt><dd class="mono" style=${{ color: v.engine.ok ? null : 'var(--crit)' }}>${v.engine.engineNo}</dd><dt>Transmission</dt><dd class="mono">${v.engine.transNo}</dd>` : null}
-        <dt>Scanner 1</dt><dd class="mono">${fmtClock(v.entryT)}${v.source === 'SIM_AUTO' ? ' · sim' : ''}</dd>${v.lineOffT ? html`<dt>Scanner 3</dt><dd class="mono">${fmtClock(v.lineOffT)}</dd>` : null}</dl>
+      <dl class="kv"><dt>Where</dt><dd>${at ? html`<${PosLink} id=${at} /> <span class="c-muted">· ${AREAS[POS[at].area].name}</span>` : M.locationLabel(S, v)}</dd>
+        <dt>Line-in</dt><dd class="mono">${fmtClock(v.entryT)} · Scanner 1 at TL1${v.source === 'SIM_AUTO' ? ' (sim)' : ''}</dd>
+        ${v.lineOffT ? html`<dt>Completed</dt><dd class="mono">${fmtClock(v.lineOffT)} · photo-eye at FL7</dd>` : null}
+        ${v.offlines.length ? html`<dt>Offline</dt><dd>${v.offlines.length}× · last at <span class="mono">${v.offline.pos}</span>, ${fmtClock(v.offline.t, false)}</dd>` : null}
+        <dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd></dl>
       <div class="sec"><div class="micro">Route</div><div class="route" aria-label="Route progress">${route.map((x, i) => html`<${React.Fragment} key=${x.sid}>${i === 6 || i === 11 ? html`<span class="g"></span>` : null}<span class=${'s ' + x.cls} title=${x.sid}></span></${React.Fragment}>`)}</div></div>
-      ${v.offline ? html`<div class="callout warn"><div class="ttl" style=${{ color: 'var(--warn)' }}><${Icon} n="exit" />Taken off line · recorded</div><div>${v.offline.reason}${v.offline.notes ? ` — ${v.offline.notes}` : ''}</div>
-        <dl class="kv" style=${{ marginTop: 4 }}><dt>Taken from</dt><dd class="mono">${dispId(v.offline.pos)}</dd><dt>Time</dt><dd class="mono">${fmtClock(v.offline.t)}</dd>${v.offline.over ? html`<dt>Over target at station</dt><dd class="mono" style=${{ color: 'var(--crit)' }}>+${fmtDur(v.offline.over)}</dd>` : null}<dt>Build at take-out</dt><dd class="mono">${v.offline.built} components</dd><dt>Responsible</dt><dd class="mono">${dispId(v.offline.responsible)}</dd><dt>Authorized by</dt><dd>${v.offline.by || 'Supervisor'}</dd></dl>
-        <div class="note">Not counted as a completed vehicle and not re-entered.</div></div>` : null}
+      ${v.offlines.map((o, i) => { const r = v.returns.find((x) => x.offlineT === o.t); return html`<div key=${i} class="callout warn"><div class="ttl" style=${{ color: 'var(--warn)' }}><${Icon} n="exit" />Taken offline at ${o.pos} · ${fmtClock(o.t, false)}</div><div>${o.reason}${o.notes ? ` — ${o.notes}` : ''}</div>
+        <dl class="kv" style=${{ marginTop: 4 }}><dt>Station</dt><dd class="mono">${o.pos} · ${AREAS[o.area].name}</dd><dt>Cycle at station</dt><dd class="mono">${fmtDur(o.cycle || 0)}</dd><dt>Build</dt><dd class="mono">${o.built} components</dd><dt>By</dt><dd>${o.by || '—'}${o.scanned ? ' · VIN scanned' : ' · correction'}</dd>
+        ${r ? html`<dt>Returned</dt><dd class="mono">${fmtClock(r.t, false)} at ${r.pos} · ${fmtDur(r.t - o.t)} offline · ${r.by}</dd>` : null}</dl>
+        ${!r ? html`<div class="note">Removed from station counts; not counted towards the target unless it returns and completes.</div>` : null}</div>`; })}
       <div class="sec"><div class="micro">Actions</div><div class="actions">
-        ${M.isActive(v) && at ? html`<button class="btn danger" onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take off line…</button>` : null}
-        ${M.isActive(v) && !at ? html`<span class="note">A unit can be taken off once it arrives at a position.</span>` : null}
-        ${v.state === 'AWAITING_LINE_OFF' ? html`<button class="btn primary" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'EXIT', vin: v.vin } })}><${Icon} n="scanout" />Exit scan</button>` : null}
-        ${v.state === 'OFF_LINE' || v.state === 'LINED_OFF' ? html`<span class="note">No actions: this record is closed.</span>` : null}
+        ${M.isActive(v) && at && M.OFFLINE_POS.includes(at) ? html`<button class="btn danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : null}
+        ${M.isActive(v) && at && !M.OFFLINE_POS.includes(at) ? html`<span class="note">Offline points: TL6 and FL1–FL7.</span>` : null}
+        ${v.state === 'OFF_LINE' ? html`<button class="btn primary" disabled=${!can('offline') || !ret.ok} title=${ret.ok ? `Rejoin at ${ret.pos} when it is free` : ret.reason} onClick=${() => setUI({ dialog: { type: 'return', vehicleId: v.id } })}><${Icon} n="ret" />Return to line at ${v.offline.pos}…</button>` : null}
+        ${v.state === 'RETURN_QUEUED' ? html`<span class="note">Waiting for ${v.returnReq.pos} to be free. It rejoins automatically.</span>` : null}
+        ${M.isActive(v) && at && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: at, vin: v.vin } })}><${Icon} n="swap" />Correct position…</button>` : null}
+        ${v.state === 'LINED_OFF' ? html`<span class="note">Completed. This record is closed.</span>` : null}
       </div></div>
+      ${rows.length ? html`<div class="sec"><div class="micro"><span>Time at each station</span><span>cycle vs takt</span></div><div style=${{ overflowX: 'auto' }}><table class="stimeline"><thead><tr><th>Station</th><th>Arrived</th><th>Cycle</th><th></th><th>Left</th></tr></thead><tbody>
+        ${rows.map((r, i) => { const over = r.cyc > r.target, w = Math.min(1, r.cyc / (r.target * 1.5)); return html`<tr key=${i}><td>${r.pos}${r.corrected ? ' ·c' : ''}</td><td class="c-muted">${fmtClock(r.arriveT, false)}</td><td style=${{ color: over ? 'var(--crit)' : null }}>${fmtDur(r.cyc)}${r.live ? ' ●' : ''}</td><td><span class="cbar" title=${`takt ${fmtDur(r.target)}`}><i style=${{ width: `${w * 100}%`, background: over ? 'var(--crit)' : r.cyc >= r.target * S.cfg.warnPct ? 'var(--warn)' : 'var(--ok)' }}></i><b style=${{ left: `${(1 / 1.5) * 100}%` }}></b></span></td><td class="l c-muted">${r.end === 'departed' ? fmtClock(r.departT, false) : r.end === 'taken off line' ? 'offline' : r.end === 'corrected' ? 'corrected' : r.live ? 'here now' : '—'}</td></tr>`; })}</tbody></table></div></div>` : null}
       <div class="sec"><div class="micro"><span>Build</span><span>${installed} / ${items.length} components</span></div><${BuildList} v=${v} /></div>
-      ${segs.length ? html`<div class="sec"><div class="micro">Position timing</div><div style=${{ overflowX: 'auto' }}><table class="data"><thead><tr><th>Pos</th><th>Work</th><th>Target</th><th>Waiting</th></tr></thead><tbody>
-        ${segs.map((s, i) => { const live = !s.end && S.pos[s.pos].occ && S.pos[s.pos].occ.vehicleId === v.id ? S.pos[s.pos].occ : null; const w = live ? live.workT : s.work; return html`<tr key=${i}><td class="mono">${s.pos}${s.credited ? ' ·cr' : ''}</td><td class="mono" style=${{ color: w > s.target ? 'var(--crit)' : null }}>${fmtDur(w)}${s.interrupted ? ' ✕' : ''}</td><td class="mono c-muted">${fmtDur(s.target)}</td><td class="mono">${fmtDur(live ? live.waitT : s.wait)}</td></tr>`; })}</tbody></table></div></div>` : null}
-      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-12).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
+      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-14).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
     </div></${React.Fragment}>`;
 }
 function Inspector() {
@@ -448,18 +541,19 @@ function Inspector() {
 /* ── anchored tags ── */
 function Anchors() {
   const S = RT.S, sel = RT.ui.selection, tags = [], byPos = {};
-  S.alarms.forEach((a) => { if (!M.alarmActive(a) || a.level === 'WARNING' || !POS[a.pos]) return; const sid = dispId(a.pos); if (!byPos[sid] || M.SEV[a.level] > M.SEV[byPos[sid].level]) byPos[sid] = a; });
-  Object.entries(byPos).forEach(([sid, a]) => {
+  S.alarms.forEach((a) => { if (!M.alarmActive(a) || a.level === 'WARNING' || !POS[a.pos]) return; const sid = a.type === 'CALL' ? `${a.pos}#${a.callType}` : dispId(a.pos); if (!byPos[sid] || M.SEV[a.level] > M.SEV[byPos[sid].level]) byPos[sid] = a; });
+  Object.entries(byPos).forEach(([key, a]) => {
+    const sid = dispId(a.pos);
     const occ = S.pos[a.pos].occ, v = occ && occ.vehicleId && S.vehicles[occ.vehicleId];
     let txt;
     if (a.type === 'DELAY') txt = html`<span class="mono k">${sid}</span><span>${a.level === 'ESCALATED' ? 'ESCALATED' : 'OVERDUE'}</span><span class="mono">+${fmtDur(occ && v ? occ.workT - M.targetFor(a.pos, v) : 0)}</span>`;
     else if (a.type === 'FAULT') txt = html`<span class="mono k">${sid}</span><span>${a.msg.split(' · ')[0]}</span>`;
     else if (a.type === 'QUALITY') txt = html`<span class="mono k">${sid}</span><span>QUALITY HOLD · E/T mismatch</span>`;
-    else if (a.type === 'ASSIST') txt = html`<span class="mono k">${sid}</span><span>ASSISTANCE</span>`;
+    else if (a.type === 'CALL') { const c = S.calls.find((x) => x.id === a.callId); txt = html`<span class="mono k">${sid}</span><span>${a.callType === 'SUP' ? 'SUPERVISOR' : 'MAINTENANCE'}</span><span class="mono">${c ? fmtDur(S.t - c.raisedT) : ''}</span>`; }
     else if (a.type === 'EMERGENCY') txt = html`<span class="mono k">${sid}</span><span>EMERGENCY · LINE STOPPED</span>`;
     else txt = html`<span class="mono k">${sid}</span><span>waiting${a.root ? html` · held by <span class="mono k">${dispId(a.root)}</span>` : ''}</span>`;
-    const cls = a.level === 'ESCALATED' || a.level === 'EMERGENCY' ? 't-esc' : a.level === 'BLOCKED' ? 't-hold' : a.level === 'ASSIST' ? 't-warn' : 't-crit';
-    tags.push(html`<div key=${'a' + sid} class="anchor" data-anchor=${'pos:' + sid}><div class=${'tag ' + cls} role="button" tabIndex="0" onClick=${() => select({ kind: 'pos', id: sid })} onKeyDown=${(e) => e.key === 'Enter' && select({ kind: 'pos', id: sid })}><${Icon} n=${LEVEL_ICON[a.level]} />${txt}</div></div>`);
+    const cls = a.level === 'ESCALATED' || a.level === 'EMERGENCY' ? 't-esc' : a.level === 'BLOCKED' ? 't-hold' : a.level === 'CALL_SUP' ? 't-sup' : a.level === 'CALL_MNT' ? 't-mnt' : 't-crit';
+    tags.push(html`<div key=${'a' + key} class="anchor" data-anchor=${'pos:' + sid} style=${a.type === 'CALL' ? { marginTop: a.callType === 'SUP' ? -30 : -60 } : null}><div class=${'tag ' + cls} role="button" tabIndex="0" onClick=${() => select({ kind: 'pos', id: sid })} onKeyDown=${(e) => e.key === 'Enter' && select({ kind: 'pos', id: sid })}><${Icon} n=${LEVEL_ICON[a.level]} />${txt}</div></div>`);
   });
   if (sel && sel.kind === 'pos' && !byPos[sel.id]) tags.push(html`<div key="sel" class="anchor" data-anchor=${'pos:' + sel.id}><div class="tag"><span class="mono k">${sel.id}</span></div></div>`);
   if (sel && sel.kind === 'veh' && S.vehicles[sel.id]) tags.push(html`<div key="selv" class="anchor" data-anchor=${'veh:' + sel.id}><div class="tag"><span class="mono k">${S.vehicles[sel.id].vin.slice(-6)}</span></div></div>`);
@@ -472,82 +566,145 @@ function HoverCard() {
     const P = POS[hv.id], st = M.stationStatus(S, hv.id), sv = M.stationVehicle(S, hv.id), occ = sv && S.pos[sv.posId].occ;
     body = html`<div style=${{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}><span class="mono" style=${{ fontSize: 16, fontWeight: 600 }}>${hv.id}</span><${StatusChip} st=${st} /></div>
       <dl>${sv ? html`<dt>VIN</dt><dd class="mono">${shortVin(sv.v.vin)}</dd>` : html`<dt>Vehicle</dt><dd>none</dd>`}
-      ${sv && P.kind === 'work' && occ ? html`<dt>Elapsed</dt><dd class="mono">${fmtDur(occ.workT)} / ${fmtDur(M.targetFor(hv.id, sv.v))}</dd>` : null}
+      ${sv && P.kind === 'work' && occ && sv.posId === hv.id ? html`<dt>Cycle / takt</dt><dd class="mono">${fmtDur(M.occCycle(S, occ))} / ${fmtDur(M.targetFor(hv.id, sv.v))}</dd>` : null}
+      ${M.callsAt(S, hv.id).map((c) => html`<dt key=${c.id}>${M.CALL_TYPES[c.type].label}</dt><dd class="mono">${fmtDur(S.t - c.raisedT)}${c.respondedT != null ? ' · responded' : ''}</dd>`)}
       ${occ && occ.completeT != null && occ.waitT > 0 ? html`<dt>Waiting</dt><dd class="mono">${fmtDur(occ.waitT)}</dd>` : null}<dt>Team</dt><dd>${P.team}</dd></dl>`;
   } else if (hv.kind === 'veh') {
     const v = S.vehicles[hv.id]; if (!v) return null;
     body = html`<div style=${{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span class="mono" style=${{ fontSize: 16, fontWeight: 600 }}>${v.vin.slice(-6)}</span><span class="c-muted" style=${{ fontSize: 12 }}>${v.variant.name}</span></div>
       <dl><dt>Location</dt><dd>${M.locationLabel(S, v)}</dd><dt>Assembly</dt><dd class="mono">${fmtDur((v.lineOffT || S.t) - v.entryT)}</dd><dt>Carrier</dt><dd class="mono">${v.carrierId || '—'}</dd></dl>`;
-  } else if (hv.kind === 'scanner') body = html`<div class="mono" style=${{ fontWeight: 600 }}>${hv.id === 'ENTRY' ? 'Scanner 1 · VIN receive' : hv.id === 'LOAD' ? 'Scanner 2 · hanger load' : hv.id === 'EXIT' ? 'Scanner 3 · line-off' : 'E/T scanner · CH-02'}</div><p class="note" style=${{ marginTop: 6 }}>${hv.id === 'ENGINE' ? 'Pairs engine and transmission serials to the VIN.' : hv.id === 'LOAD' ? 'Pairs the VIN to its hanger automatically at TL6.' : 'Click to scan.'}</p>`;
+  } else if (hv.kind === 'scanner') { const SC = { ENTRY: ['Scanner 1 · line-in at TL1', 'Every body is scanned here. Click to scan.'], OFFLINE: ['Offline scanner · TL6, end of Trim', 'Scans a unit taken offline at the end of Trim.'], HH1: ['Handheld offline scanner · Final (FL1–FL3)', 'Wireless; docked at FL2. Scans a unit taken offline on the Final line.'], HH2: ['Handheld offline scanner · Final (FL4–FL7)', 'Wireless; docked at FL5. Scans a unit taken offline on the Final line.'], EOL: ['End-of-line photo-eye · FL7', 'Detects the car driving off the line. No scan: the VIN comes from tracking.'] }[hv.id] || [hv.id, ''];
+    body = html`<div class="mono" style=${{ fontWeight: 600 }}>${SC[0]}</div><p class="note" style=${{ marginTop: 6 }}>${SC[1]}</p>`; }
   return html`<div class="glass hovercard ticks" id="hovercard" style=${{ transform: `translate(${Math.min(hv.x + 16, window.innerWidth - 310)}px, ${hv.y + 16}px)` }}>${body}</div>`;
 }
 function Legend() {
   const row = (sw, txt) => html`<div class="row"><span class="sw" style=${{ background: sw }}></span><span>${txt}</span></div>`;
   return html`<div class="glass legend-pop ticks" role="dialog" aria-label="Key">
     <div class="micro">Reading the floor</div>
-    ${row('var(--text)', 'Timer bar along each position: work time against target')}
-    ${row('var(--warn)', 'Near target')}${row('var(--crit)', 'Overdue, fault or quality hold · pulsing tint and tag')}${row('var(--esc)', 'Escalated delay')}
-    ${row('var(--ok)', 'Work complete, transfer permitted')}${row('var(--hold)', 'Work complete, waiting for transfer')}
+    ${row('var(--andon-ok)', 'Normal · cycle time inside takt (stack light green)')}
+    ${row('var(--warn)', 'Close to limit · past ' + Math.round(RT.S.cfg.warnPct * 100) + '% of takt')}${row('var(--crit)', 'Over takt · buzzer rings until the unit leaves')}
+    ${row('var(--call-sup)', 'Supervisor call · violet lamp, blinks until someone responds')}${row('var(--call-mnt)', 'Maintenance call · blue lamp, blinks until someone responds')}
+    ${row('var(--hold)', 'Work complete, waiting for transfer')}
     ${row('repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 10px)', 'Chevrons point from waiting bodies to the position holding them')}
     ${row('var(--transit)', 'Bright parts on a car are being installed right now')}
     <p class="note">X-ray (X) makes the body glass so interior and underbody parts are visible. Every state also shows as text with an icon.</p>
-    <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
-    <button class="btn sm" onClick=${() => setUI({ dialog: { type: 'about' }, legend: false })}><${Icon} n="info" />Layout, assumptions & PLC integration</button>
+    <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>/</b> find VIN · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
+    <button class="btn sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />How it works · URD coverage</button>
   </div>`;
 }
 
 /* ── dialogs ── */
+/* Scanner 1 at TL1: line-in (URD req 1). The only routine scan on the line. */
 function ScanDialog({ d }) {
-  const S = RT.S, entry = d.scanner === 'ENTRY';
+  const S = RT.S;
   const [vin, setVin] = useState(d.vin || ''), [res, setRes] = useState(null), [scanning, setScanning] = useState(false), inp = useRef(null);
   useEffect(() => { inp.current && inp.current.focus(); }, []);
   const head = M.bufferHead(S), headBody = head >= 0 ? S.bodyBuffer[head] : null;
-  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { const v = vin.trim().toUpperCase(); const r = entry ? M.entryScan(S, v, 'MANUAL') : M.exitScan(S, v, 'MANUAL'); if (r.ok && !entry && r.vehicleId) delete S.holdExit[r.vehicleId]; setRes(r); setScanning(false); bump(); }, 650); };
-  const E0 = S.pos['TL1'], lo = S.pos.FL7, loV = lo.occ && lo.occ.vehicleId && lo.occ.completeT != null && S.vehicles[lo.occ.vehicleId];
+  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { const r = M.entryScan(S, vin.trim().toUpperCase(), 'MANUAL'); setRes(r); setScanning(false); bump(); }, 650); };
+  const E0 = S.pos['TL1'];
   const activeV = S.vehOrder.map((id) => S.vehicles[id]).find((v) => v.state === 'IN_PROCESS' && v.carrierId && S.carriers[v.carrierId].posId && POS[S.carriers[v.carrierId].posId].kind === 'work');
   const entryState = !E0.carrierId ? (E0.reservedBy ? `skid ${E0.reservedBy} arriving` : 'no skid present') : E0.occ.vehicleId ? `occupied by ${S.vehicles[E0.occ.vehicleId].vin.slice(-6)}` : E0.occ.pendingBody ? 'body being placed' : `empty skid ${E0.carrierId} ready`;
   const garble = () => { const g = headBody ? headBody.label : 'LSJA34661TP248999'; return g.slice(0, 8) + (g[8] === '7' ? '3' : '7') + g.slice(9); };
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="scan-h">
-    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">${entry ? 'Scanner 1 · TL1 VIN receive' : 'Scanner 3 · FL7 line-off'}</div><h3 id="scan-h">${entry ? 'Register a body entering assembly' : 'Register normal line-off'}</h3></div><span class="sim-tag">SIMULATED</span><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Scanner 1 · TL1 · line-in</div><h3 id="scan-h">Register a body entering the line</h3></div><span class="sim-tag">SIMULATED</span><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">
       <div class=${'scanwin' + (scanning ? ' scanning' : '')}><div class="barcode"></div><div class="laser"></div></div>
-      <div class="field"><label for="vin-in">VIN · 17 characters</label><input id="vin-in" ref=${inp} class="vin-input" aria-invalid=${res && !res.ok ? "true" : "false"} data-state=${res ? (res.ok ? "ok" : "bad") : ""} maxLength="17" spellCheck="false" autoComplete="off" value=${vin} onInput=${(e) => { setVin(e.target.value.toUpperCase()); setRes(null); }} onKeyDown=${(e) => e.key === 'Enter' && vin && !scanning && doScan()} /></div>
-      <div class="actions">${entry ? html`
+      <div class="field"><label for="vin-in">VIN · 17 characters</label><input id="vin-in" ref=${inp} class="vin-input" aria-invalid=${res && !res.ok ? 'true' : 'false'} data-state=${res ? (res.ok ? 'ok' : 'bad') : ''} maxLength="17" spellCheck="false" autoComplete="off" value=${vin} onInput=${(e) => { setVin(e.target.value.toUpperCase()); setRes(null); }} onKeyDown=${(e) => e.key === 'Enter' && vin && !scanning && doScan()} /></div>
+      <div class="actions">
         ${headBody ? html`<button class="btn sm sim" onClick=${() => { setVin(headBody.label); setRes(null); }}>Label on next body</button>` : null}
         ${activeV ? html`<button class="btn sm sim" onClick=${() => { setVin(activeV.vin); setRes(null); }}>VIN already on line</button>` : null}
-        <button class="btn sm sim" onClick=${() => { setVin(garble()); setRes(null); }}>Misread label</button>` : html`
-        ${loV ? html`<button class="btn sm sim" onClick=${() => { setVin(loV.vin); setRes(null); }}>Vehicle at line-off</button>` : null}
-        <button class="btn sm sim" onClick=${() => { const b = 'LSJA34660TP999999'; setVin(b.slice(0, 8) + M.vinCheckDigit(b) + b.slice(9)); setRes(null); }}>Unknown VIN</button>
-        ${activeV ? html`<button class="btn sm sim" onClick=${() => { setVin(activeV.vin); setRes(null); }}>VIN still mid-line</button>` : null}`}</div>
-      <p class="note">${entry ? html`TL1: <b>${entryState}</b>. Paint-shop buffer: <b>${S.bodyBuffer.filter(Boolean).length} of 6</b> bodies.${S.cfg.autoEntryScan ? ' Auto scan is on, so the simulator also scans bodies when TL1 is free.' : ''}` : html`FL7: <b>${loV ? `${loV.vin} done, waiting ${fmtDur(lo.occ.waitT)}` : 'no finished vehicle waiting'}</b>.`}</p>
+        <button class="btn sm sim" onClick=${() => { setVin(garble()); setRes(null); }}>Misread label</button></div>
+      <p class="note">TL1: <b>${entryState}</b>. Paint-shop buffer: <b>${S.bodyBuffer.filter(Boolean).length} of 6</b> bodies.${S.cfg.autoEntryScan ? ' Auto scan is on, so the simulator also scans bodies at the planned pace.' : ''} After this scan the VIN is tracked from station to station without further scans.</p>
       ${res ? html`<div class=${'result ' + (res.ok ? 'ok' : 'bad')} role="alert"><div class="ttl" style=${{ color: res.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n=${res.ok ? 'checkc' : 'xc'} />${res.ok ? 'Accepted' : 'Rejected'}</div><div>${res.reason}</div>
-        <ul>${res.ok ? (entry ? [html`<li key="a">Body taken from the buffer and placed on the Trim conveyor at TL1</li>`, html`<li key="b">Assembly timer started ${fmtClock(res.t)}</li>`] : [html`<li key="a">Assembly timer stopped · ${fmtDur(res.dur)}</li>`, html`<li key="b">Completed count updated · vehicle released to storage</li>`]) : [html`<li key="c">No production record was created or changed</li>`, html`<li key="d">Logged as an exception</li>`]}</ul></div>` : null}
+        <ul>${res.ok ? [html`<li key="a">Body taken from the buffer and placed on the Trim conveyor at TL1</li>`, html`<li key="b">Line-in recorded ${fmtClock(res.t)}</li>`] : [html`<li key="c">No production record was created or changed</li>`, html`<li key="d">Logged as an exception</li>`]}</ul></div>` : null}
     </div>
     <div class="dialog-foot">${res && res.ok && res.vehicleId ? html`<button class="btn" onClick=${() => { setUI({ dialog: null }); select({ kind: 'veh', id: res.vehicleId }); }}>Show vehicle</button>` : null}<button class="btn" onClick=${() => setUI({ dialog: null })}>Done</button><button class="btn primary" aria-busy=${scanning ? 'true' : 'false'} disabled=${!vin && !scanning} onClick=${() => !scanning && doScan()}><${Icon} n="scan" />${scanning ? 'Scanning…' : 'Scan'}</button></div>
   </div></div>`;
 }
+/* Taking a unit offline (URD req 2–3, 6): scan the VIN at the station; the station is recorded. */
 function OffLineDialog({ d }) {
   const S = RT.S, v = S.vehicles[d.vehicleId];
-  const chk = v ? M.canTakeOffLine(S, v.id) : { ok: false }, at = chk.ok ? chk.posId : null, c = v && v.carrierId && S.carriers[v.carrierId];
-  const occ = at && S.pos[at].occ, tgt = at && v ? M.targetFor(at, v) : 0, over = at && POS[at].kind === 'work' && occ && occ.completeT == null ? occ.workT - tgt : 0;
-  const [reason, setReason] = useState(d.reason || (over > 0 ? M.OFFLINE_REASONS[0] : M.OFFLINE_REASONS[1])), [resp, setResp] = useState(at ? dispId(at) : 'TL1'), [notes, setNotes] = useState(''), [by, setBy] = useState('Line supervisor · Shift A'), [ok, setOk] = useState(false), [err, setErr] = useState(null);
+  const chk = v ? M.canTakeOffLine(S, v.id) : { ok: false }, at = chk.ok ? chk.posId : null;
+  const occ = at && S.pos[at].occ, an = at ? M.andonState(S, at) : null;
+  const [reason, setReason] = useState(d.reason || (an && an.state === 'over' ? M.OFFLINE_REASONS[0] : M.OFFLINE_REASONS[1])), [notes, setNotes] = useState(''), [scan, setScan] = useState(''), [scanning, setScanning] = useState(false), [ok, setOk] = useState(false), [err, setErr] = useState(null);
   if (!v) return null;
-  const submit = () => { const r = M.takeOffLine(S, v.id, { reason, notes, responsible: resp, by }); if (!r.ok) { setErr(r.reason); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const scanner = at === 'TL6' ? 'Offline scanner at TL6 (end of Trim)' : at && ['FL1', 'FL2', 'FL3'].includes(at) ? 'Handheld scanner 1 (FL1–FL3)' : 'Handheld scanner 2 (FL4–FL7)';
+  const doScan = () => { setScanning(true); setTimeout(() => { setScan(v.vin); setScanning(false); }, 550); };
+  const submit = () => { const r = M.takeOffLine(S, v.id, { reason, notes, by: userName(), scan }); if (!r.ok) { setErr(r.reason); bump(); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const scanOk = scan && scan.trim().toUpperCase() === v.vin;
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="off-h">
-    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Authorized process event · fast mode</div><h3 id="off-h">Take unit off the line</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">${at || '—'} · ${scanner}</div><h3 id="off-h">Take unit offline</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">
-      <dl class="kv"><dt>VIN</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Variant</dt><dd>${v.variant.name}</dd><dt>Position</dt><dd class="mono">${at ? dispId(at) : M.locationLabel(S, v)}</dd><dt>Carrier</dt><dd class="mono">${c ? `${c.kind} ${c.id}` : '—'}</dd>
-        ${at && POS[at].kind === 'work' && occ ? html`<dt>Time at station</dt><dd class="mono" style=${{ color: over > 0 ? 'var(--crit)' : null }}>${fmtDur(occ.workT)} / ${fmtDur(tgt)}${over > 0 ? ` (+${fmtDur(over)})` : ''}</dd>` : null}</dl>
+      <dl class="kv"><dt>Tracking shows</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Variant</dt><dd>${v.variant.name}</dd><dt>Station</dt><dd class="mono">${at || M.locationLabel(S, v)}</dd>
+        ${an && an.state !== 'idle' ? html`<dt>Cycle at station</dt><dd class="mono" style=${{ color: an.state === 'over' ? 'var(--crit)' : null }}>${fmtDur(an.cycle)} / ${fmtDur(an.takt)}</dd>` : null}</dl>
       ${!at ? html`<div class="result bad">${chk.reason}</div>` : null}
-      <div class="field"><label for="off-reason">Reason</label><select id="off-reason" value=${reason} onChange=${(e) => setReason(e.target.value)}>${M.OFFLINE_REASONS.map((r) => html`<option key=${r}>${r}</option>`)}</select></div>
-      <div class="field"><label for="off-resp">Station where the issue occurred</label><select id="off-resp" value=${resp} onChange=${(e) => setResp(e.target.value)}>${STATIONS.map((r) => html`<option key=${r} value=${r}>${r} · ${POS[r].team}</option>`)}</select></div>
-      <div class="field"><label for="off-notes">Notes for the record</label><textarea id="off-notes" rows="2" value=${notes} onInput=${(e) => setNotes(e.target.value)} placeholder="e.g. Exhaust hanger bracket misaligned, would not seat"></textarea></div>
-      <div class="field"><label for="off-by">Authorized by</label><input id="off-by" value=${by} onInput=${(e) => setBy(e.target.value)} /></div>
-      <label class="confirm-row" for="off-ok"><input id="off-ok" type="checkbox" checked=${ok} onChange=${(e) => setOk(e.target.checked)} /><span>The unit leaves the line now. Its timing stops, it is recorded as off-line with its build state, and it will <b>not</b> count as a completed line-off. Its carrier continues empty.</span></label>
+      <div class="field"><label for="off-scan">1 · Scan the VIN on the unit</label><div style=${{ display: 'flex', gap: 8 }}><input id="off-scan" class="vin-input" style=${{ flex: 1 }} data-state=${scan ? (scanOk ? 'ok' : 'bad') : ''} maxLength="17" spellCheck="false" autoComplete="off" value=${scan} placeholder="Scan or type" onInput=${(e) => { setScan(e.target.value.toUpperCase()); setErr(null); }} /><button class="btn" aria-busy=${scanning ? 'true' : 'false'} onClick=${doScan}><${Icon} n="scan" />${scanning ? 'Scanning…' : 'Scan label'}</button></div>
+        ${scan && !scanOk && scan.length === 17 ? html`<div class="note" style=${{ color: 'var(--crit)' }}>This VIN does not match the unit tracked at ${at}. Check the unit, or correct its position first.</div>` : null}</div>
+      <div class="field"><label for="off-reason">2 · Reason</label><select id="off-reason" value=${reason} onChange=${(e) => setReason(e.target.value)}>${M.OFFLINE_REASONS.map((r) => html`<option key=${r}>${r}</option>`)}</select></div>
+      <div class="field"><label for="off-notes">Notes for the record</label><textarea id="off-notes" rows="2" value=${notes} onInput=${(e) => setNotes(e.target.value)} placeholder="e.g. Grille clip broken, would not seat"></textarea></div>
+      <label class="confirm-row" for="off-ok"><input id="off-ok" type="checkbox" checked=${ok} onChange=${(e) => setOk(e.target.checked)} /><span>The unit leaves the line now. It is removed from station counts and will <b>not</b> count towards the target unless it returns and completes. Recorded by <b>${userName()}</b>.</span></label>
       ${err ? html`<div class="result bad">${err}</div>` : null}
     </div>
-    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn danger" disabled=${!ok || !at} onClick=${submit}><${Icon} n="exit" />Take off line</button></div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn danger" disabled=${!ok || !at || !scan} onClick=${submit}><${Icon} n="exit" />Take offline</button></div>
   </div></div>`;
+}
+/* Return to line (URD §6): rejoin at the station it left. */
+function ReturnDialog({ d }) {
+  const S = RT.S, v = S.vehicles[d.vehicleId], [note, setNote] = useState(''), [err, setErr] = useState(null);
+  if (!v || !v.offline) return null;
+  const pos = v.offline.pos, slot = M.stationCount(S, pos);
+  const submit = () => { const r = M.returnToLine(S, v.id, userName(), note); if (!r.ok) { setErr(r.reason); return; } bump(); setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="ret-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Offline since ${fmtClock(v.offline.t, false)} · ${fmtDur(S.t - v.offline.t)}</div><h3 id="ret-h">Return ${v.vin.slice(-6)} to the line</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <dl class="kv"><dt>VIN</dt><dd><${VinText} vin=${v.vin} /></dd><dt>Taken off at</dt><dd class="mono">${pos}</dd><dt>Reason</dt><dd>${v.offline.reason}</dd><dt>${pos} now</dt><dd>${slot ? 'occupied · it waits for the station to be free' : 'free · it can rejoin straight away'}</dd></dl>
+      <div class="field"><label for="ret-note">What was done</label><textarea id="ret-note" rows="2" value=${note} onInput=${(e) => setNote(e.target.value)} placeholder="e.g. Correct grille fitted offline; recheck at FL4"></textarea></div>
+      <p class="note">It rejoins at <b>${pos}</b>, where work restarts. It counts towards the target only when it completes the line. Both visits stay in its history.</p>
+      ${err ? html`<div class="result bad">${err}</div>` : null}
+    </div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn primary" onClick=${submit}><${Icon} n="ret" />Return to ${pos}</button></div>
+  </div></div>`;
+}
+/* Manual position correction (URD req 7): authorised users only; every change is audited. */
+function CorrectDialog({ d }) {
+  const S = RT.S, here = S.pos[d.pos] && S.pos[d.pos].occ, cur = here && here.vehicleId && S.vehicles[here.vehicleId];
+  const [mode, setMode] = useState('move'), [vin, setVin] = useState(d.vin || (cur ? cur.vin : '')), [to, setTo] = useState(''), [reason, setReason] = useState(''), [res, setRes] = useState(null);
+  const active = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => M.isActive(v) && v.carrierId && S.carriers[v.carrierId].mode === 'POS');
+  const targets = WORK_POS.filter((id) => S.pos[id].carrierId && id !== (cur && cur.posId));
+  const submit = () => { const r = mode === 'move' ? M.correctPosition(S, vin, to, userName(), reason) : M.clearGhost(S, d.pos, userName(), reason); setRes(r); bump(); if (r.ok) setTimeout(() => setUI({ dialog: null }), 900); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="cor-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Authorised · audited</div><h3 id="cor-h">Correct vehicle position</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <div class="tabs" role="tablist" style=${{ margin: 0 }}>${[['move', 'Move or swap a VIN'], ['ghost', `Unit not at ${d.pos}`]].map(([k, l]) => html`<button key=${k} role="tab" aria-selected=${mode === k} onClick=${() => { setMode(k); setRes(null); }}>${l}</button>`)}</div>
+      ${mode === 'move' ? html`
+        <div class="field"><label for="cor-vin">VIN that is out of step</label><select id="cor-vin" value=${vin} onChange=${(e) => setVin(e.target.value)}>${active.map((v) => html`<option key=${v.id} value=${v.vin}>${v.vin.slice(-6)} · recorded at ${S.carriers[v.carrierId].posId}</option>`)}</select></div>
+        <div class="field"><label for="cor-to">Where it really is</label><select id="cor-to" value=${to} onChange=${(e) => setTo(e.target.value)}><option value="">Choose a station…</option>${targets.map((id) => { const o = S.pos[id].occ, ov = o && o.vehicleId && S.vehicles[o.vehicleId]; return html`<option key=${id} value=${id}>${id}${ov ? ` · holds ${ov.vin.slice(-6)} (will swap)` : ' · empty carrier'}</option>`; })}</select></div>
+        <p class="note">If another unit is recorded at that station, the two are swapped. Only stations with a carrier standing at them can be chosen.</p>`
+      : html`<p class="note">${cur ? html`Tracking shows <b class="mono">${cur.vin.slice(-6)}</b> at ${d.pos}. If it is not physically there, it is recorded offline as “not found at station” so the counts are right. It can be returned later.` : `No unit is recorded at ${d.pos}.`}</p>`}
+      <div class="field"><label for="cor-why">Reason (required, kept in the audit log)</label><input id="cor-why" value=${reason} onInput=${(e) => setReason(e.target.value)} placeholder="e.g. Units swapped by hand at FL3/FL4" /></div>
+      ${res ? html`<div class=${'result ' + (res.ok ? 'ok' : 'bad')}>${res.ok ? (mode === 'move' ? `Corrected${res.swapped ? ` · swapped with ${res.swapped.slice(-6)}` : ''}. Logged in the audit trail.` : 'Recorded offline. Logged in the audit trail.') : res.reason}</div>` : null}
+    </div>
+    <div class="dialog-foot"><button class="btn" onClick=${() => setUI({ dialog: null })}>Cancel</button><button class="btn primary" disabled=${!reason.trim() || (mode === 'move' && !to)} onClick=${submit}><${Icon} n="swap" />Apply correction</button></div>
+  </div></div>`;
+}
+/* VIN lookup (URD req 5): type part of a VIN and open its record. */
+function VinSearchDialog() {
+  const S = RT.S, [q, setQ] = useState(''), [i, setI] = useState(0), inp = useRef(null);
+  useEffect(() => { inp.current && inp.current.focus(); }, []);
+  const Q = q.trim().toUpperCase();
+  const all = S.vehOrder.map((id) => S.vehicles[id]);
+  const hits = (Q ? all.filter((v) => v.vin.includes(Q)) : all.slice().reverse()).slice(0, 30);
+  const open = (v) => { setUI({ dialog: null }); if (RT.route.page !== 'floor') go('floor'); select({ kind: 'veh', id: v.id }, M.isActive(v)); };
+  return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="vs-h">
+    <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Vehicle lookup</div><h3 id="vs-h">Find a vehicle by VIN</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
+    <div class="dialog-body">
+      <div class="vsearch"><input ref=${inp} value=${q} placeholder="Full VIN or the last digits, e.g. 248271" aria-label="VIN" spellCheck="false" autoComplete="off"
+        onInput=${(e) => { setQ(e.target.value); setI(0); }} onKeyDown=${(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); setI(Math.min(hits.length - 1, i + 1)); } else if (e.key === 'ArrowUp') { e.preventDefault(); setI(Math.max(0, i - 1)); } else if (e.key === 'Enter' && hits[i]) open(hits[i]); }} /></div>
+      <div class="vresults" role="listbox">${hits.length ? hits.map((v, k) => { const [lbl, tone] = VSTATE[v.state]; return html`<button key=${v.id} class="vresult" role="option" aria-selected=${k === i} onClick=${() => open(v)}>
+        <span><${VinText} vin=${v.vin} /></span><span class=${'chip c-' + tone}>${lbl}</span>
+        <span class="sub">${v.variant.name} · ${M.locationLabel(S, v)}</span><span class="sub mono">in ${fmtClock(v.entryT, false)}${v.lineOffT ? ` · done ${fmtClock(v.lineOffT, false)}` : ''}</span></button>`; }) : html`<div class="empty">No vehicle with “${Q}” in its VIN in this session.</div>`}</div>
+      <p class="note">Searches every vehicle registered at Scanner 1 in this session: on the line, offlined and completed.</p>
+    </div></div></div>`;
 }
 function AboutDialog() {
   const li = (t, i) => html`<li key=${i}>${t}</li>`;
@@ -557,22 +714,22 @@ function AboutDialog() {
     <div class="dialog-body" style=${{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 22, fontSize: 13, lineHeight: 1.55 }}>
       <div><div class="micro">Line flow (confirmed by the plant)</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
         'Trim TL1–TL5 on a floor conveyor (moved by hand today). Scanner 1 receives the VIN at TL1.',
-        'TL6 is a Trim work point and the hanger load point. Scanner 2 pairs the VIN to the hanger.',
+        'TL6 is a Trim work point, the hanger load point and the end of Trim, where a unit can be taken offline with a scan.',
         'Exactly 4 hangers: TL6 → CL1 → CL2 → CL3 → Buffer → CL4 → FL1. The buffer is normally empty and holds a loaded hanger when CL4 is busy.',
         'FL1 is a Final work point on the hanger; the body is then lowered onto the Final conveyor FL2–FL7. Empty hangers return FL1 → TL6 on a separate rail.',
-        'FL7 is the final inspection and line-off point with Scanner 3.',
-        'Each unit moves on its own as soon as its team presses Work done and the next point is free.',
-        'Every station has three buttons: Work done, Assistance call and Emergency call. Emergency stops that line until cleared.',
+        'FL7 is the final inspection point. An end-of-line photo-eye detects completion; there is no scan.',
+        'Units move on their own when the station finishes and the next point is free. Position is tracked without extra scans.',
+        'Every Chassis and Final station has two call buttons, Supervisor and Maintenance, and a buzzer that rings over takt.',
       ].map(li)}</ul></div>
       <div><div class="micro">Assumptions (labelled, configurable)</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
         'Which part goes on at which point, and the target times, follow the plant split but are assumed.',
-        'Engine/transmission scan at CL2 comes from the GA drawing.',
-        'Conveyor speeds, hanger travel times, return-rail route and the 32-vehicle plan are assumed.',
+        'The CL2 engine/transmission scan from the GA drawing is an option, off by default (outside the URD).',
+        'Conveyor speeds, hanger travel times, return-rail route, shift times, breaks and the 30-vehicle shift target are assumed.',
         'Units with problems are taken off the line and recorded; the off-line hold area location is assumed.',
       ].map(li)}</ul></div>
       <div><div class="micro">Needed for real PLC integration</div><ul style=${{ paddingLeft: 18, color: 'var(--text-2)' }}>${[
-        'PLC tag list or event interface: carrier arrival/position confirmation, presence sensors, permissive and interlock states, fault codes, station Work done / Assistance / Emergency signals.',
-        'Scanner models and protocols for Scanners 1–3 and the CL2 E/T scanner; MES source for VIN, variant and engine data.',
+        'PLC tag list or event interface: carrier arrival/position confirmation, presence sensors, station call buttons, buzzer outputs, fault codes.',
+        'Scanner models and protocols for Scanner 1 and the offline scanners; MES source for VIN and variant data.',
         'Team work-complete signal per position and approved targets per variant.',
         'Controls safety review: this HMI shows permissives and records requests only. Motion authorization stays in the PLC and safety system.',
       ].map(li)}</ul></div>
@@ -584,23 +741,28 @@ function AboutDialog() {
 /* ── alarm drawer ── */
 function AlarmDrawer() {
   const S = RT.S, tab = RT.ui.drawer;
-  const active = S.alarms.filter(M.alarmActive), un = active.filter((a) => a.ackT == null), ak = active.filter((a) => a.ackT != null);
-  const resolved = S.alarms.filter((a) => !M.alarmActive(a) && a.level !== 'WARNING').slice(-60).reverse();
+  const active = S.alarms.filter((a) => M.alarmActive(a) && a.type !== 'CALL'), un = active.filter((a) => a.ackT == null), ak = active.filter((a) => a.ackT != null);
+  const openCalls = S.calls.filter((c) => c.clearedT == null).sort((a, b) => a.raisedT - b.raisedT), doneCalls = S.calls.filter((c) => c.clearedT != null).slice(-25).reverse();
+  const resolved = S.alarms.filter((a) => !M.alarmActive(a) && a.level !== 'WARNING' && a.type !== 'CALL').slice(-60).reverse();
   const sortA = (l) => l.slice().sort((a, b) => M.SEV[b.level] - M.SEV[a.level] || a.raisedT - b.raisedT);
   const list = tab === 'active' ? sortA(un) : tab === 'acked' ? sortA(ak) : tab === 'resolved' ? resolved : null;
-  const off = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => v.state === 'OFF_LINE').reverse();
-  const filters = [['all', 'All'], ['exception', 'Exceptions'], ['alarm', 'Alarms'], ['scan', 'Scans'], ['offline', 'Off-line'], ['move', 'Movement'], ['sim', 'Simulation']];
+  const off = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => ['OFF_LINE', 'RETURN_QUEUED', 'RETURNING'].includes(v.state)).reverse();
+  const filters = [['all', 'All'], ['call', 'Calls'], ['andon', 'Buzzers'], ['alarm', 'Alarms'], ['exception', 'Exceptions'], ['scan', 'Scans'], ['offline', 'Offline'], ['config', 'Changes'], ['shift', 'Shifts'], ['move', 'Movement'], ['sim', 'Simulation']];
   const evs = tab === 'log' ? S.events.filter((e) => RT.ui.logFilter === 'all' || e.cat === RT.ui.logFilter || (RT.ui.logFilter === 'move' && e.cat === 'work')).slice(-200).reverse() : [];
   return html`<aside class="glass drawer ticks in" aria-label="Alarms and events">
     <div class="head"><div style=${{ flex: 1 }}><div class="micro">Exceptions</div><div style=${{ fontWeight: 600, fontSize: 18 }}>Alarms & events</div></div>
       ${tab === 'active' && un.some((a) => a.level !== 'WARNING') ? html`<button class="btn sm warn" onClick=${act(() => un.filter((a) => a.level !== 'WARNING').forEach((a) => M.ackAlarm(S, a.id)))}><${Icon} n="check" />Acknowledge all</button>` : null}
       <button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ drawer: null })}><${Icon} n="x" /></button></div>
-    <div class="tabs" role="tablist">${[['active', 'Active', un.length], ['acked', 'Acknowledged', ak.length], ['resolved', 'Resolved', resolved.length], ['offline', 'Off-line units', off.length], ['log', 'Event log', null]].map(([k, l, n]) => html`<button key=${k} role="tab" aria-selected=${tab === k} onClick=${() => setUI({ drawer: k })}>${l}${n != null ? html`<span class="n">${n}</span>` : null}</button>`)}</div>
-    ${tab === 'offline' ? html`<div class="alist">${off.length ? off.map((v) => html`<div key=${v.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': 'var(--warn)' }} onClick=${() => { setUI({ drawer: null }); select({ kind: 'veh', id: v.id }); }} onKeyDown=${(e) => e.key === 'Enter' && (setUI({ drawer: null }), select({ kind: 'veh', id: v.id }))}>
-        <div class="top"><span class="chip c-warn"><${Icon} n="exit" />Off-line</span><span class="mono" style=${{ fontWeight: 600 }}>${dispId(v.offline.pos)}</span><span class="mono c-muted">${shortVin(v.vin)}</span></div>
+    <div class="tabs" role="tablist">${[['calls', 'Calls', openCalls.length], ['active', 'Alarms', un.length], ['acked', 'Acknowledged', ak.length], ['resolved', 'Resolved', resolved.length], ['offline', 'Offline', off.length], ['log', 'Log', null]].map(([k, l, n]) => html`<button key=${k} role="tab" aria-selected=${tab === k} onClick=${() => setUI({ drawer: k })}>${l}${n != null ? html`<span class="n">${n}</span>` : null}</button>`)}</div>
+    ${tab === 'calls' ? html`<div class="alist" style=${{ padding: 12 }}>
+        ${openCalls.length ? openCalls.map((c) => html`<${CallRow} key=${c.id} c=${c} compact />`) : html`<div class="empty">No open calls. Calls appear here the moment a station presses Supervisor or Maintenance.</div>`}
+        ${doneCalls.length ? html`<div class="micro" style=${{ margin: '16px 0 6px' }}>Recently cleared</div><table class="data"><thead><tr><th>Station</th><th>Call</th><th>Raised</th><th>Response</th><th>Total</th><th>By</th></tr></thead><tbody>${doneCalls.map((c) => html`<tr key=${c.id}><td class="mono">${c.pos}</td><td><span class=${'c-' + c.type.toLowerCase()}>${M.CALL_TYPES[c.type].label}</span></td><td class="mono">${fmtClock(c.raisedT, false)}</td><td class="mono">${fmtDur(M.callResponse(c))}</td><td class="mono">${fmtDur(M.callDuration(c))}</td><td style=${{ textAlign: 'left' }}>${(c.clearedBy || '').split(' · ')[0]}</td></tr>`)}</tbody></table>` : null}</div>`
+    : tab === 'offline' ? html`<div class="alist">${off.length ? off.map((v) => html`<div key=${v.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': 'var(--warn)' }} onClick=${() => { setUI({ drawer: null }); select({ kind: 'veh', id: v.id }); }} onKeyDown=${(e) => e.key === 'Enter' && (setUI({ drawer: null }), select({ kind: 'veh', id: v.id }))}>
+        <div class="top"><span class="chip c-warn"><${Icon} n=${v.state === 'OFF_LINE' ? 'exit' : 'ret'} />${v.state === 'OFF_LINE' ? 'Offline' : 'Returning'}</span><span class="mono" style=${{ fontWeight: 600 }}>${dispId(v.offline.pos)}</span><span class="mono c-muted">${shortVin(v.vin)}</span></div>
         <div>${v.offline.reason}${v.offline.notes ? ` — ${v.offline.notes}` : ''}</div>
         <div class="meta"><span class="mono">${fmtClock(v.offline.t, false)}</span><span>${v.variant.name}</span><span class="mono">built ${v.offline.built}</span>${v.offline.over ? html`<span class="mono" style=${{ color: 'var(--crit)' }}>+${fmtDur(v.offline.over)} over</span>` : null}<span>${v.offline.by || 'Supervisor'}</span></div>
-      </div>`) : html`<div class="empty">No units taken off the line this shift.</div>`}</div>`
+        ${v.state === 'OFF_LINE' && can('offline') ? html`<div class="actions"><button class="btn sm" onClick=${(e) => { e.stopPropagation(); setUI({ dialog: { type: 'return', vehicleId: v.id } }); }}><${Icon} n="ret" />Return to ${v.offline.pos}…</button></div>` : null}
+      </div>`) : html`<div class="empty">No units are offline.</div>`}</div>`
     : list ? html`<div class="alist">${list.length ? list.map((a) => html`<div key=${a.id} class="arow" role="button" tabIndex="0" style=${{ '--tone': tv(LEVEL_TONE[a.level]) }} onClick=${() => openAlarm(a)} onKeyDown=${(e) => e.key === 'Enter' && openAlarm(a)}>
         <div class="top"><${LevelChip} a=${a} /><span class="mono" style=${{ fontWeight: 600 }}>${dispId(a.pos)}</span>${a.vin ? html`<span class="mono c-muted">${shortVin(a.vin)}</span>` : null}</div>
         <div>${a.msg}</div>
@@ -691,78 +853,16 @@ function Report() {
 const pad = (n) => String(n).padStart(2, '0');
 const PaintChip = ({ p }) => html`<span class="paint"><i style=${{ background: p.hex }}></i>${p.name}</span>`;
 
-/* Line-off moment: a short card when a unit passes Scanner 3 at FL7. */
+/* Line-off moment: a short card when a unit passes the end-of-line photo-eye at FL7. */
 function LineOffCard() {
   const lo = RT.ui.lineoff; if (!lo) return null;
   const c = lo.rec;
   return html`<div class="glass lineoff ticks" role="status" aria-live="polite">
     <div class="lo-mark"><${MgMark} /></div>
-    <div><div class="micro lo-k">Line-off · Scanner 3 · FL7</div><div class="lo-name">${c.name}</div>
+    <div><div class="micro lo-k">Completed · photo-eye · FL7${c.returned ? ' · returned unit' : ''}</div><div class="lo-name">${c.name}</div>
       <div class="lo-meta"><${PaintChip} p=${M.PAINTS.find((x) => x.name === c.paint) || { name: c.paint, hex: '#888' }} /><span class="mono">${c.vin}</span></div></div>
     <div class="lo-stat"><span class="micro">Build time</span><span class="num">${fmtDur(c.dur)}</span></div>
-    <div class="lo-stat"><span class="micro">Today</span><span class="num">${c.n}<small> / ${RT.S.cfg.shiftTarget}</small></span></div>
+    <div class="lo-stat"><span class="micro">This shift</span><span class="num">${c.n}<small> / ${RT.S.shift && RT.S.shift.targets ? RT.S.shift.targets.FINAL : '—'}</small></span></div>
   </div>`;
 }
 
-/* ── root ── */
-function App() {
-  const [, force] = useReducer((x) => x + 1, 0), sceneRef = useRef(null), [webgl, setWebgl] = useState(true);
-  useEffect(() => {
-    const ok3d = Scene3D.init(sceneRef.current, {
-      getState: () => RT.S, getUI: () => RT.ui, theme: effectiveTheme(),
-      onHover: (hit, changed) => { if (changed || !hit) setUI({ hover: hit }); else { RT.ui.hover = hit; const n = document.getElementById('hovercard'); if (n) n.style.transform = `translate(${Math.min(hit.x + 16, window.innerWidth - 310)}px, ${hit.y + 16}px)`; } },
-      onSelect: (hit) => select(hit),
-    });
-    if (!ok3d) { setWebgl(false); RT.ui.view2D = true; }
-    let last = performance.now(), lastRev = -1, lastPaint = 0;
-    const loop = (now) => {
-      const dt = Math.min(0.25, (now - last) / 1000); last = now;
-      if (RT.running && RT.demo && !RT.demo.fired && (RT.demo.elapsed += dt) >= DEMO_AFTER) { RT.demo.fired = true; injectDemoDelay(RT.S); }
-      if (RT.running) { RT.acc += dt * RT.speed; let n = 0; while (RT.acc >= 1 && n < 400) { M.step(RT.S, 1); RT.acc -= 1; n++; } }
-      if (!RT.ui.view2D) Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
-      Horn.tick(now);
-      const done = RT.S.stats.completed, lastC = done[done.length - 1];
-      if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
-      if (RT.ui.lineoff && now - RT.ui.lineoff.at > 6500) setUI({ lineoff: null });
-      if (now - lastPaint > (RT.ui.view2D ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-    const l = () => force(); RT.listeners.add(l);
-    const key = (e) => {
-      if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.report) setUI({ report: false }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); }
-      else if (e.key === '0') { setUI({ selection: null, view: 'overview' }); Scene3D.focusView('overview'); }
-      else if (e.key === '1' || e.key === '2' || e.key === '3') { const v = ['TRIM', 'CHASSIS', 'FINAL'][+e.key - 1]; setUI({ view: v, selection: null }); Scene3D.focusView(v); }
-      else if (e.key === 'a' || e.key === 'A') { const t = topAlarm(RT.S); if (t) openAlarm(t); }
-      else if (e.key === 'x' || e.key === 'X') setUI({ xray: !RT.ui.xray });
-      else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); RT.running = !RT.running; bump(); }
-    };
-    window.addEventListener('keydown', key);
-    return () => { RT.listeners.delete(l); window.removeEventListener('keydown', key); };
-  }, []);
-  const d = RT.ui.dialog;
-  return html`<main class="stage">
-    <div id="scene" ref=${sceneRef} style=${{ visibility: RT.ui.view2D ? 'hidden' : 'visible' }}></div>
-    ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
-    ${!RT.ui.view2D ? html`<${HoverCard} />` : null}
-    <header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header>
-    <${Strip} /><${SimConsole} /><${LineOffCard} />
-    ${RT.ui.legend ? html`<${Legend} />` : null}
-    ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
-    ${RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
-    ${RT.ui.report ? html`<${Report} />` : null}
-    ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
-    ${d && d.type === 'offline' ? html`<${OffLineDialog} key=${d.vehicleId} d=${d} />` : null}
-    ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}
-  </main>`;
-}
-(function boot() {
-  const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
-  if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
-  RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
-  M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
-  const start = () => ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`);
-  const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
-  fonts.then(start, start);
-})();
