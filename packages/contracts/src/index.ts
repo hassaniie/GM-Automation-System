@@ -47,30 +47,29 @@ export const isPlantEvent = (x: unknown): x is PlantEvent =>
   typeof x === 'object' && x !== null && (PLANT_EVENT_TYPES as readonly string[]).includes((x as { type?: string }).type ?? '');
 
 /* ── commands (what people do on the screens), validated at the edge server ──
-   Phase 3: `by` is sent by the client. Phase 4 replaces it with the signed-in user on the server. */
+   Commands carry no user name: the server takes it from the signed-in session. */
 const pos = z.string().min(1).max(8);
 const area = z.enum(['TRIM', 'CHASSIS', 'FINAL']);
-const by = z.string().min(1).max(120);
 const reason = z.string().max(500).optional();
 const breakDef = z.object({ name: z.string(), start: z.number(), end: z.number() }).passthrough();
 const shiftDef = z.object({ name: z.string(), start: z.number(), end: z.number(), breaks: z.array(breakDef) }).passthrough();
 
 export const OperatorCommand = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('RAISE_CALL'), pos, callType: z.enum(['SUP', 'MNT']), by }),
-  z.object({ type: z.literal('RESPOND_CALL'), callId: z.string(), by }),
-  z.object({ type: z.literal('CLEAR_CALL'), callId: z.string(), by, note: z.string().max(500).optional() }),
-  z.object({ type: z.literal('ACK_ALARM'), alarmId: z.string(), by: by.optional() }),
+  z.object({ type: z.literal('RAISE_CALL'), pos, callType: z.enum(['SUP', 'MNT']) }),
+  z.object({ type: z.literal('RESPOND_CALL'), callId: z.string() }),
+  z.object({ type: z.literal('CLEAR_CALL'), callId: z.string(), note: z.string().max(500).optional() }),
+  z.object({ type: z.literal('ACK_ALARM'), alarmId: z.string() }),
   z.object({ type: z.literal('ENTRY_SCAN'), raw: z.string().max(64), source: z.enum(['MANUAL', 'SCAN']) }),
-  z.object({ type: z.literal('TAKE_OFFLINE'), vehicleId: z.string(), reason: z.string().min(1).max(200), notes: z.string().max(500).optional(), responsible: z.string().max(40).optional(), scan: z.string().max(64), by }),
-  z.object({ type: z.literal('RETURN_TO_LINE'), vehicleId: z.string(), by, note: z.string().max(500).optional() }),
-  z.object({ type: z.literal('CORRECT_POSITION'), vin: z.string().max(64), toPos: pos, by, reason: z.string().max(500) }),
-  z.object({ type: z.literal('CLEAR_GHOST'), pos, by, reason: z.string().max(500) }),
-  z.object({ type: z.literal('SET_TAKT'), area, sec: z.number().int().min(60).max(3600), by, reason }),
-  z.object({ type: z.literal('SET_WARN_PCT'), pct: z.number().min(0.5).max(0.99), by, reason }),
-  z.object({ type: z.literal('SET_DEFAULT_TARGET'), area, n: z.number().int().min(0).max(500), by, reason }),
-  z.object({ type: z.literal('SET_PLAN'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), patch: z.record(z.string(), z.unknown()), by, reason }),
-  z.object({ type: z.literal('SET_SHIFTS'), shifts: z.array(shiftDef).min(1).max(4), by, reason }),
-  z.object({ type: z.literal('SET_BUZZER'), pos, on: z.boolean(), by, reason }),
+  z.object({ type: z.literal('TAKE_OFFLINE'), vehicleId: z.string(), reason: z.string().min(1).max(200), notes: z.string().max(500).optional(), responsible: z.string().max(40).optional(), scan: z.string().max(64) }),
+  z.object({ type: z.literal('RETURN_TO_LINE'), vehicleId: z.string(), note: z.string().max(500).optional() }),
+  z.object({ type: z.literal('CORRECT_POSITION'), vin: z.string().max(64), toPos: pos, reason: z.string().max(500) }),
+  z.object({ type: z.literal('CLEAR_GHOST'), pos, reason: z.string().max(500) }),
+  z.object({ type: z.literal('SET_TAKT'), area, sec: z.number().int().min(60).max(3600), reason }),
+  z.object({ type: z.literal('SET_WARN_PCT'), pct: z.number().min(0.5).max(0.99), reason }),
+  z.object({ type: z.literal('SET_DEFAULT_TARGET'), area, n: z.number().int().min(0).max(500), reason }),
+  z.object({ type: z.literal('SET_PLAN'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), patch: z.record(z.string(), z.unknown()), reason }),
+  z.object({ type: z.literal('SET_SHIFTS'), shifts: z.array(shiftDef).min(1).max(4), reason }),
+  z.object({ type: z.literal('SET_BUZZER'), pos, on: z.boolean(), reason }),
   z.object({ type: z.literal('MANUAL_COMPLETE'), pos }),
   z.object({ type: z.literal('RESCAN_ENGINE'), pos }),
   z.object({ type: z.literal('LOG_NOTE'), cat: z.enum(['sim', 'note']), text: z.string().max(500), extra: z.record(z.string(), z.unknown()).optional() }),
@@ -99,6 +98,33 @@ export type SimCommand = z.infer<typeof SimCommand>;
 export type Command = z.infer<typeof Command>;
 export type CommandType = Command['type'];
 export const isSimCommand = (c: Command): c is SimCommand => c.type.startsWith('SIM_');
+
+/* ── roles and permissions (URD req 30): shared by the screens and the edge server ── */
+export type RoleId = 'admin' | 'authorised' | 'supervisor' | 'maintenance' | 'viewer';
+export type Permission = '*' | 'call' | 'respond.SUP' | 'respond.MNT' | 'offline' | 'buzzer' | 'takt' | 'plan' | 'correct' | 'reports' | 'audit' | 'users' | 'sim';
+export interface RoleDef { label: string; short: string; home: string; perms: Permission[]; desc: string }
+export const ROLES: Record<RoleId, RoleDef> = {
+  admin:       { label: 'Administrator', short: 'Admin', home: 'dash', perms: ['*'] as Permission[], desc: 'Everything, including users and the audit log.' },
+  authorised:  { label: 'Authorised person', short: 'Authorised', home: 'floor', perms: ['call', 'offline', 'buzzer', 'takt', 'plan', 'correct', 'reports', 'audit'], desc: 'Sets takt, targets and shifts; corrects positions; switches buzzers.' },
+  supervisor:  { label: 'Line supervisor', short: 'Supervisor', home: 'floor', perms: ['call', 'respond.SUP', 'offline', 'reports'], desc: 'Responds to and clears supervisor calls; takes units offline.' },
+  maintenance: { label: 'Maintenance', short: 'Maintenance', home: 'floor', perms: ['call', 'respond.MNT', 'reports'], desc: 'Responds to and clears maintenance calls.' },
+  viewer:      { label: 'View only · management', short: 'View only', home: 'dash', perms: ['reports'], desc: 'Dashboard, line displays, reports and VIN lookup.' },
+};
+export const ROLE_IDS = Object.keys(ROLES) as RoleId[];
+export const roleCan = (role: RoleId | undefined | null, perm: Permission) => {
+  const P = role && ROLES[role] ? ROLES[role].perms : [];
+  return P.includes('*') || P.includes(perm);
+};
+/** Permission each command needs. Calls are answered by the matching team (respond.SUP / respond.MNT). */
+export const COMMAND_PERMISSION: Record<CommandType, Permission | 'respond'> = {
+  RAISE_CALL: 'call', ACK_ALARM: 'call', RESPOND_CALL: 'respond', CLEAR_CALL: 'respond',
+  TAKE_OFFLINE: 'offline', RETURN_TO_LINE: 'offline', ENTRY_SCAN: 'offline',
+  CORRECT_POSITION: 'correct', CLEAR_GHOST: 'correct',
+  SET_TAKT: 'takt', SET_WARN_PCT: 'takt', SET_PLAN: 'plan', SET_DEFAULT_TARGET: 'plan', SET_SHIFTS: 'plan', SET_BUZZER: 'buzzer',
+  MANUAL_COMPLETE: 'sim', RESCAN_ENGINE: 'sim', LOG_NOTE: 'sim',
+  SIM_SPEED: 'sim', SIM_RUNNING: 'sim', SIM_SKIP: 'sim', SIM_SCENARIO: 'sim', SIM_PAUSE_AREA: 'sim', SIM_FAULT_CARRIER: 'sim', SIM_FAULT_SENSOR: 'sim',
+  SIM_CLEAR_FAULT: 'sim', SIM_EMERGENCY: 'sim', SIM_CLEAR_EMERGENCY: 'sim', SIM_POWER_CUT: 'sim', SIM_CONFIG: 'sim',
+};
 
 /* ── live connection (WS /api/live) ── */
 export interface Clock { speed: number; running: boolean; mode: 'simulation' | 'live' }

@@ -21,6 +21,8 @@ export class EngineHost {
   private timer: NodeJS.Timeout | null = null;
   private listeners = new Set<HostListener>();
   readonly seed: number;
+  /** Called after every command (allowed or refused); the persistence layer logs it. */
+  onCommand?: (actor: import('./commands.ts').Actor, command: unknown, ok: boolean, error?: string) => void;
   readonly tickMs: number;
 
   constructor(opts: HostOptions = {}) {

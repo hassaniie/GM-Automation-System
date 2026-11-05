@@ -69,29 +69,29 @@ describe('edge server', () => {
 
   test('a call raised on one screen appears on another within a second', async () => {
     const a = new Screen(wsUrl), b = new Screen(wsUrl); await Promise.all([a.ready, b.ready]);
-    const r = await a.send({ type: 'RAISE_CALL', pos: 'FL4', callType: 'MNT', by: 'Tester A' });
+    const r = await a.send({ type: 'RAISE_CALL', pos: 'FL4', callType: 'MNT' });
     expect(r.ok).toBe(true);
     const id = (r.value as { id: string }).id;
     await b.until(() => b.state.calls.some((c: { id: string }) => c.id === id), 1000);
-    expect((await b.send({ type: 'RESPOND_CALL', callId: id, by: 'Tester B' })).ok).toBe(true);
-    await a.until(() => a.state.calls.find((c: { id: string; respondedBy: string }) => c.id === id)?.respondedBy === 'Tester B', 1000);
+    expect((await b.send({ type: 'RESPOND_CALL', callId: id })).ok).toBe(true);
+    await a.until(() => a.state.calls.find((c: { id: string; respondedBy: string | null }) => c.id === id)?.respondedBy != null, 1000);
     a.close(); b.close();
   });
 
   test('engine refusals come back as results, bad commands are rejected', async () => {
     const a = new Screen(wsUrl); await a.ready;
     const vid = Object.values(a.state.pos as Record<string, { occ: { vehicleId: string | null } | null }>).map((p) => p.occ?.vehicleId).find(Boolean)!;
-    const wrong = await a.send({ type: 'TAKE_OFFLINE', vehicleId: vid, reason: 'Part fitment issue', by: 'Tester', scan: 'LSJA00000TP000000' });
+    const wrong = await a.send({ type: 'TAKE_OFFLINE', vehicleId: vid, reason: 'Part fitment issue', scan: 'LSJA00000TP000000' });
     expect(wrong.ok).toBe(true);
     expect((wrong.value as { ok: boolean }).ok).toBe(false);
-    const bad = await a.send({ type: 'SET_TAKT', area: 'PAINT', sec: 10, by: 'x' });
+    const bad = await a.send({ type: 'SET_TAKT', area: 'PAINT', sec: 10 });
     expect(bad.ok).toBe(false);
     expect(bad.error).toMatch(/Invalid command/);
     const unknown = await a.send({ type: 'DROP_TABLES' });
     expect(unknown.ok).toBe(false);
-    const rest = await fetch(`${base}/api/commands`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'SET_TAKT', area: 'CHASSIS', sec: 540, by: 'Planner', reason: 'test' }) });
+    const rest = await fetch(`${base}/api/commands`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'SET_TAKT', area: 'CHASSIS', sec: 540, reason: 'test' }) });
     expect((await rest.json()).value).toBe(true);
-    expect(srv.host.S.audit.some((x) => x.action === 'Takt time changed' && x.by === 'Planner')).toBe(true);
+    expect(srv.host.S.audit.some((x) => x.action === 'Takt time changed' && x.reason === 'test')).toBe(true);
     a.close();
   });
 

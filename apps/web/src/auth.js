@@ -9,13 +9,8 @@ import { go } from './lib/router.js';
 import { M, RT, bump, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Icon, MgMark, tv } from './lib/ui-kit.js';
 
-export const ROLES = {
-  admin:       { label: 'Administrator', short: 'Admin', home: 'dash', perms: ['*'], desc: 'Everything, including users and the audit log.' },
-  authorised:  { label: 'Authorised person', short: 'Authorised', home: 'floor', perms: ['call', 'offline', 'buzzer', 'takt', 'plan', 'correct', 'reports', 'audit'], desc: 'Sets takt, targets and shifts; corrects positions; switches buzzers.' },
-  supervisor:  { label: 'Line supervisor', short: 'Supervisor', home: 'floor', perms: ['call', 'respond.SUP', 'offline', 'reports'], desc: 'Responds to and clears supervisor calls; takes units offline.' },
-  maintenance: { label: 'Maintenance', short: 'Maintenance', home: 'floor', perms: ['call', 'respond.MNT', 'reports'], desc: 'Responds to and clears maintenance calls.' },
-  viewer:      { label: 'View only · management', short: 'View only', home: 'dash', perms: ['reports'], desc: 'Dashboard, line displays, reports and VIN lookup.' },
-};
+export { ROLES } from '@mg/contracts';
+import { ROLES } from '@mg/contracts';
 // Demo accounts (fictional people). Shown on the sign-in screen.
 const DEMO_USERS = [
   { id: 'u1', name: 'Hamza Siddiqui', empId: 'MG-1001', email: 'hamza.siddiqui@mgjw.pk', role: 'admin', pw: 'Admin@2026' },

@@ -12,7 +12,7 @@ import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
 import { ClientMessage, type ServerMessage } from '@mg/contracts';
 import { EngineHost, type HostOptions } from './engine-host.ts';
-import { CommandError, runCommand } from './commands.ts';
+import { CommandError, SYSTEM, runCommand } from './commands.ts';
 
 export const VERSION = '0.3.0';
 const MAX_BUFFERED = 8 * 1024 * 1024; // a client this far behind is dropped; it reconnects and resyncs
@@ -27,7 +27,7 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
   app.get('/api/health', async () => ({ ok: true, version: VERSION, clock: host.clock, t: host.S.t, rev: host.rev, clients: host.listenerCount }));
   app.get('/api/snapshot', async () => ({ rev: host.rev, clock: host.clock, state: JSON.parse(JSON.stringify(host.S, (_k, v) => (typeof v === 'function' ? undefined : v))) }));
   app.post('/api/commands', async (req, reply) => {
-    try { return { ok: true, value: runCommand(host, req.body) }; }
+    try { return { ok: true, value: await runCommand(host, req.body, SYSTEM) }; } // phase 4 step 5: the signed-in actor
     catch (e) { const err = e as Error; reply.code(e instanceof CommandError ? e.status : 500); return { ok: false, error: err.message }; }
   });
 
@@ -42,12 +42,12 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
       snapshot: (rev, clock, state, hints) => send({ type: 'snapshot', rev, clock, state, hints }),
       patch: (rev, clock, ops) => send({ type: 'patch', rev, clock, ops }),
     });
-    socket.on('message', (raw: Buffer) => {
+    socket.on('message', async (raw: Buffer) => {
       let id = '';
       try {
         const msg = ClientMessage.parse(JSON.parse(raw.toString()));
         id = msg.id;
-        const value = runCommand(host, msg.command);
+        const value = await runCommand(host, msg.command, SYSTEM);
         send({ type: 'result', id, ok: true, value });
       } catch (e) {
         send({ type: 'result', id, ok: false, error: (e as Error).message });
