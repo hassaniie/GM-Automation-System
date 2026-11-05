@@ -344,7 +344,7 @@ function StationInspector({ id }) {
   const tone = st.code === 'COMPLETE' ? 'ok' : st.code === 'WAITING' ? 'hold' : st.tone === 'muted' ? 'text' : st.tone;
   const setTarget = (d) => { POS[id].target = M.clamp(P.target + d * 60, 5 * 60, 30 * 60); M.logEvent(S, 'sim', `Configuration · ${id} base target set to ${fmtDur(POS[id].target)}`, { pos: id }); bump(); };
   const xf = S.xfers.find((q) => q.from === id || q.to === id);
-  const assist = M.callActive(S, 'ASSIST', id), emerg = M.callActive(S, 'EMERG', id);
+  const assist = M.callActive(S, 'SUP', id), emerg = M.callActive(S, 'EMERG', id);
   const stopped = S.paused[P.area];
   const canDone = !!(v && isWork && occ && occ.vehicleId === v.id && occ.completeT == null && !stopped && !(id === 'CL2' && !(v.engine && v.engine.ok)));
   const doneWhy = !v || !occ || occ.vehicleId !== v.id ? 'No unit at this station' : occ.completeT != null ? 'Already done' : stopped ? `${AREAS[P.area].short} line is stopped` : id === 'CL2' && !(v.engine && v.engine.ok) ? 'Engine/transmission not paired yet' : '';
@@ -357,7 +357,7 @@ function StationInspector({ id }) {
     <div class="insp-body">
       ${P.kind === 'work' ? html`<div class="btn-row" role="group" aria-label="Station controls">
         <button class="btn lg primary" disabled=${!canDone} title=${canDone ? `Work done · unit moves to ${M.XFER_FROM[id] ? M.XFER_FROM[id].to : M.NEXT[id] || 'line-off scan'} when free` : doneWhy} onClick=${act(() => M.manualComplete(S, id))}><${Icon} n="check" />Work done</button>
-        <button class=${'btn lg warn' + (assist ? ' on' : '')} aria-pressed=${assist} title=${assist ? 'Assistance call open · press again when help has arrived' : 'Call a team leader to this station'} onClick=${act(() => (assist ? M.clearAssist(S, id) : M.callAssist(S, id)))}><${Icon} n="hand" />Assistance</button>
+        <button class=${'btn lg warn' + (assist ? ' on' : '')} aria-pressed=${assist} title=${assist ? 'Assistance call open · press again when help has arrived' : 'Call a team leader to this station'} onClick=${act(() => { const c = M.openCall(S, id, 'SUP'); c ? M.clearCall(S, c.id, 'Line supervisor') : M.raiseCall(S, id, 'SUP', 'Station button'); })}><${Icon} n="hand" />Assistance</button>
         <button class=${'btn lg danger' + (emerg ? ' on' : '')} aria-pressed=${emerg} title=${emerg ? `Emergency active · ${AREAS[P.area].short} line stopped · press again to clear` : `Emergency · stops the ${AREAS[P.area].short} line`} onClick=${act(() => (emerg ? M.clearEmergency(S, id) : M.callEmergency(S, id)))}><${Icon} n="siren" />Emergency</button>
       </div>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
       ${v && isWork ? html`<div class="timer"><${Ring} r=${r} tone=${tone} /><div>
