@@ -6,7 +6,7 @@
 RT.route = { page: 'floor', sub: null };
 function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
 function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
-window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false, report: false }); });
+window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false }); });
 const PAGES = [
   ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
   ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
@@ -19,7 +19,7 @@ function NavIsland() {
 function PageShell({ children }) {
   return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
 }
-function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note">This screen is part of the next build step.</p></div></div>`; }
+function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 
 /* ── root ── */
 function App() {
@@ -51,7 +51,7 @@ function App() {
     const key = (e) => {
       if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.report) setUI({ report: false }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
+      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
       if (e.key === '/') { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (RT.route.page !== 'floor') return;
       if (e.key === '0') { setUI({ selection: null, view: 'overview' }); Scene3D.focusView('overview'); }
@@ -73,10 +73,9 @@ function App() {
     <header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${StateIsland} /><${ActIsland} /></header>
     <${Strip} /><${SimConsole} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
-    ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
-    ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
+    ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}</${React.Fragment}>`
     : page === 'display' ? html`<${LineDisplay} />`
-    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : page === 'reports' ? html`<${ReportsPage} />` : page === 'how' ? html`<${HowPage} />` : html`<${Placeholder} title="Page not found" />`}</${PageShell}>`}
     <${PowerOverlay} />
     ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
     ${gate ? null : html`<${React.Fragment}>

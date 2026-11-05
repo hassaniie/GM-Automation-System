@@ -1,10 +1,10 @@
-# MG GA Operations: General Assembly digital twin (prototype)
+# MG GA Operations: General Assembly Andon and digital twin (prototype)
 
-An interactive 3D digital twin and HMI for the MG Motors Pakistan (MG JW Automobile) General Assembly shop. It covers the HS and ZS lineup, with hanger automation, station timers, VIN scans, delay alarms, bottleneck tracing and take-off-line handling.
+An Andon system and 3D digital twin for the MG Motors Pakistan (MG JW Automobile) General Assembly shop. It covers the HS and ZS lineup across the Trim, Chassis and Final lines. It is built to the plant's URD *"Andon System – General Assembly Shop"* (draft 2, Nov 2026) and shows every one of its 36 requirements working in simulation.
 
 Designed and built by **Bolt & Volt (Pvt) Ltd**.
 
-> **Status: simulation only.** No PLC, scanner or sensor is connected. Every value on screen comes from a deterministic simulator and is labelled `SIMULATION`.
+> **Status: simulation only.** No PLC, scanner or sensor is connected. Every value on screen comes from a deterministic simulator and is labelled `SIMULATION`. Accounts, settings and the audit log are stored in the browser.
 
 ## Run
 
@@ -14,40 +14,78 @@ Designed and built by **Bolt & Volt (Pvt) Ltd**.
 python3 -m http.server 8080   # then open http://localhost:8080
 ```
 
-It loads three.js r128, React 18.3.1, htm 3.1.1 and the Barlow and JetBrains Mono fonts from public CDNs, so it needs internet access.
+It loads three.js r128, React 18.3.1, htm 3.1.1 and the Barlow and JetBrains Mono fonts from public CDNs. SheetJS 0.18.5 is loaded only when a report is exported to Excel.
+
+Sign in with one of the demo accounts listed on the sign-in screen (fictional people):
+
+| Role | ID | Password |
+|---|---|---|
+| Administrator | MG-1001 | Admin@2026 |
+| Authorised person | MG-2040 | Plan@2026 |
+| Line supervisor | MG-3112 | Line@2026 |
+| Maintenance | MG-4207 | Fix@2026 |
+| View only (management) | MG-9001 | View@2026 |
+
+Line displays need no sign-in: open `#/display/trim`, `#/display/chassis` or `#/display/final`.
+
+## Screens
+
+| Screen | Route | Who | What |
+|---|---|---|---|
+| Dashboard | `#/dash` | everyone | All lines: completed / target / remaining, downtime, takt, work in line, station states, active calls, downtime by cause, offlined units; drill-down to the floor |
+| Floor | `#/floor` | everyone | 3D twin with stack lights and buzzer rings, line strip, station panels with Supervisor / Maintenance call buttons, offline and return, VIN record |
+| Line displays | `#/display/<line>` | kiosk | TV page for each line, readable from the line |
+| Reports | `#/reports` | everyone signed in | By day, shift and line: production, cycle times, downtime, offlined vehicles, call response; Excel and PDF |
+| Settings | `#/admin/<tab>` | admin, authorised | Takt, targets and 14-day plan, shifts and breaks, buzzers, position correction, users (admin), audit log |
+| How it works | `#/how` | everyone | Architecture, answers to the URD's §6 points, and the coverage of all 36 requirements with "Show me" links |
 
 ## Source layout
 
 | File | Contents |
 |---|---|
-| `src/01-head.html` | Title, fonts, all CSS: light, dark and auto themes, the sharp-frame design system and buttons |
-| `src/02-engine.js` | Deterministic line simulator (`window.MGE`): stations, carriers, hangers, transfers, permissives, alarms, root-cause analysis, scans, take-off-line, HS/ZS variants and paints |
-| `src/03-scene.js` | three.js scene (`Scene3D`): floor and layout, conveyors, hanger loop, cars (HS and ZS bodies), build-phase parts, signage, MG and Bolt & Volt floor marks, lighting per theme |
-| `src/04-ui.js` | React + htm HMI: top bar, line strip, inspectors, alarms drawer, scan and take-off dialogs, shift report, scenarios |
-| `src/00-shell-open.html`, `src/05-shell-close.html` | Document wrapper: doctype, viewport and base styles |
+| `src/01-head.html` | Title, fonts, all CSS: themes, design system, Andon, sign-in, dashboard, line display, reports, print |
+| `src/02-engine.js` | Deterministic line simulator (`window.MGE`): stations, carriers, hangers, transfers, alarms, root-cause analysis, scans, offline and return, takt, cycle time, downtime, buzzers, assist calls, shift calendar, targets, corrections, audit |
+| `src/03-scene.js` | three.js scene (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye |
+| `src/04-ui.js` | Floor HMI: top bar, line strip, station and vehicle panels, dialogs (scan, offline, return, correction, VIN search), drawer, simulator console |
+| `src/05-app.js` | App shell: router, navigation, root component |
+| `src/06-auth.js` | Sign-in, roles and permissions, user menu, idle lock |
+| `src/07-admin.js` | Settings screens and on-device persistence |
+| `src/08-screens.js` | Dashboard, line displays, link-loss and power-cut demos |
+| `src/08b-reports.js` | Reports and Excel/PDF export |
+| `src/08c-how.js` | How it works / URD coverage |
+| `src/90-boot.js` | Starts the app once every module is defined |
+| `src/00-shell-open.html`, `src/99-shell-close.html` | Document wrapper |
 | `build.sh` | Concatenates `src/` into `index.html` |
+| `test/engine.check.js` | Headless engine checks (Node, no dependencies) |
 | `docs/ga-layout-reference.png` | Plant GA layout drawing the floor plan was traced from |
 
-Edit files in `src/`, then run `./build.sh`. The engine is wrapped in an IIFE so its top-level constants don't clash with the scene and UI scripts.
+Edit files in `src/`, then run `./build.sh`. Run `node test/engine.check.js` after engine changes.
 
 ## Line model
 
-- **Trim, Station 1:** TL1–TL5 on a manual floor conveyor. Scanner 1 receives the VIN at TL1. TL6 is a Trim work point and the hanger load point (Scanner 2).
-- **Chassis, Station 2:** exactly 4 hangers run TL6 → CL1 → CL2 → CL3 → Buffer → CL4 → FL1. The buffer can hold a loaded hanger while CL4 is busy. Empty hangers return FL1 → TL6 on their own rail. CL2 pairs the engine and gearbox to the VIN by scan; a mismatch puts the station on quality hold.
-- **Final, Station 3:** FL1 is worked on the hanger, then the body is lowered onto the Final conveyor FL2–FL7. Scanner 3 at FL7 scans the car off the line.
-- **Stations:** every station has a 10:00 target. In the simulation teams finish in 9:00. Each station has **Work done**, **Assistance** and **Emergency** buttons, and a unit moves on when Work done is pressed and the next point is free.
-- **No in-shop repair:** a problem unit is taken off the line and recorded, never counted as completed.
-- **Alarms:**
-  - **Warning** at 9:30 of work time.
-  - **Overdue** at 10:00.
-  - **Escalated** at 13:00.
-  - **Blocked** 90 s after Work done if the unit can't move.
-  - **Hold, Fault and Emergency** are raised the moment they happen.
-- **Scenario 1 demo:** after about 2½ minutes of running, CL2 hits an engine-mount problem that runs past target, escalates and holds up the line behind it.
+- **Flow:** Trim TL1–TL6 → Chassis CL1–CL4 (4 hangers, buffer before CL4) → Final FL1–FL7.
+- **Scans (URD req 1–4):** only where the URD puts them.
+  - Scanner 1 at TL1 records line-in.
+  - An offline scan is taken at TL6 (end of Trim), and two handhelds cover FL1–FL7.
+  - FL7 completion is detected by a photo-eye.
+  - Between these points the VIN follows its carrier. There are no hanger-load or exit scans, and the CL2 engine/gearbox pairing scan is an option that is off by default.
+- **Takt and cycle time:** takt is set per line (default 10:00) and teams finish in 9:00. Cycle time is the time at the station, with breaks excluded.
+- **States:** a station is normal below the close-to-limit threshold (95 % of takt), close to limit from there, and over at takt.
+- **Downtime:**
+  - **Station:** the time its unit is over takt.
+  - **Line:** the time during which any station on that line is over takt.
+  - **Exclusions:** breaks and time between shifts don't count.
+  - **Cause:** each second is put down to the station that caused it.
+- **Buzzers:** one per Chassis and Final station. It rings over takt, stops when the unit leaves, and can be switched off per station.
+- **Calls:** Supervisor (violet) and Maintenance (blue). A call is raised, then responded to, then cleared, and the response and clear times are recorded.
+- **Targets and shifts:** each line has a target per shift. Shift A runs 06:00–14:30 and Shift B 14:30–23:00, each with breaks. Plans can be scheduled 14 days ahead, and counts reset at each shift start.
+- **Offline and return:** a unit taken offline leaves the counts and the target. It can return and rejoin at the station it left, and counts only when it completes.
+- **Trim Andon:** full Trim tracking is shown as an expansion preview (req 34). Trim buzzers are off by default.
 
 ## Assumptions to confirm with the plant
 
-1. The HS/ZS variant mix and the ZS paint list. The ZS currently uses the HS paints.
-2. The model codes used in the simulated VINs.
-3. Exact station work content. The drawing shows positions only.
-4. The protocols and data sources for real PLC, scanner and MES integration.
+1. Shift times, breaks, default targets (30 per shift) and takt.
+2. Downtime based on cycle time, so it includes waiting when blocked downstream, with the cause attributed to the root station.
+3. Carrier RFID tags, an FL7 photo-eye, and the scanner placement: fixed at TL1 and TL6, handhelds at FL2 and FL5.
+4. The HS/ZS mix, the ZS paint list and the model codes used in simulated VINs.
+5. Protocols for real PLC, scanner and MES integration, and how long data must be kept.

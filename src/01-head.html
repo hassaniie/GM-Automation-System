@@ -959,6 +959,48 @@ svg.plan text { font-family: var(--font-mono); }
 .power-ov { position: absolute; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(4,6,8,.78); }
 .power-ov.off { background: rgba(0,0,0,.92); }
 .pw-bar { height: 3px; background: var(--hair); overflow: hidden; } .pw-bar i { display: block; height: 100%; width: 40%; background: var(--text); animation: pw 1.2s ease-in-out infinite; } @keyframes pw { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+
+/* ═════════ reports ═════════ */
+.reports { display: grid; gap: 16px; }
+.reports .pg-head { margin-bottom: 0; }
+.rep-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); }
+.rep-filters .field { min-width: 170px; }
+.rep-filters select { height: 38px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
+.rep-jump { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.rep-jump a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--hair-2); } .rep-jump a:hover { color: var(--text); }
+.rep-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.rep-kpis > div { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); }
+.rep-kpis.small > div { background: transparent; }
+.rep-kpis .num { font-size: 30px; font-weight: 300; line-height: 1; } .rep-kpis .num small { font-size: 14px; color: var(--muted); margin-left: 4px; }
+.rsec { display: grid; gap: 10px; overflow-x: auto; }
+.rsec .data { min-width: 640px; }
+.cbar2 { position: relative; display: block; height: 6px; background: var(--hair); min-width: 120px; }
+.cbar2 i { position: absolute; left: 0; top: 0; bottom: 0; } .cbar2 b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
+.attn { display: inline-block; width: 70px; height: 6px; background: var(--hair); margin-right: 8px; vertical-align: middle; } .attn i { display: block; height: 100%; background: var(--ok); }
+/* ═════════ how it works ═════════ */
+.how { display: grid; gap: 16px; }
+.how-h { margin: 14px 0 0; font-size: 18px; font-weight: 600; }
+.six { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.six.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+.six .panel { display: grid; gap: 8px; align-content: start; } .six .panel p { margin: 0; line-height: 1.55; color: var(--text-2); }
+.six-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
+.how-ul { margin: 0; padding-left: 18px; color: var(--text-2); line-height: 1.6; }
+.cov { overflow-x: auto; } .cov .data { min-width: 760px; } .cov td:nth-child(2) { width: 32%; } .cov td:nth-child(3) { width: 44%; }
+.arch { width: 100%; height: auto; margin-top: 10px; }
+.ar-box rect { fill: var(--fill); stroke: var(--hair-2); } .ar-box.core rect { stroke: var(--text); stroke-width: 1.5; }
+.ar-t { font: 600 13px/1 var(--font-ui); fill: var(--text); } .ar-s { font: 400 11.5px/1 var(--font-ui); fill: var(--text-2); }
+.ar-ln line { stroke: var(--text-2); stroke-width: 1.4; } .ar-hd { fill: var(--text-2); } .ar-l { font: 500 10.5px/1 var(--font-mono); fill: var(--muted); }
+/* ═════════ print (PDF export of reports) ═════════ */
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  :root { color-scheme: light; --bg: #fff; --text: #111; --text-2: #333; --muted: #666; --hair: #ccc; --hair-2: #999; --fill: #f5f5f5; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+  .stage, .page-shell, .page-scroll { position: static !important; overflow: visible !important; height: auto !important; }
+  .hud, #scene, .simcon, .strip, .noprint, .drawer, .anchors, .lineoff, .pg-head .actions, .umenu-pop { display: none !important; }
+  .page-wrap { padding: 0 !important; max-width: none !important; }
+  .panel, .rsec { break-inside: avoid; box-shadow: none !important; }
+  .ticks::before, .ticks::after { display: none !important; }
+}
 </style>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

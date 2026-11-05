@@ -10,7 +10,7 @@ const { POS, STATIONS, WORK_POS, AREAS, fmtClock, fmtDur, shortVin, dispId } = M
 /* ── runtime ── */
 const RT = {
   S: null, speed: 5, running: true, acc: 0, scenario: 1, rev: 0,
-  ui: { selection: null, hover: null, drawer: null, dialog: null, report: false, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto' },
+  ui: { selection: null, hover: null, drawer: null, dialog: null, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto' },
   listeners: new Set(),
 };
 function setUI(patch) { Object.assign(RT.ui, patch); RT.rev++; RT.listeners.forEach((f) => f()); }
@@ -207,7 +207,7 @@ function loadScenario(n) {
   const r = sc.setup(S) || {}; S.holdExit = {};
   M.step(S, 1);
   RT.S = S; RT.acc = 0; RT.scenario = n; RT.speed = r.speed || 5; RT.running = true; RT.demo = r.demo ? { elapsed: 0, fired: false } : null;
-  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, report: false, hover: null, view: r.view || RT.ui.view });
+  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, hover: null, view: r.view || RT.ui.view });
   M.logEvent(S, 'sim', `SIMULATION · scenario ${n}: ${sc.title}`);
   setTimeout(() => { if (r.select) focusSel(r.select); else if (Scene3D.ok) Scene3D.focusView(r.view || 'overview'); }, 30);
 }
@@ -806,52 +806,8 @@ function Plan2D({ fallback }) {
     </svg></div>`;
 }
 
-/* ── shift report ── */
+/* ── chart tooltip (reports) ── */
 function useTip() { const [tip, setTip] = useState(null); return [tip ? html`<div class="charttip" style=${{ left: tip.x + 14, top: tip.y + 10 }}>${tip.body}</div>` : null, (e, body) => setTip({ x: e.clientX, y: e.clientY, body }), () => setTip(null)]; }
-function Report() {
-  const S = RT.S, C = S.cfg, [tipNode, showTip, hideTip] = useTip(), [table, setTable] = useState(false);
-  const done = S.stats.completed.filter((c) => c.t >= C.shiftStart), removed = S.stats.offline.filter((c) => c.t >= C.shiftStart), segs = S.stats.segments.filter((s) => s.t >= C.shiftStart && !s.credited);
-  const W = 640, H = 220, pl = 34, pr = 16, pt = 14, pb = 26, t0 = C.shiftStart, t1 = C.shiftEnd, yMax = Math.max(C.shiftTarget, done.length) + 2;
-  const sx = (t) => pl + ((t - t0) / (t1 - t0)) * (W - pl - pr), sy = (n) => H - pb - (n / yMax) * (H - pt - pb);
-  let path = `M${sx(t0)},${sy(0)}`; done.forEach((c, i) => { path += ` H${sx(c.t)} V${sy(i + 1)}`; }); path += ` H${sx(Math.min(S.t, t1))}`;
-  const onPace = (e) => { const r = e.currentTarget.getBoundingClientRect(), t = t0 + ((e.clientX - r.left) / r.width * W - pl) / (W - pl - pr) * (t1 - t0); if (t < t0 || t > Math.min(S.t, t1)) return hideTip(); showTip(e, html`<div class="mono">${fmtClock(t, false)}</div><div>Completed <b>${done.filter((c) => c.t <= t).length}</b> · plan ${(C.shiftTarget * (t - t0) / (t1 - t0)).toFixed(1)}</div>`); };
-  const st = WORK_POS.map((id) => { const l = segs.filter((s) => s.pos === id), n = l.length || 1; return { id, n: l.length, work: l.reduce((a, s) => a + s.work, 0) / n, wait: l.reduce((a, s) => a + s.wait, 0) / n, target: POS[id].target, overdue: S.stats.overdue[id] || 0, block: (S.stats.block[id] || 0) / 60 }; });
-  const maxT = Math.max(...st.map((s) => Math.max(s.work + s.wait, s.target))) * 1.05 || 1, rowH = 20, bl = 50, br = 56, BW = 640, bx = (v) => bl + (v / maxT) * (BW - bl - br);
-  const maxBlock = Math.max(1, ...st.map((s) => s.block)), maxOd = Math.max(1, ...st.map((s) => s.overdue));
-  const avgTotal = done.length ? done.reduce((a, c) => a + c.dur, 0) / done.length : 0, p = M.pace(S);
-  const hbars = (k, max, fmt, label) => html`<svg viewBox=${`0 0 640 ${st.length * rowH + 6}`} role="img" aria-label=${label}>${st.map((s, i) => { const w = (s[k] / max) * (640 - bl - br), y = 3 + i * rowH; return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · ${fmt(s[k])}`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width="640" height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text>${s[k] > 0 ? html`<rect x=${bl} y=${y + 5} width=${Math.max(2, w)} height="10" rx="0" fill="var(--chart-a)" /><text x=${bl + Math.max(2, w) + 6} y=${y + 14} font-size="11" fill="var(--text-2)" class="mono">${fmt(s[k])}</text>` : html`<line x1=${bl} x2=${bl} y1=${y + 5} y2=${y + 15} stroke="var(--hair-2)" />`}</g>`; })}</svg>`;
-  return html`<div class="glass report ticks in" role="dialog" aria-label="Shift report"><div class="rep-scroll">
-    <div class="rep-head"><div style=${{ flex: 1 }}><div class="micro">Shift report · ${C.shiftName} · 06:00 → ${fmtClock(S.t, false)}</div><h2>${p.done} vehicles off the line, ${p.delta >= 0 ? `${p.delta} ahead of` : `${-p.delta} behind`} plan</h2></div><span class="sim-tag">SIMULATED DATA</span><button class="btn" onClick=${() => setUI({ report: false })}><${Icon} n="x" />Back to the floor</button></div>
-    <div class="rep-grid">
-      <section class="panel ticks span-6"><h3>Completed vs plan</h3><div class="q">Cumulative line-offs at Scanner 3 against a linear plan of ${C.shiftTarget}.</div>
-        <svg viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="Cumulative completed vs plan" onMouseMove=${onPace} onMouseLeave=${hideTip}>
-          ${[0, 8, 16, 24, 32].filter((n) => n <= yMax).map((n) => html`<g key=${n}><line x1=${pl} x2=${W - pr} y1=${sy(n)} y2=${sy(n)} stroke="var(--hair)" /><text x=${pl - 6} y=${sy(n) + 4} font-size="10" text-anchor="end" fill="var(--muted)" class="mono">${n}</text></g>`)}
-          ${[6, 8, 10, 12, 14].map((hh) => html`<text key=${hh} x=${sx(hh * 3600)} y=${H - 6} font-size="10" text-anchor="middle" fill="var(--muted)" class="mono">${pad(hh)}:00</text>`)}
-          <line x1=${sx(t0)} y1=${sy(0)} x2=${sx(t1)} y2=${sy(C.shiftTarget)} stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4" /><text x=${sx(t1) - 4} y=${sy(C.shiftTarget) - 6} font-size="11" text-anchor="end" fill="var(--muted)">Plan ${C.shiftTarget}</text>
-          <path d=${path} fill="none" stroke="var(--chart-a)" stroke-width="2" /><circle cx=${sx(Math.min(S.t, t1))} cy=${sy(done.length)} r="4" fill="var(--chart-a)" stroke="var(--bg)" stroke-width="2" /><text x=${sx(Math.min(S.t, t1)) + 8} y=${sy(done.length) + 4} font-size="11" fill="var(--text)">Actual ${done.length}</text>
-        </svg></section>
-      <section class="panel ticks span-3" style=${{ display: 'grid', gap: 16, alignContent: 'start' }}><div><h3>Line-off vs taken off line</h3><div class="q">Units taken off the line are recorded, never counted as completed.</div></div>
-        <div style=${{ display: 'flex', gap: 28, flexWrap: 'wrap' }}><div><div class="micro">Lined off</div><div class="big">${done.length}</div><div class="note">avg ${fmtDur(avgTotal)}</div></div><div><div class="micro">Taken off</div><div class="big" style=${{ color: 'var(--warn)' }}>${removed.length}</div></div><div><div class="micro">Assistance calls</div><div class="big">${S.stats.assist}</div></div><div><div class="micro">Emergencies</div><div class="big" style=${{ color: S.stats.emergency ? 'var(--esc)' : null }}>${S.stats.emergency}</div></div><div><div class="micro">E/T holds</div><div class="big">${S.stats.quality}</div></div></div>
-        ${removed.length ? html`<table class="data"><thead><tr><th>VIN</th><th>From</th><th>Reason</th><th>Built</th><th>Time</th></tr></thead><tbody>${removed.map((r) => html`<tr key=${r.vin}><td class="mono">${shortVin(r.vin)}</td><td class="mono">${r.pos}</td><td style=${{ whiteSpace: 'normal', textAlign: 'left' }}>${r.reason}</td><td class="mono">${r.built}</td><td class="mono">${fmtClock(r.t, false)}</td></tr>`)}</tbody></table>` : html`<p class="note">No units taken off the line this shift.</p>`}</section>
-      <section class="panel ticks span-3"><h3>Model mix</h3><div class="q">Units lined off this shift, by model and variant.</div>
-        ${(() => { const m = {}; done.forEach((c) => { const k = c.name || c.variant; m[k] = (m[k] || 0) + 1; }); const rows = M.VARIANTS.map((v) => [v.name, v.model, m[v.name] || 0]); const mx = Math.max(1, ...rows.map((r) => r[2]));
-          const hs = rows.filter((r) => r[1] === 'HS').reduce((a, r) => a + r[2], 0), zs = rows.filter((r) => r[1] === 'ZS').reduce((a, r) => a + r[2], 0);
-          return html`<div class="mix-tot"><div><span class="micro">MG HS</span><span class="big">${hs}</span></div><div><span class="micro">MG ZS</span><span class="big">${zs}</span></div></div>
-          <ul class="mix">${rows.map(([n, , k]) => html`<li key=${n}><span>${n.replace('MG ', '')}</span><span class="mbar"><i style=${{ width: `${(k / mx) * 100}%` }}></i></span><span class="mono">${k}</span></li>`)}</ul>`; })()}
-        <p class="note">Mix shares in the simulation are assumed.</p></section>
-      <section class="panel ticks span-7"><div style=${{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}><div><h3>Average work time vs target</h3><div class="q">Team processing time only; waiting and transfer excluded.</div></div><button class="btn sm ghost" onClick=${() => setTable(!table)}>${table ? 'Chart' : 'Table'}</button></div>
-        ${table ? html`<div style=${{ overflowX: 'auto', marginTop: 10 }}><table class="data"><thead><tr><th>Position</th><th>Cycles</th><th>Avg work</th><th>Target</th><th>Avg waiting</th><th>Overdue</th></tr></thead><tbody>${st.map((s) => html`<tr key=${s.id}><td class="mono">${s.id}</td><td>${s.n}</td><td class="mono">${fmtDur(s.work)}</td><td class="mono">${fmtDur(s.target)}</td><td class="mono">${fmtDur(s.wait)}</td><td>${s.overdue}</td></tr>`)}</tbody></table></div>`
-        : html`<svg viewBox=${`0 0 ${BW} ${st.length * rowH + 26}`} role="img" aria-label="Average work time per position with target">${st.map((s, i) => { const y = 3 + i * rowH, over = s.work > s.target; return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · avg ${fmtDur(s.work)} vs ${fmtDur(s.target)} · ${s.n} cycles`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width=${BW} height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text><rect x=${bl} y=${y + 5} width=${Math.max(2, bx(s.work) - bl)} height="10" rx="0" fill="var(--chart-a)" /><line x1=${bx(s.target)} x2=${bx(s.target)} y1=${y + 2} y2=${y + 18} stroke="var(--text)" stroke-width="2" /><text x=${Math.max(bx(s.work), bx(s.target)) + 6} y=${y + 14} font-size="11" fill=${over ? 'var(--crit)' : 'var(--text-2)'} class="mono">${fmtDur(s.work)}</text></g>`; })}
-          <g transform=${`translate(${bl}, ${st.length * rowH + 18})`}><rect width="10" height="10" rx="0" fill="var(--chart-a)" y="-9" /><text x="16" font-size="11" fill="var(--text-2)">Avg work time</text><line x1="120" x2="120" y1="-10" y2="2" stroke="var(--text)" stroke-width="2" /><text x="128" font-size="11" fill="var(--text-2)">Target</text></g></svg>`}</section>
-      <section class="panel ticks span-5"><h3>Work vs waiting</h3><div class="q">Average per cycle. Waiting is time complete but not yet transferred.</div>
-        <svg viewBox=${`0 0 640 ${st.length * rowH + 6}`} role="img" aria-label="Average work and waiting time per position">${st.map((s, i) => { const y = 3 + i * rowH, ww = bx(s.work) - bl, wt = (s.wait / maxT) * (BW - bl - br); return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · work ${fmtDur(s.work)} · waiting ${fmtDur(s.wait)}`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width="640" height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text><rect x=${bl} y=${y + 5} width=${Math.max(2, ww)} height="10" rx="0" fill="var(--chart-a)" />${wt > 1 ? html`<rect x=${bl + ww + 2} y=${y + 5} width=${wt} height="10" rx="0" fill="var(--chart-b)" />` : null}<text x=${bl + ww + wt + 8} y=${y + 14} font-size="11" fill="var(--text-2)" class="mono">${fmtDur(s.wait)}</text></g>`; })}</svg>
-        <div class="legend"><span><i style=${{ background: 'var(--chart-a)' }}></i>Work</span><span><i style=${{ background: 'var(--chart-b)' }}></i>Waiting (value shown)</span></div></section>
-      <section class="panel ticks span-6"><h3>Bottleneck impact</h3><div class="q">Minutes other finished bodies spent blocked because of this position.</div>${hbars('block', maxBlock, (v) => `${v.toFixed(1)} min`, 'Blocking minutes caused per position')}</section>
-      <section class="panel ticks span-6"><h3>Delay frequency</h3><div class="q">Times the team exceeded its target this shift.</div>${hbars('overdue', maxOd, (v) => `${v}×`, 'Overdue count per position')}</section>
-    </div>
-    <p class="note" style=${{ marginTop: 14 }}>All figures come from this session's simulation records. Plan assumes a linear rate over 06:00–14:30.</p>${tipNode}</div>
-  </div>`;
-}
 const pad = (n) => String(n).padStart(2, '0');
 const PaintChip = ({ p }) => html`<span class="paint"><i style=${{ background: p.hex }}></i>${p.name}</span>`;
 

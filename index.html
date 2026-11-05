@@ -960,6 +960,48 @@ svg.plan text { font-family: var(--font-mono); }
 .power-ov { position: absolute; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(4,6,8,.78); }
 .power-ov.off { background: rgba(0,0,0,.92); }
 .pw-bar { height: 3px; background: var(--hair); overflow: hidden; } .pw-bar i { display: block; height: 100%; width: 40%; background: var(--text); animation: pw 1.2s ease-in-out infinite; } @keyframes pw { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+
+/* ═════════ reports ═════════ */
+.reports { display: grid; gap: 16px; }
+.reports .pg-head { margin-bottom: 0; }
+.rep-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); }
+.rep-filters .field { min-width: 170px; }
+.rep-filters select { height: 38px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
+.rep-jump { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.rep-jump a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--hair-2); } .rep-jump a:hover { color: var(--text); }
+.rep-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.rep-kpis > div { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); }
+.rep-kpis.small > div { background: transparent; }
+.rep-kpis .num { font-size: 30px; font-weight: 300; line-height: 1; } .rep-kpis .num small { font-size: 14px; color: var(--muted); margin-left: 4px; }
+.rsec { display: grid; gap: 10px; overflow-x: auto; }
+.rsec .data { min-width: 640px; }
+.cbar2 { position: relative; display: block; height: 6px; background: var(--hair); min-width: 120px; }
+.cbar2 i { position: absolute; left: 0; top: 0; bottom: 0; } .cbar2 b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
+.attn { display: inline-block; width: 70px; height: 6px; background: var(--hair); margin-right: 8px; vertical-align: middle; } .attn i { display: block; height: 100%; background: var(--ok); }
+/* ═════════ how it works ═════════ */
+.how { display: grid; gap: 16px; }
+.how-h { margin: 14px 0 0; font-size: 18px; font-weight: 600; }
+.six { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.six.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+.six .panel { display: grid; gap: 8px; align-content: start; } .six .panel p { margin: 0; line-height: 1.55; color: var(--text-2); }
+.six-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
+.how-ul { margin: 0; padding-left: 18px; color: var(--text-2); line-height: 1.6; }
+.cov { overflow-x: auto; } .cov .data { min-width: 760px; } .cov td:nth-child(2) { width: 32%; } .cov td:nth-child(3) { width: 44%; }
+.arch { width: 100%; height: auto; margin-top: 10px; }
+.ar-box rect { fill: var(--fill); stroke: var(--hair-2); } .ar-box.core rect { stroke: var(--text); stroke-width: 1.5; }
+.ar-t { font: 600 13px/1 var(--font-ui); fill: var(--text); } .ar-s { font: 400 11.5px/1 var(--font-ui); fill: var(--text-2); }
+.ar-ln line { stroke: var(--text-2); stroke-width: 1.4; } .ar-hd { fill: var(--text-2); } .ar-l { font: 500 10.5px/1 var(--font-mono); fill: var(--muted); }
+/* ═════════ print (PDF export of reports) ═════════ */
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  :root { color-scheme: light; --bg: #fff; --text: #111; --text-2: #333; --muted: #666; --hair: #ccc; --hair-2: #999; --fill: #f5f5f5; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+  .stage, .page-shell, .page-scroll { position: static !important; overflow: visible !important; height: auto !important; }
+  .hud, #scene, .simcon, .strip, .noprint, .drawer, .anchors, .lineoff, .pg-head .actions, .umenu-pop { display: none !important; }
+  .page-wrap { padding: 0 !important; max-width: none !important; }
+  .panel, .rsec { break-inside: avoid; box-shadow: none !important; }
+  .ticks::before, .ticks::after { display: none !important; }
+}
 </style>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3137,7 +3179,7 @@ const { POS, STATIONS, WORK_POS, AREAS, fmtClock, fmtDur, shortVin, dispId } = M
 /* ── runtime ── */
 const RT = {
   S: null, speed: 5, running: true, acc: 0, scenario: 1, rev: 0,
-  ui: { selection: null, hover: null, drawer: null, dialog: null, report: false, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto' },
+  ui: { selection: null, hover: null, drawer: null, dialog: null, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto' },
   listeners: new Set(),
 };
 function setUI(patch) { Object.assign(RT.ui, patch); RT.rev++; RT.listeners.forEach((f) => f()); }
@@ -3334,7 +3376,7 @@ function loadScenario(n) {
   const r = sc.setup(S) || {}; S.holdExit = {};
   M.step(S, 1);
   RT.S = S; RT.acc = 0; RT.scenario = n; RT.speed = r.speed || 5; RT.running = true; RT.demo = r.demo ? { elapsed: 0, fired: false } : null;
-  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, report: false, hover: null, view: r.view || RT.ui.view });
+  setUI({ selection: r.select || null, dialog: r.dialog || null, drawer: r.drawer || null, hover: null, view: r.view || RT.ui.view });
   M.logEvent(S, 'sim', `SIMULATION · scenario ${n}: ${sc.title}`);
   setTimeout(() => { if (r.select) focusSel(r.select); else if (Scene3D.ok) Scene3D.focusView(r.view || 'overview'); }, 30);
 }
@@ -3933,52 +3975,8 @@ function Plan2D({ fallback }) {
     </svg></div>`;
 }
 
-/* ── shift report ── */
+/* ── chart tooltip (reports) ── */
 function useTip() { const [tip, setTip] = useState(null); return [tip ? html`<div class="charttip" style=${{ left: tip.x + 14, top: tip.y + 10 }}>${tip.body}</div>` : null, (e, body) => setTip({ x: e.clientX, y: e.clientY, body }), () => setTip(null)]; }
-function Report() {
-  const S = RT.S, C = S.cfg, [tipNode, showTip, hideTip] = useTip(), [table, setTable] = useState(false);
-  const done = S.stats.completed.filter((c) => c.t >= C.shiftStart), removed = S.stats.offline.filter((c) => c.t >= C.shiftStart), segs = S.stats.segments.filter((s) => s.t >= C.shiftStart && !s.credited);
-  const W = 640, H = 220, pl = 34, pr = 16, pt = 14, pb = 26, t0 = C.shiftStart, t1 = C.shiftEnd, yMax = Math.max(C.shiftTarget, done.length) + 2;
-  const sx = (t) => pl + ((t - t0) / (t1 - t0)) * (W - pl - pr), sy = (n) => H - pb - (n / yMax) * (H - pt - pb);
-  let path = `M${sx(t0)},${sy(0)}`; done.forEach((c, i) => { path += ` H${sx(c.t)} V${sy(i + 1)}`; }); path += ` H${sx(Math.min(S.t, t1))}`;
-  const onPace = (e) => { const r = e.currentTarget.getBoundingClientRect(), t = t0 + ((e.clientX - r.left) / r.width * W - pl) / (W - pl - pr) * (t1 - t0); if (t < t0 || t > Math.min(S.t, t1)) return hideTip(); showTip(e, html`<div class="mono">${fmtClock(t, false)}</div><div>Completed <b>${done.filter((c) => c.t <= t).length}</b> · plan ${(C.shiftTarget * (t - t0) / (t1 - t0)).toFixed(1)}</div>`); };
-  const st = WORK_POS.map((id) => { const l = segs.filter((s) => s.pos === id), n = l.length || 1; return { id, n: l.length, work: l.reduce((a, s) => a + s.work, 0) / n, wait: l.reduce((a, s) => a + s.wait, 0) / n, target: POS[id].target, overdue: S.stats.overdue[id] || 0, block: (S.stats.block[id] || 0) / 60 }; });
-  const maxT = Math.max(...st.map((s) => Math.max(s.work + s.wait, s.target))) * 1.05 || 1, rowH = 20, bl = 50, br = 56, BW = 640, bx = (v) => bl + (v / maxT) * (BW - bl - br);
-  const maxBlock = Math.max(1, ...st.map((s) => s.block)), maxOd = Math.max(1, ...st.map((s) => s.overdue));
-  const avgTotal = done.length ? done.reduce((a, c) => a + c.dur, 0) / done.length : 0, p = M.pace(S);
-  const hbars = (k, max, fmt, label) => html`<svg viewBox=${`0 0 640 ${st.length * rowH + 6}`} role="img" aria-label=${label}>${st.map((s, i) => { const w = (s[k] / max) * (640 - bl - br), y = 3 + i * rowH; return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · ${fmt(s[k])}`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width="640" height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text>${s[k] > 0 ? html`<rect x=${bl} y=${y + 5} width=${Math.max(2, w)} height="10" rx="0" fill="var(--chart-a)" /><text x=${bl + Math.max(2, w) + 6} y=${y + 14} font-size="11" fill="var(--text-2)" class="mono">${fmt(s[k])}</text>` : html`<line x1=${bl} x2=${bl} y1=${y + 5} y2=${y + 15} stroke="var(--hair-2)" />`}</g>`; })}</svg>`;
-  return html`<div class="glass report ticks in" role="dialog" aria-label="Shift report"><div class="rep-scroll">
-    <div class="rep-head"><div style=${{ flex: 1 }}><div class="micro">Shift report · ${C.shiftName} · 06:00 → ${fmtClock(S.t, false)}</div><h2>${p.done} vehicles off the line, ${p.delta >= 0 ? `${p.delta} ahead of` : `${-p.delta} behind`} plan</h2></div><span class="sim-tag">SIMULATED DATA</span><button class="btn" onClick=${() => setUI({ report: false })}><${Icon} n="x" />Back to the floor</button></div>
-    <div class="rep-grid">
-      <section class="panel ticks span-6"><h3>Completed vs plan</h3><div class="q">Cumulative line-offs at Scanner 3 against a linear plan of ${C.shiftTarget}.</div>
-        <svg viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="Cumulative completed vs plan" onMouseMove=${onPace} onMouseLeave=${hideTip}>
-          ${[0, 8, 16, 24, 32].filter((n) => n <= yMax).map((n) => html`<g key=${n}><line x1=${pl} x2=${W - pr} y1=${sy(n)} y2=${sy(n)} stroke="var(--hair)" /><text x=${pl - 6} y=${sy(n) + 4} font-size="10" text-anchor="end" fill="var(--muted)" class="mono">${n}</text></g>`)}
-          ${[6, 8, 10, 12, 14].map((hh) => html`<text key=${hh} x=${sx(hh * 3600)} y=${H - 6} font-size="10" text-anchor="middle" fill="var(--muted)" class="mono">${pad(hh)}:00</text>`)}
-          <line x1=${sx(t0)} y1=${sy(0)} x2=${sx(t1)} y2=${sy(C.shiftTarget)} stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4" /><text x=${sx(t1) - 4} y=${sy(C.shiftTarget) - 6} font-size="11" text-anchor="end" fill="var(--muted)">Plan ${C.shiftTarget}</text>
-          <path d=${path} fill="none" stroke="var(--chart-a)" stroke-width="2" /><circle cx=${sx(Math.min(S.t, t1))} cy=${sy(done.length)} r="4" fill="var(--chart-a)" stroke="var(--bg)" stroke-width="2" /><text x=${sx(Math.min(S.t, t1)) + 8} y=${sy(done.length) + 4} font-size="11" fill="var(--text)">Actual ${done.length}</text>
-        </svg></section>
-      <section class="panel ticks span-3" style=${{ display: 'grid', gap: 16, alignContent: 'start' }}><div><h3>Line-off vs taken off line</h3><div class="q">Units taken off the line are recorded, never counted as completed.</div></div>
-        <div style=${{ display: 'flex', gap: 28, flexWrap: 'wrap' }}><div><div class="micro">Lined off</div><div class="big">${done.length}</div><div class="note">avg ${fmtDur(avgTotal)}</div></div><div><div class="micro">Taken off</div><div class="big" style=${{ color: 'var(--warn)' }}>${removed.length}</div></div><div><div class="micro">Assistance calls</div><div class="big">${S.stats.assist}</div></div><div><div class="micro">Emergencies</div><div class="big" style=${{ color: S.stats.emergency ? 'var(--esc)' : null }}>${S.stats.emergency}</div></div><div><div class="micro">E/T holds</div><div class="big">${S.stats.quality}</div></div></div>
-        ${removed.length ? html`<table class="data"><thead><tr><th>VIN</th><th>From</th><th>Reason</th><th>Built</th><th>Time</th></tr></thead><tbody>${removed.map((r) => html`<tr key=${r.vin}><td class="mono">${shortVin(r.vin)}</td><td class="mono">${r.pos}</td><td style=${{ whiteSpace: 'normal', textAlign: 'left' }}>${r.reason}</td><td class="mono">${r.built}</td><td class="mono">${fmtClock(r.t, false)}</td></tr>`)}</tbody></table>` : html`<p class="note">No units taken off the line this shift.</p>`}</section>
-      <section class="panel ticks span-3"><h3>Model mix</h3><div class="q">Units lined off this shift, by model and variant.</div>
-        ${(() => { const m = {}; done.forEach((c) => { const k = c.name || c.variant; m[k] = (m[k] || 0) + 1; }); const rows = M.VARIANTS.map((v) => [v.name, v.model, m[v.name] || 0]); const mx = Math.max(1, ...rows.map((r) => r[2]));
-          const hs = rows.filter((r) => r[1] === 'HS').reduce((a, r) => a + r[2], 0), zs = rows.filter((r) => r[1] === 'ZS').reduce((a, r) => a + r[2], 0);
-          return html`<div class="mix-tot"><div><span class="micro">MG HS</span><span class="big">${hs}</span></div><div><span class="micro">MG ZS</span><span class="big">${zs}</span></div></div>
-          <ul class="mix">${rows.map(([n, , k]) => html`<li key=${n}><span>${n.replace('MG ', '')}</span><span class="mbar"><i style=${{ width: `${(k / mx) * 100}%` }}></i></span><span class="mono">${k}</span></li>`)}</ul>`; })()}
-        <p class="note">Mix shares in the simulation are assumed.</p></section>
-      <section class="panel ticks span-7"><div style=${{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}><div><h3>Average work time vs target</h3><div class="q">Team processing time only; waiting and transfer excluded.</div></div><button class="btn sm ghost" onClick=${() => setTable(!table)}>${table ? 'Chart' : 'Table'}</button></div>
-        ${table ? html`<div style=${{ overflowX: 'auto', marginTop: 10 }}><table class="data"><thead><tr><th>Position</th><th>Cycles</th><th>Avg work</th><th>Target</th><th>Avg waiting</th><th>Overdue</th></tr></thead><tbody>${st.map((s) => html`<tr key=${s.id}><td class="mono">${s.id}</td><td>${s.n}</td><td class="mono">${fmtDur(s.work)}</td><td class="mono">${fmtDur(s.target)}</td><td class="mono">${fmtDur(s.wait)}</td><td>${s.overdue}</td></tr>`)}</tbody></table></div>`
-        : html`<svg viewBox=${`0 0 ${BW} ${st.length * rowH + 26}`} role="img" aria-label="Average work time per position with target">${st.map((s, i) => { const y = 3 + i * rowH, over = s.work > s.target; return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · avg ${fmtDur(s.work)} vs ${fmtDur(s.target)} · ${s.n} cycles`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width=${BW} height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text><rect x=${bl} y=${y + 5} width=${Math.max(2, bx(s.work) - bl)} height="10" rx="0" fill="var(--chart-a)" /><line x1=${bx(s.target)} x2=${bx(s.target)} y1=${y + 2} y2=${y + 18} stroke="var(--text)" stroke-width="2" /><text x=${Math.max(bx(s.work), bx(s.target)) + 6} y=${y + 14} font-size="11" fill=${over ? 'var(--crit)' : 'var(--text-2)'} class="mono">${fmtDur(s.work)}</text></g>`; })}
-          <g transform=${`translate(${bl}, ${st.length * rowH + 18})`}><rect width="10" height="10" rx="0" fill="var(--chart-a)" y="-9" /><text x="16" font-size="11" fill="var(--text-2)">Avg work time</text><line x1="120" x2="120" y1="-10" y2="2" stroke="var(--text)" stroke-width="2" /><text x="128" font-size="11" fill="var(--text-2)">Target</text></g></svg>`}</section>
-      <section class="panel ticks span-5"><h3>Work vs waiting</h3><div class="q">Average per cycle. Waiting is time complete but not yet transferred.</div>
-        <svg viewBox=${`0 0 640 ${st.length * rowH + 6}`} role="img" aria-label="Average work and waiting time per position">${st.map((s, i) => { const y = 3 + i * rowH, ww = bx(s.work) - bl, wt = (s.wait / maxT) * (BW - bl - br); return html`<g key=${s.id} onMouseMove=${(e) => showTip(e, html`<b class="mono">${s.id}</b> · work ${fmtDur(s.work)} · waiting ${fmtDur(s.wait)}`)} onMouseLeave=${hideTip}><rect x="0" y=${y} width="640" height=${rowH} fill="transparent" /><text x=${bl - 8} y=${y + 14} font-size="11" text-anchor="end" fill="var(--text-2)" class="mono">${s.id}</text><rect x=${bl} y=${y + 5} width=${Math.max(2, ww)} height="10" rx="0" fill="var(--chart-a)" />${wt > 1 ? html`<rect x=${bl + ww + 2} y=${y + 5} width=${wt} height="10" rx="0" fill="var(--chart-b)" />` : null}<text x=${bl + ww + wt + 8} y=${y + 14} font-size="11" fill="var(--text-2)" class="mono">${fmtDur(s.wait)}</text></g>`; })}</svg>
-        <div class="legend"><span><i style=${{ background: 'var(--chart-a)' }}></i>Work</span><span><i style=${{ background: 'var(--chart-b)' }}></i>Waiting (value shown)</span></div></section>
-      <section class="panel ticks span-6"><h3>Bottleneck impact</h3><div class="q">Minutes other finished bodies spent blocked because of this position.</div>${hbars('block', maxBlock, (v) => `${v.toFixed(1)} min`, 'Blocking minutes caused per position')}</section>
-      <section class="panel ticks span-6"><h3>Delay frequency</h3><div class="q">Times the team exceeded its target this shift.</div>${hbars('overdue', maxOd, (v) => `${v}×`, 'Overdue count per position')}</section>
-    </div>
-    <p class="note" style=${{ marginTop: 14 }}>All figures come from this session's simulation records. Plan assumes a linear rate over 06:00–14:30.</p>${tipNode}</div>
-  </div>`;
-}
 const pad = (n) => String(n).padStart(2, '0');
 const PaintChip = ({ p }) => html`<span class="paint"><i style=${{ background: p.hex }}></i>${p.name}</span>`;
 
@@ -4003,7 +4001,7 @@ function LineOffCard() {
 RT.route = { page: 'floor', sub: null };
 function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
 function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
-window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false, report: false }); });
+window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false }); });
 const PAGES = [
   ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
   ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
@@ -4016,7 +4014,7 @@ function NavIsland() {
 function PageShell({ children }) {
   return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
 }
-function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note">This screen is part of the next build step.</p></div></div>`; }
+function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 
 /* ── root ── */
 function App() {
@@ -4048,7 +4046,7 @@ function App() {
     const key = (e) => {
       if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.report) setUI({ report: false }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
+      if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
       if (e.key === '/') { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (RT.route.page !== 'floor') return;
       if (e.key === '0') { setUI({ selection: null, view: 'overview' }); Scene3D.focusView('overview'); }
@@ -4070,10 +4068,9 @@ function App() {
     <header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${StateIsland} /><${ActIsland} /></header>
     <${Strip} /><${SimConsole} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
-    ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
-    ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
+    ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}</${React.Fragment}>`
     : page === 'display' ? html`<${LineDisplay} />`
-    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : page === 'reports' ? html`<${ReportsPage} />` : page === 'how' ? html`<${HowPage} />` : html`<${Placeholder} title="Page not found" />`}</${PageShell}>`}
     <${PowerOverlay} />
     ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
     ${gate ? null : html`<${React.Fragment}>
@@ -4618,6 +4615,255 @@ function LineDisplay() {
       <nav>${M.AREA_IDS.map((k) => html`<button key=${k} aria-current=${k === area ? 'page' : null} onClick=${() => go('display', k.toLowerCase())}>${AREAS[k].short}</button>`)}</nav>
       <span class="lcd-act"><button onClick=${fs} title="Full screen"><${Icon} n="max" /></button>${Auth.user ? html`<button onClick=${() => go(ROLES[Auth.user.role].home)} title="Back to the app"><${Icon} n="x" /></button>` : html`<button onClick=${() => go('dash')} title="Sign in"><${Icon} n="user" /></button>`}</span></footer>
   </div>`;
+}
+/* ════════════════════════════════════════════════════════════════════════
+   Reports (URD req 28–29): by day, shift and line; Excel and PDF export.
+   Shifts run in this session come from the live records. Earlier days are
+   generated deterministically from the seed and labelled as simulated
+   history, so the date filter has something to show.
+   ════════════════════════════════════════════════════════════════════════ */
+const REPORT_SECTIONS = [['prod', 'Production summary'], ['cycle', 'Station cycle times'], ['down', 'Downtime'], ['off', 'Offlined vehicles'], ['calls', 'Assist calls']];
+function shiftStarted(S, date, name) { const sh = M.shiftsFor(S, date).find((x) => x.name === name); return sh && M.dayOfDate(S, date) * 86400 + sh.start <= S.t; }
+function liveKey(S, key) { return (S.shift && S.shift.key === key) || S.history.some((h) => h.key === key); }
+
+function reportData(S, date, shiftSel, lineSel) {
+  const names = M.shiftsFor(S, date).map((s) => s.name), shifts = shiftSel === 'all' ? names : names.filter((n) => n === shiftSel);
+  const lines = lineSel === 'all' ? M.AREA_IDS : [lineSel], stations = M.WORK_POS.filter((id) => lines.includes(POS[id].area));
+  const out = { prod: [], cycle: [], down: [], off: [], calls: [], sources: [], notStarted: [] };
+  for (const sh of shifts) {
+    const key = M.shiftKey(date, sh);
+    if (!shiftStarted(S, date, sh)) { out.notStarted.push(sh); continue; }
+    if (liveKey(S, key)) { out.sources.push(`${sh}: live records`); liveRows(S, key, sh, lines, stations, out); }
+    else { out.sources.push(`${sh}: simulated history`); synthRows(S, date, sh, lines, stations, out); }
+  }
+  return out;
+}
+function liveRows(S, key, sh, lines, stations, out) {
+  const H = S.history.find((h) => h.key === key), D = S.down[key] || { pos: {}, line: {}, cause: {} };
+  for (const a of lines) {
+    const target = H ? H.lines[a].target : S.shift.targets[a], done = S.prod.filter((r) => r.shiftKey === key && r.area === a).length;
+    out.prod.push({ shift: sh, line: AREAS[a].name, target, done, remaining: Math.max(0, target - done), offline: S.stats.offline.filter((o) => o.shiftKey === key && o.area === a).length, down: D.line[a] || 0 });
+  }
+  for (const id of stations) {
+    const segs = S.stats.segments.filter((g) => g.shiftKey === key && g.pos === id), n = segs.length;
+    out.cycle.push({ shift: sh, station: id, line: AREAS[POS[id].area].short, n, avg: n ? segs.reduce((x, g) => x + g.cycle, 0) / n : 0, max: n ? Math.max(...segs.map((g) => g.cycle)) : 0, takt: n ? segs.reduce((x, g) => x + g.target, 0) / n : S.cfg.takt[POS[id].area], over: segs.filter((g) => g.cycle > g.target).length });
+    out.down.push({ shift: sh, station: id, line: AREAS[POS[id].area].short, down: D.pos[id] || 0, caused: D.cause[id] || 0 });
+  }
+  S.stats.offline.filter((o) => o.shiftKey === key && lines.includes(o.area)).forEach((o) => out.off.push({ shift: sh, t: o.t, vin: o.vin, station: o.pos, reason: o.reason, by: (o.by || '').split(' · ')[0], returned: o.returnedT != null ? fmtClock(o.returnedT, false) : '' }));
+  S.calls.filter((c) => c.shiftKey === key && c.recorded && lines.includes(c.area)).forEach((c) => out.calls.push({ shift: sh, t: c.raisedT, station: c.pos, type: M.CALL_TYPES[c.type].label, response: M.callResponse(c), total: M.callDuration(c), by: (c.clearedBy || c.respondedBy || '').split(' · ')[0] }));
+}
+function synthRows(S, date, sh, lines, stations, out) {
+  const r = (k) => M.hash01(`${date}|${sh}|${k}`), base = M.dayOfDate(S, date) * 86400, def = M.shiftsFor(S, date).find((x) => x.name === sh), tg = M.targetsFor(S, date, sh);
+  const lineDown = {};
+  for (const a of lines) {
+    const target = tg[a], off = r(a + 'off') < 0.35 ? 1 : 0, done = Math.max(0, target - Math.round(r(a + 'd') * 3) - off + (r(a + 'p') < 0.25 ? 1 : 0));
+    lineDown[a] = Math.round(240 + r(a + 'dn') * (a === 'TRIM' ? 4200 : 1400));
+    out.prod.push({ shift: sh, line: AREAS[a].name, target, done, remaining: Math.max(0, target - done), offline: off, down: lineDown[a] });
+    if (off) { const n = 248000 + Math.floor(r(a + 'v') * 900), body = `LSJA34660TP${String(n).padStart(6, '0')}`, vin = body.slice(0, 8) + M.vinCheckDigit(body) + body.slice(9); const st = a === 'TRIM' ? 'TL6' : a === 'FINAL' ? `FL${1 + Math.floor(r(a + 's') * 7)}` : 'TL6';
+      if (a !== 'CHASSIS') out.off.push({ shift: sh, t: base + def.start + 3600 + Math.floor(r(a + 'ot') * 20000), vin, station: st, reason: M.OFFLINE_REASONS[Math.floor(r(a + 'rs') * 4) + 1], by: 'Usman Tariq', returned: r(a + 'rt') < 0.5 ? 'yes' : '' }); }
+  }
+  for (const id of stations) {
+    const takt = S.cfg.takt[POS[id].area], n = 27 + Math.floor(r(id + 'n') * 5), avg = takt * (0.86 + r(id + 'a') * 0.12), over = r(id + 'o') < 0.5 ? Math.floor(r(id + 'oc') * 4) : 0;
+    out.cycle.push({ shift: sh, station: id, line: AREAS[POS[id].area].short, n, avg, max: over ? takt + 30 + r(id + 'm') * 400 : avg + r(id + 'm') * (takt - avg), takt, over });
+    const dn = over ? Math.round(over * (40 + r(id + 'dd') * 180)) : 0;
+    out.down.push({ shift: sh, station: id, line: AREAS[POS[id].area].short, down: dn, caused: dn });
+  }
+  const nc = 6 + Math.floor(r('nc') * 10);
+  for (let i = 0; i < nc; i++) { const id = stations[Math.floor(r('cs' + i) * stations.length)]; if (!id || (POS[id].area === 'TRIM' && !S.cfg.trimAndon)) continue; const resp = Math.round(35 + r('cr' + i) * 190); out.calls.push({ shift: sh, t: base + def.start + Math.floor(r('ct' + i) * (def.end - def.start)), station: id, type: r('ty' + i) < 0.55 ? 'Supervisor' : 'Maintenance', response: resp, total: resp + Math.round(60 + r('cl' + i) * 280), by: r('ty' + i) < 0.55 ? 'Usman Tariq' : 'Bilal Ahmed' }); }
+  out.calls.sort((x, y) => x.t - y.t);
+}
+
+/* sheets for export: plain rows with readable headings */
+function reportSheets(d, meta) {
+  const dur = (s) => (s == null ? '' : fmtDur(s));
+  return {
+    'Production summary': [['Shift', 'Line', 'Target', 'Completed', 'Remaining', 'Offlined', 'Downtime (h:mm:ss)', 'Attainment %'], ...d.prod.map((r) => [r.shift, r.line, r.target, r.done, r.remaining, r.offline, dur(r.down), r.target ? Math.round((r.done / r.target) * 100) : ''])],
+    'Station cycle times': [['Shift', 'Station', 'Line', 'Cycles', 'Average cycle', 'Longest cycle', 'Takt', 'Cycles over takt'], ...d.cycle.map((r) => [r.shift, r.station, r.line, r.n, dur(r.avg), dur(r.max), dur(r.takt), r.over])],
+    Downtime: [['Shift', 'Station', 'Line', 'Downtime at station', 'Downtime caused (root)'], ...d.down.map((r) => [r.shift, r.station, r.line, dur(r.down), dur(r.caused)])],
+    'Offlined vehicles': [['Shift', 'Time', 'VIN', 'Station', 'Reason', 'By', 'Returned'], ...d.off.map((r) => [r.shift, fmtClock(r.t, false), r.vin, r.station, r.reason, r.by, r.returned || ''])],
+    'Assist calls': [['Shift', 'Time', 'Station', 'Call', 'Response time', 'Time to clear', 'Cleared by'], ...d.calls.map((r) => [r.shift, fmtClock(r.t, false), r.station, r.type, dur(r.response), dur(r.total), r.by])],
+    About: [['MG GA Andon · report'], ['Date', meta.date], ['Shift', meta.shift], ['Line', meta.line], ['Exported', new Date().toLocaleString('en-GB')], ['By', userName()], ['Data', meta.sources], ['Note', 'SIMULATION: no PLC, scanner or sensor is connected.']],
+  };
+}
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = () => (window.XLSX ? res(window.XLSX) : rej(new Error('no XLSX'))); s.onerror = () => rej(new Error('blocked')); document.head.appendChild(s); });
+}
+async function exportExcel(d, meta) {
+  const sheets = reportSheets(d, meta), name = `MG-GA-Andon_${meta.date}_${meta.shift}_${meta.line}`.replace(/\s+/g, '-');
+  try {
+    const X = await loadXLSX(), wb = X.utils.book_new();
+    for (const [n, rows] of Object.entries(sheets)) { const ws = X.utils.aoa_to_sheet(rows); ws['!cols'] = rows[0].map((_, i) => ({ wch: Math.min(48, Math.max(10, ...rows.map((r) => String(r[i] == null ? '' : r[i]).length + 2))) })); X.utils.book_append_sheet(wb, ws, n.slice(0, 31)); }
+    X.writeFile(wb, `${name}.xlsx`);
+    return 'xlsx';
+  } catch (e) {
+    // offline fallback: one CSV with every table
+    const csv = Object.entries(sheets).map(([n, rows]) => `${n}\n` + rows.map((r) => r.map((c) => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(',')).join('\n')).join('\n\n');
+    downloadText(`${name}.csv`, 'text/csv', csv); return 'csv';
+  }
+}
+
+function ReportsPage() {
+  const S = RT.S, days = Array.from({ length: 7 }, (_, i) => M.dateKeyOf(S, M.dayOf(S.t) - i));
+  const [date, setDate] = useState(days[0]), [shift, setShift] = useState(S.shift && S.shift.name ? S.shift.name : 'all'), [line, setLine] = useState('all'), [busy, setBusy] = useState(null), [, tick] = useReducer((x) => x + 1, 0);
+  useEffect(() => { const i = setInterval(tick, 2000); return () => clearInterval(i); }, []);
+  if (!can('reports')) return html`<${NoAccess} what="Reports" />`;
+  const d = reportData(S, date, shift, line), names = M.shiftsFor(S, date).map((s) => s.name);
+  const meta = { date, shift: shift === 'all' ? 'All shifts' : shift, line: line === 'all' ? 'All lines' : AREAS[line].name, sources: d.sources.join('; ') || 'no data' };
+  const wd = (k) => new Date(k + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const sum = (l, k) => l.reduce((x, r) => x + (r[k] || 0), 0), tgt = sum(d.prod, 'target'), done = sum(d.prod.filter((r) => r.line === 'Final Line' || line !== 'all'), 'done');
+  const callsT = d.calls.filter((c) => c.response != null), avgR = callsT.length ? sum(callsT, 'response') / callsT.length : null, avgC = callsT.length ? sum(callsT.filter((c) => c.total != null), 'total') / Math.max(1, callsT.filter((c) => c.total != null).length) : null;
+  const maxDown = Math.max(1, ...d.down.map((r) => Math.max(r.down, r.caused)));
+  const doXlsx = async () => { setBusy('xlsx'); const k = await exportExcel(d, meta); setBusy(k === 'csv' ? 'csv' : null); };
+  return html`<div class="page-wrap reports" id="report-print">
+    <${PageHead} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. ${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
+      <button class="btn" aria-busy=${busy === 'xlsx' ? 'true' : 'false'} onClick=${doXlsx}><${Icon} n="download" />Excel</button><button class="btn" onClick=${() => window.print()}><${Icon} n="file" />PDF</button></${PageHead}>
+    ${busy === 'csv' ? html`<div class="result bad" style=${{ marginBottom: 12 }}>The Excel library could not load (offline?), so a CSV with every table was downloaded instead.</div>` : null}
+    <div class="rep-filters noprint" role="group" aria-label="Report filters">
+      <div class="field"><label for="rp-d">Day</label><select id="rp-d" value=${date} onChange=${(e) => setDate(e.target.value)}>${days.map((k, i) => html`<option key=${k} value=${k}>${wd(k)}${i === 0 ? ' · today' : ''}</option>`)}</select></div>
+      <div class="field"><label for="rp-s">Shift</label><select id="rp-s" value=${shift} onChange=${(e) => setShift(e.target.value)}><option value="all">All shifts</option>${names.map((n) => html`<option key=${n} value=${n}>${n}</option>`)}</select></div>
+      <div class="field"><label for="rp-l">Line</label><select id="rp-l" value=${line} onChange=${(e) => setLine(e.target.value)}><option value="all">All lines</option>${M.AREA_IDS.map((a) => html`<option key=${a} value=${a}>${AREAS[a].name}</option>`)}</select></div>
+      <nav class="rep-jump">${REPORT_SECTIONS.map(([k, l]) => html`<a key=${k} href=${'#/reports'} onClick=${(e) => { e.preventDefault(); const el = document.getElementById('rs-' + k); el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>${l}</a>`)}</nav>
+    </div>
+    <div class="rep-kpis"><div><span class="micro">${line === 'all' ? 'Vehicles completed (Final)' : 'Completed'}</span><b class="num">${done}<small>/ ${line === 'all' ? sum(d.prod.filter((r) => r.line === 'Final Line'), 'target') : tgt}</small></b></div>
+      <div><span class="micro">Offlined</span><b class="num">${d.off.length}</b></div><div><span class="micro">Downtime (line total)</span><b class="num">${fmtDur(sum(d.prod, 'down'))}</b></div>
+      <div><span class="micro">Assist calls</span><b class="num">${d.calls.length}</b></div><div><span class="micro">Avg response</span><b class="num">${avgR != null ? fmtDur(avgR) : '—'}</b></div><div><span class="micro">Avg time to clear</span><b class="num">${avgC != null ? fmtDur(avgC) : '—'}</b></div></div>
+
+    <section class="panel ticks rsec" id="rs-prod"><h3>Production summary</h3><div class="q">Completed is counted when a unit leaves the last station of each line (TL6, CL4, FL7). Offlined units never count.</div>
+      <table class="data"><thead><tr><th>Shift</th><th>Line</th><th>Target</th><th>Completed</th><th>Remaining</th><th>Offlined</th><th>Downtime</th><th>Attainment</th></tr></thead><tbody>
+        ${d.prod.length ? d.prod.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td style=${{ textAlign: 'left' }}>${r.line}</td><td class="mono">${r.target}</td><td class="mono">${r.done}</td><td class="mono">${r.remaining}</td><td class="mono">${r.offline}</td><td class="mono">${fmtDur(r.down)}</td><td><span class="attn"><i style=${{ width: `${Math.min(100, r.target ? (r.done / r.target) * 100 : 0)}%` }}></i></span><span class="mono">${r.target ? Math.round((r.done / r.target) * 100) : 0}%</span></td></tr>`) : html`<tr><td colspan="8" class="c-muted">No shift has run yet for this selection.</td></tr>`}
+      </tbody></table></section>
+
+    <section class="panel ticks rsec" id="rs-cycle"><h3>Station cycle times</h3><div class="q">Cycle time = time a vehicle spent at the station, breaks excluded. The marker is takt.</div>
+      <table class="data"><thead><tr><th>Shift</th><th>Station</th><th>Cycles</th><th>Average</th><th style=${{ minWidth: 160 }}></th><th>Longest</th><th>Takt</th><th>Over takt</th></tr></thead><tbody>
+        ${d.cycle.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${r.station}</td><td class="mono">${r.n}</td><td class="mono" style=${{ color: r.avg > r.takt ? 'var(--crit)' : null }}>${fmtDur(r.avg)}</td>
+          <td><span class="cbar2"><i style=${{ width: `${Math.min(100, (r.avg / (r.takt * 1.4)) * 100)}%`, background: r.avg > r.takt ? 'var(--crit)' : r.avg > r.takt * RT.S.cfg.warnPct ? 'var(--warn)' : 'var(--ok)' }}></i><b style=${{ left: `${(1 / 1.4) * 100}%` }}></b></span></td>
+          <td class="mono" style=${{ color: r.max > r.takt ? 'var(--crit)' : null }}>${fmtDur(r.max)}</td><td class="mono c-muted">${fmtDur(r.takt)}</td><td class="mono">${r.over}</td></tr>`)}
+      </tbody></table></section>
+
+    <section class="panel ticks rsec" id="rs-down"><h3>Downtime</h3><div class="q">At the station: time its unit was over takt. Caused: the same time, put down to the station that held the others up. Planned stops are excluded.</div>
+      <table class="data"><thead><tr><th>Shift</th><th>Station</th><th>At the station</th><th>Caused</th><th style=${{ minWidth: 200 }}></th></tr></thead><tbody>
+        ${d.down.filter((r) => r.down || r.caused).length ? d.down.filter((r) => r.down || r.caused).sort((a, b) => b.caused - a.caused).map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${r.station}</td><td class="mono">${fmtDur(r.down)}</td><td class="mono">${fmtDur(r.caused)}</td><td><span class="cbar2"><i style=${{ width: `${(r.caused / maxDown) * 100}%`, background: 'var(--crit)' }}></i></span></td></tr>`) : html`<tr><td colspan="5" class="c-muted">No downtime in this selection.</td></tr>`}
+      </tbody></table></section>
+
+    <section class="panel ticks rsec" id="rs-off"><h3>Offlined vehicles</h3>
+      <table class="data"><thead><tr><th>Shift</th><th>Time</th><th>VIN</th><th>Station</th><th>Reason</th><th>By</th><th>Returned</th></tr></thead><tbody>
+        ${d.off.length ? d.off.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${fmtClock(r.t, false)}</td><td class="mono">${r.vin}</td><td class="mono">${r.station}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason}</td><td style=${{ textAlign: 'left' }}>${r.by}</td><td class="mono">${r.returned || '—'}</td></tr>`) : html`<tr><td colspan="7" class="c-muted">No vehicles offlined in this selection.</td></tr>`}
+      </tbody></table></section>
+
+    <section class="panel ticks rsec" id="rs-calls"><h3>Assist calls</h3><div class="q">Response = call to help arriving. Time to clear = call to the responder clearing it.</div>
+      <div class="rep-kpis small">${['Supervisor', 'Maintenance'].map((t) => { const l = d.calls.filter((c) => c.type === t && c.response != null); return html`<div key=${t}><span class=${'micro c-' + (t === 'Supervisor' ? 'sup' : 'mnt')}>${t}</span><b class="num">${d.calls.filter((c) => c.type === t).length}</b><span class="note">avg response ${l.length ? fmtDur(sum(l, 'response') / l.length) : '—'} · longest ${l.length ? fmtDur(Math.max(...l.map((c) => c.response))) : '—'}</span></div>`; })}</div>
+      <table class="data"><thead><tr><th>Shift</th><th>Time</th><th>Station</th><th>Call</th><th>Response</th><th>To clear</th><th>Cleared by</th></tr></thead><tbody>
+        ${d.calls.length ? d.calls.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${fmtClock(r.t, false)}</td><td class="mono">${r.station}</td><td style=${{ textAlign: 'left' }} class=${r.type === 'Supervisor' ? 'c-sup' : 'c-mnt'}>${r.type}</td><td class="mono" style=${{ color: r.response > 180 ? 'var(--crit)' : null }}>${r.response != null ? fmtDur(r.response) : 'open'}</td><td class="mono">${r.total != null ? fmtDur(r.total) : 'open'}</td><td style=${{ textAlign: 'left' }}>${r.by || '—'}</td></tr>`) : html`<tr><td colspan="7" class="c-muted">No calls in this selection.</td></tr>`}
+      </tbody></table></section>
+    <p class="note">Stored on the line server; see <button class="linkish" onClick=${() => go('how')}>How it works</button> for retention. SIMULATION: no PLC, scanner or sensor is connected.</p>
+  </div>`;
+}
+/* ════════════════════════════════════════════════════════════════════════
+   How it works: the proposal view for the URD. Architecture, answers to
+   the five points the supplier must propose (§6), and a coverage matrix of
+   all 36 requirements with a "Show me" link into the running system.
+   ════════════════════════════════════════════════════════════════════════ */
+const showFloor = (n, after) => () => { go('floor'); setTimeout(() => { if (n) loadScenario(n); if (after) after(); }, 80); };
+const COVERAGE = [
+  ['Scanning & tracking', [
+    [1, 'VIN scan at the first Trim station registers line-in', 'Fixed Scanner 1 at TL1 validates the VIN (format and check digit, duplicates refused) and records line-in.', 'demo', showFloor(0, () => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } }))],
+    [2, 'Scan when a vehicle is taken offline at the end of Trim', 'Offline scanner at TL6. The offline needs a matching VIN scan.', 'demo', showFloor(0, () => select({ kind: 'pos', id: 'TL6' }))],
+    [3, 'Scan when offlined anywhere on Final, recording the station', 'Two wireless handhelds (FL1–FL3, FL4–FL7). The station is stored with the offline record.', 'demo', showFloor(5)],
+    [4, 'No other scanning; VIN known at every station', 'VIN is bound to its carrier at line-in and follows the skid, hanger and fixture handovers. Hanger-load and end-of-line scans are removed.', 'demo', showFloor(0, () => select({ kind: 'pos', id: 'CL2' }))],
+    [5, 'Enter a VIN: location, status and history', 'VIN search (/ or Ctrl+K) opens the vehicle record: where it is, on line / offlined / completed, line-in, time at each station, offline time and place.', 'demo', () => setUI({ dialog: { type: 'vin' } })],
+    [6, 'Offlined vehicles leave station counts and the target', 'Removed from counts at once; counted only if it returns and completes.', 'demo', showFloor(9)],
+    [7, 'Authorised manual correction of positions, logged', 'Move or swap a VIN, or remove a unit not physically there. Reason required; audited.', 'demo', () => go('admin', 'correct')],
+  ]],
+  ['Station monitoring', [
+    [8, 'Number of vehicles at each station', 'Shown on each station panel, line display tile and the dashboard; work in line per line.', 'demo', () => go('display', 'final')],
+    [9, 'Cycle time per station, live and for completed vehicles', 'Live timer per station; every completed cycle stored (reports, vehicle record).', 'demo', showFloor(0, () => select({ kind: 'pos', id: 'FL3' }))],
+    [10, 'Authorised person enters and changes takt; logged', 'Takt per line in Settings, immediately or scheduled from a date; every change audited.', 'demo', () => go('admin', 'takt')],
+    [11, 'Downtime calculated automatically per station and line; breaks excludable', 'Time over takt per station; line downtime = time with any station over takt. Breaks and off-shift excluded. Root cause attributed.', 'demo', () => go('dash')],
+    [12, 'Normal, close to limit and over time shown clearly', 'Green / amber / red on stack lights, the strip, displays and dashboard. Close-to-limit threshold is configurable.', 'demo', showFloor(2)],
+  ]],
+  ['Daily target', [
+    [13, 'Authorised person enters daily target per line', 'Default target per shift and line in Settings.', 'demo', () => go('admin', 'plan')],
+    [14, 'Target, completed and remaining per line; targets scheduled in advance', 'On every line display and dashboard card; 14-day plan for targets, takt and shift times.', 'demo', () => go('admin', 'plan')],
+    [15, 'Counts reset at each shift start; shift timings scheduled in advance', 'Shift pattern with breaks; per-date overrides; automatic reset and shift history.', 'demo', () => go('admin', 'shifts')],
+  ]],
+  ['Station buzzer', [
+    [16, 'Every Chassis and Final station has a buzzer', '11 sounders, one per station, driven by the line controller.', 'proposal', () => go('admin', 'buzzers')],
+    [17, 'Rings over takt, stops when the vehicle leaves', 'Exactly this rule; shown live with sound rings in 3D and a buzzer icon on displays.', 'demo', showFloor(2)],
+    [18, 'Audible at its own station only; switch off per station', 'Directional sounder ~85 dB at 1 m with adjustable volume; per-station switch, audited.', 'demo', () => go('admin', 'buzzers')],
+  ]],
+  ['Assist calls', [
+    [19, 'Two buttons per station: supervisor and maintenance, distinct colour and label', 'Violet SUPERVISOR and blue MAINTENANCE, illuminated, 40 mm, IP65.', 'demo', showFloor(7)],
+    [20, 'Button lit while its call is active', 'Lit and blinking until someone responds; steady while help is at the station.', 'demo', showFloor(7)],
+    [21, 'Active calls on line display and dashboard with station, type, waiting time', 'Call bands on the line displays; active-call list on the dashboard and the floor.', 'demo', () => { go('display', 'chassis'); M.raiseCall(RT.S, 'CL2', 'SUP', 'Demo'); }],
+    [22, 'Cleared by the responder; response and clear times recorded', 'Respond on arrival, Clear when done; both durations kept and reported.', 'demo', showFloor(7)],
+  ]],
+  ['Displays and dashboard', [
+    [23, 'LCD at each of the three lines', '3 industrial 55" LCDs, each driven by a small kiosk PC showing its line page.', 'proposal', () => go('display', 'trim')],
+    [24, 'Line display content (stations, cycle, takt, downtime, target, calls); Trim shows its scans', 'As shown. Trim shows entered, offlined, in Trim, to Chassis and recent scans.', 'demo', () => go('display', 'chassis')],
+    [25, 'Main dashboard of all lines with drill-down', 'Line cards, station strip, calls, downtime causes; click a station to open it on the floor.', 'demo', () => go('dash')],
+    [26, 'Viewable at head office in a normal browser, no install', 'This web app: any current browser on the company network; sign-in by user.', 'demo', () => go('dash')],
+    [27, 'Updates within a few seconds', 'Events push to screens in under 2 s; the dashboard shows the time of the last update.', 'demo', () => go('dash')],
+  ]],
+  ['Data, reports, users', [
+    [28, 'Stores production, cycle, downtime, scans and calls; state retention', 'Line server database (historian). Proposed: 3 years online, then archive; about 2 GB a year.', 'proposal', () => go('reports')],
+    [29, 'Reports by day, shift and line; Excel and PDF', 'Production, cycle times, downtime, offlined vehicles and call response; Excel and PDF export.', 'demo', () => go('reports')],
+    [30, 'User levels and individual sign-in', 'Administrator, authorised person, supervisor, maintenance, view-only; personal accounts; directory sign-in at deployment.', 'demo', () => go('admin', 'users')],
+  ]],
+  ['General', [
+    [31, 'Equipment suits the shop (dust, oil mist, vibration, noise); continuous use', 'IP65 call stations and sounders, industrial PLC/edge I/O, fanless PCs, shielded cabling.', 'proposal', null],
+    [32, 'No data loss on power or network cut; restarts with correct positions; one station fault does not stop others', 'UPS on line servers; local store-and-forward; positions from controller memory and tag re-read. Stations are independent I/O points.', 'demo', () => { go('dash'); setTimeout(powerCut, 300); }],
+    [33, 'Displays and data collection keep working if head office link fails', 'Line server is on the shop floor; head office is a viewer. Buffered events sync when the link returns.', 'demo', () => { go('dash'); setTimeout(() => setLink(false), 200); }],
+    [34, 'Expandable (stations, lines, displays, full Trim tracking)', 'Stations and lines are configuration. Full Trim Andon is already shown as a preview.', 'demo', showFloor(0, () => { setUI({ view: 'TRIM' }); Scene3D.focusView('TRIM'); })],
+    [35, 'Share data with production / IT systems', 'REST API and webhooks for events; OPC UA from the PLC layer; scheduled exports.', 'proposal', null],
+    [36, 'Electrical safety standards and IT security rules', 'IEC 60204-1 panels, CE/UL parts; role-based access, audit trail, TLS, directory sign-in.', 'proposal', null],
+  ]],
+];
+const SIX = [
+  ['How completion at the end of Final is detected', 'A retro-reflective photo-eye across the exit of FL7. When the car drives through it, the system records completion against the VIN tracked at FL7. No scan, no operator action.', 'Shown: watch FL7, the “Completed · photo-eye” card appears.', showFloor(0, () => select({ kind: 'pos', id: 'FL7' }))],
+  ['How the VIN is tracked between scans', 'At line-in the VIN is bound to its Trim skid. Each carrier (skid, 4 hangers, Final fixtures) carries an RFID tag read at every station, and the two handovers (TL5→TL6 onto a hanger, FL1→FL2 onto a fixture) move the VIN to the next carrier. Station presence comes from the tag read plus a presence sensor.', 'Shown: open any station; the panel names the carrier and VIN with no scan.', showFloor(0, () => select({ kind: 'pos', id: 'CL3' }))],
+  ['How an offlined vehicle that returns is handled', 'An authorised user selects “Return to line”. The unit rejoins at the station it left, when that station is free, and its work there restarts. It counts towards the target only when it completes. Both visits stay on its record.', 'Shown: scenario “Offline and return”.', showFloor(9)],
+  ['Number and placement of Final line scanners', 'Two wireless handheld scanners with charging docks at FL2 (covers FL1–FL3) and FL5 (covers FL4–FL7), plus fixed scanners at TL1 (line-in) and TL6 (end of Trim). Four in total. The scan is checked against the VIN tracked at that station.', 'Shown: the docks are marked on the 3D floor.', showFloor(0, () => { setUI({ view: 'FINAL' }); Scene3D.focusView('FINAL'); })],
+  ['The downtime calculation (req 11)', 'Station downtime = Σ max(0, cycle time − takt), where cycle time is arrival to departure less planned stops. Line downtime = time during which at least one station on that line is over takt, so overlaps are not double-counted. Breaks and time between shifts are excluded. Each second is also put down to the station that caused it, using the blockage chain.', 'Example: takt 10:00, unit leaves CL2 at 12:30 → CL2 has 2:30 downtime; if CL1 waited behind it, those seconds are attributed to CL2.', () => go('dash')],
+];
+function HowPage() {
+  const all = COVERAGE.flatMap(([, rows]) => rows), demo = all.filter((r) => r[3] === 'demo').length;
+  return html`<div class="page-wrap how">
+    <${PageHead} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
+    <section class="panel ticks"><h3>Architecture</h3><div class="q">The line server sits on the shop floor, so displays and data collection never depend on the head-office link.</div><${ArchDiagram} /></section>
+    <h3 class="how-h">Points the URD asks the supplier to propose (§6)</h3>
+    <div class="six">${SIX.map(([t, a, s, fn], i) => html`<section key=${i} class="panel ticks"><div class="micro">§6 · ${i + 1}</div><h3>${t}</h3><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<button class="btn sm" onClick=${fn}><${Icon} n="target" />Show me</button>` : null}</div></section>`)}</div>
+    <h3 class="how-h">Requirement coverage</h3>
+    ${COVERAGE.map(([g, rows]) => html`<section key=${g} class="panel ticks cov"><h3>${g}</h3><table class="data"><thead><tr><th>Req</th><th>What the URD asks</th><th>How it is met</th><th>Status</th><th></th></tr></thead><tbody>
+      ${rows.map(([n, req, how, st, fn]) => html`<tr key=${n}><td class="mono">${n}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${req}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal', color: 'var(--text-2)' }}>${how}</td>
+        <td><span class=${'chip ' + (st === 'demo' ? 'c-ok' : 'c-hold')}>${st === 'demo' ? 'Working in demo' : 'Proposal'}</span></td><td>${fn ? html`<button class="btn sm ghost" onClick=${fn}>Show me</button>` : null}</td></tr>`)}</tbody></table></section>`)}
+    <div class="six two">
+      <section class="panel ticks"><h3>Beyond the URD (included, can be switched off)</h3><ul class="how-ul">
+        <li>3D digital twin of the shop, with stack lights and the 4-hanger loop.</li><li>Root-cause attribution: downtime is put down to the station that held the line up.</li>
+        <li>Trim Andon preview (req 34) and the optional CL2 engine/gearbox pairing scan, both off by default in the plant build.</li><li>Lock screen for shared shop PCs and a full audit log with CSV export.</li></ul></section>
+      <section class="panel ticks"><h3>Assumptions to confirm with MG JW</h3><ul class="how-ul">
+        <li>Downtime is based on cycle time (it includes waiting when blocked downstream), with the cause attributed to the root station.</li>
+        <li>Shift times, breaks, default targets (30 a shift) and takt (10:00) are placeholders until the plant enters its own.</li>
+        <li>Carrier RFID tags and an FL7 photo-eye are acceptable; scanner placement as above.</li>
+        <li>Data retention of 3 years online; integration through REST/webhooks and OPC UA.</li></ul></section>
+    </div>
+  </div>`;
+}
+function ArchDiagram() {
+  const box = (x, y, w, h, t, s, cls = '') => html`<g class=${'ar-box ' + cls}><rect x=${x} y=${y} width=${w} height=${h} /><text x=${x + 12} y=${y + 22} class="ar-t">${t}</text>${s.map((l, i) => html`<text key=${i} x=${x + 12} y=${y + 42 + i * 16} class="ar-s">${l}</text>`)}</g>`;
+  const arrow = (x1, y1, x2, y2, label) => html`<g class="ar-ln"><line x1=${x1} y1=${y1} x2=${x2} y2=${y2} marker-end="url(#ar-h)" />${label ? html`<text x=${(x1 + x2) / 2} y=${(y1 + y2) / 2 - 6} text-anchor="middle" class="ar-l">${label}</text>` : null}</g>`;
+  return html`<svg class="arch" viewBox="0 0 1120 330" role="img" aria-label="System architecture: stations to line controllers to the line server, then line displays and head office">
+    <defs><marker id="ar-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ar-hd" /></marker></defs>
+    ${box(10, 20, 220, 132, 'Each station (×17)', ['Supervisor + Maintenance buttons', 'Buzzer · stack light', 'Carrier RFID reader', 'Presence sensor'])}
+    ${box(10, 172, 220, 132, 'Scan & detect points', ['Scanner 1 at TL1 (line-in)', 'Offline scanner at TL6', '2 handhelds on Final', 'Photo-eye at FL7'])}
+    ${box(310, 60, 210, 200, 'Line controllers (×3)', ['PLC / edge I/O per line', 'Reads buttons, tags, sensors', 'Drives buzzers and lights', 'Keeps positions over a', 'power cut (retained memory)', 'UPS'])}
+    ${box(610, 60, 220, 200, 'Line server (shop floor)', ['Andon engine: tracking,', 'cycle time, downtime, calls', 'Historian database', 'Store-and-forward', 'Web app and API', 'UPS · runs without head office'], 'core')}
+    ${box(900, 10, 210, 92, 'Line LCDs (×3)', ['55" industrial screen', 'Kiosk PC · browser page'])}
+    ${box(900, 118, 210, 92, 'Head office & mgmt', ['Any browser on the', 'company network'])}
+    ${box(900, 226, 210, 92, 'Plant systems', ['MES / ERP · REST, webhooks', 'OPC UA from controllers'])}
+    ${arrow(230, 86, 310, 130, 'I/O')}${arrow(230, 238, 310, 190, 'scans')}${arrow(520, 160, 610, 160, 'events')}
+    ${arrow(830, 110, 900, 56, '')}${arrow(830, 160, 900, 164, 'LAN')}${arrow(830, 210, 900, 272, '')}
+  </svg>`;
 }
 boot();
 </script>
