@@ -2,7 +2,8 @@
    - PlantEvent: what the shop floor reports (simulator today; PLC, scanners, RFID and the FL7 photo-eye in deployment).
    - Command:    what people do on the screens (calls, offline/return, corrections, configuration).
    - EngineState / Snapshot: the state the rules keep and the screens read.
-   Types only, plus the list of event types for runtime validation at the device gateway. */
+   Types, plus zod schemas for what crosses the network (commands, client messages). */
+import { z } from 'zod';
 
 export type AreaId = 'TRIM' | 'CHASSIS' | 'FINAL';
 /** A station or transfer position, e.g. 'TL1', 'CL2', 'BUF', 'FL7'. */
@@ -45,23 +46,66 @@ export const PLANT_EVENT_TYPES = [
 export const isPlantEvent = (x: unknown): x is PlantEvent =>
   typeof x === 'object' && x !== null && (PLANT_EVENT_TYPES as readonly string[]).includes((x as { type?: string }).type ?? '');
 
-/* ── operator commands (served by the API from phase 3) ── */
-export type Command =
-  | { type: 'RAISE_CALL'; pos: PositionId; callType: CallType }
-  | { type: 'RESPOND_CALL'; callId: string }
-  | { type: 'CLEAR_CALL'; callId: string; note?: string }
-  | { type: 'TAKE_OFFLINE'; vehicleId: VehicleId; reason: string; notes?: string; responsible?: PositionId; scan: string }
-  | { type: 'RETURN_TO_LINE'; vehicleId: VehicleId; note?: string }
-  | { type: 'CORRECT_POSITION'; vin: string; toPos: PositionId; reason: string }
-  | { type: 'CLEAR_GHOST'; pos: PositionId; reason: string }
-  | { type: 'SET_TAKT'; area: AreaId; sec: Seconds; reason?: string }
-  | { type: 'SET_DEFAULT_TARGET'; area: AreaId; n: number; reason?: string }
-  | { type: 'SET_PLAN'; date: string; patch: PlanPatch; reason?: string }
-  | { type: 'SET_SHIFTS'; shifts: ShiftDef[]; reason?: string }
-  | { type: 'SET_BUZZER'; pos: PositionId; on: boolean; reason?: string }
-  | { type: 'ACK_ALARM'; alarmId: string };
-/** Every command carries who did it; the server fills this from the signed-in user. */
-export type CommandEnvelope = Command & { by: string };
+/* ── commands (what people do on the screens), validated at the edge server ──
+   Phase 3: `by` is sent by the client. Phase 4 replaces it with the signed-in user on the server. */
+const pos = z.string().min(1).max(8);
+const area = z.enum(['TRIM', 'CHASSIS', 'FINAL']);
+const by = z.string().min(1).max(120);
+const reason = z.string().max(500).optional();
+const breakDef = z.object({ name: z.string(), start: z.number(), end: z.number() }).passthrough();
+const shiftDef = z.object({ name: z.string(), start: z.number(), end: z.number(), breaks: z.array(breakDef) }).passthrough();
+
+export const OperatorCommand = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('RAISE_CALL'), pos, callType: z.enum(['SUP', 'MNT']), by }),
+  z.object({ type: z.literal('RESPOND_CALL'), callId: z.string(), by }),
+  z.object({ type: z.literal('CLEAR_CALL'), callId: z.string(), by, note: z.string().max(500).optional() }),
+  z.object({ type: z.literal('ACK_ALARM'), alarmId: z.string(), by: by.optional() }),
+  z.object({ type: z.literal('ENTRY_SCAN'), raw: z.string().max(64), source: z.enum(['MANUAL', 'SCAN']) }),
+  z.object({ type: z.literal('TAKE_OFFLINE'), vehicleId: z.string(), reason: z.string().min(1).max(200), notes: z.string().max(500).optional(), responsible: z.string().max(40).optional(), scan: z.string().max(64), by }),
+  z.object({ type: z.literal('RETURN_TO_LINE'), vehicleId: z.string(), by, note: z.string().max(500).optional() }),
+  z.object({ type: z.literal('CORRECT_POSITION'), vin: z.string().max(64), toPos: pos, by, reason: z.string().max(500) }),
+  z.object({ type: z.literal('CLEAR_GHOST'), pos, by, reason: z.string().max(500) }),
+  z.object({ type: z.literal('SET_TAKT'), area, sec: z.number().int().min(60).max(3600), by, reason }),
+  z.object({ type: z.literal('SET_WARN_PCT'), pct: z.number().min(0.5).max(0.99), by, reason }),
+  z.object({ type: z.literal('SET_DEFAULT_TARGET'), area, n: z.number().int().min(0).max(500), by, reason }),
+  z.object({ type: z.literal('SET_PLAN'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), patch: z.record(z.string(), z.unknown()), by, reason }),
+  z.object({ type: z.literal('SET_SHIFTS'), shifts: z.array(shiftDef).min(1).max(4), by, reason }),
+  z.object({ type: z.literal('SET_BUZZER'), pos, on: z.boolean(), by, reason }),
+  z.object({ type: z.literal('MANUAL_COMPLETE'), pos }),
+  z.object({ type: z.literal('RESCAN_ENGINE'), pos }),
+  z.object({ type: z.literal('LOG_NOTE'), cat: z.enum(['sim', 'note']), text: z.string().max(500), extra: z.record(z.string(), z.unknown()).optional() }),
+]);
+/** Simulator controls: accepted only when the edge server runs in simulation mode. */
+export const SimCommand = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('SIM_SPEED'), speed: z.number().min(0.25).max(60) }),
+  z.object({ type: z.literal('SIM_RUNNING'), running: z.boolean() }),
+  z.object({ type: z.literal('SIM_SKIP'), to: z.number() }),
+  z.object({ type: z.literal('SIM_SCENARIO'), n: z.number().int().min(1).max(20) }),
+  z.object({ type: z.literal('SIM_PAUSE_AREA'), area, on: z.boolean() }),
+  z.object({ type: z.literal('SIM_FAULT_CARRIER'), carrierId: z.string() }),
+  z.object({ type: z.literal('SIM_FAULT_SENSOR'), pos }),
+  z.object({ type: z.literal('SIM_CLEAR_FAULT'), kind: z.enum(['C', 'P']), id: z.string() }),
+  z.object({ type: z.literal('SIM_EMERGENCY'), pos }),
+  z.object({ type: z.literal('SIM_CLEAR_EMERGENCY'), pos }),
+  z.object({ type: z.literal('SIM_POWER_CUT') }),
+]);
+export const Command = z.union([OperatorCommand, SimCommand]);
+export type OperatorCommand = z.infer<typeof OperatorCommand>;
+export type SimCommand = z.infer<typeof SimCommand>;
+export type Command = z.infer<typeof Command>;
+export type CommandType = Command['type'];
+export const isSimCommand = (c: Command): c is SimCommand => c.type.startsWith('SIM_');
+
+/* ── live connection (WS /api/live) ── */
+export interface Clock { speed: number; running: boolean; mode: 'simulation' | 'live' }
+export type ServerMessage =
+  | { type: 'hello'; server: string; version: string; clock: Clock }
+  | { type: 'snapshot'; rev: number; clock: Clock; state: unknown; hints?: Record<string, unknown> }
+  | { type: 'patch'; rev: number; clock: Clock; ops: unknown[] }
+  | { type: 'result'; id: string; ok: boolean; value?: unknown; error?: string }
+  | { type: 'notice'; level: 'info' | 'warn'; text: string };
+export const ClientMessage = z.object({ type: z.literal('command'), id: z.string().max(64), command: z.unknown() });
+export type ClientMessage = z.infer<typeof ClientMessage>;
 
 /* ── configuration ── */
 export interface BreakDef { name: string; start: Seconds; end: Seconds }

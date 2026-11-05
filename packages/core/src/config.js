@@ -53,3 +53,11 @@ export function setBuzzer(S, posId, on, by, reason = '') {
   audit(S, by, on ? 'Buzzer switched on' : 'Buzzer switched off', posId, before ? 'on' : 'off', on ? 'on' : 'off', reason);
   return true;
 }
+/** Close-to-limit threshold for all lines, as a fraction of takt (URD req 12). Audited. */
+export function setWarnPct(S, pct, by, reason = '') {
+  const w = clamp(Math.round(+pct * 100) || 0, 50, 99) / 100;
+  if (w === S.cfg.warnPct) return false;
+  audit(S, by, 'Close-to-limit threshold changed', 'All lines', `${Math.round(S.cfg.warnPct * 100)}%`, `${Math.round(w * 100)}%`, reason);
+  S.cfg.warnPct = w;
+  return true;
+}

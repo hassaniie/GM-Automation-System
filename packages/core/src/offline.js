@@ -19,6 +19,11 @@ export function canTakeOffLine(S, vehicleId, force = false) {
   if (!force && !OFFLINE_POS.includes(c.posId)) return { ok: false, posId: c.posId, reason: `Offline points are TL6 (end of Trim) and FL1–FL7. ${dispId(c.posId)} is on the ${AREAS[POS[c.posId].area].name}, where units are not taken off.` };
   return { ok: true, posId: c.posId };
 }
+/**
+ * Takes a unit off the line at an offline point (URD req 2–3, 6). Needs a matching VIN scan unless forced.
+ * @param {import('@mg/contracts').EngineState} S @param {string} vehicleId
+ * @param {{ reason: string, notes?: string, responsible?: string, by: string, scan?: string, force?: boolean }} opts
+ */
 export function takeOffLine(S, vehicleId, { reason, notes, responsible, by, scan, force = false }) {
   const chk = canTakeOffLine(S, vehicleId, force); if (!chk.ok) return chk;
   const v = S.vehicles[vehicleId], posId = chk.posId, occ = S.pos[posId].occ, c = S.carriers[v.carrierId];

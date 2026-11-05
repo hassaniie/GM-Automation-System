@@ -4,7 +4,7 @@
 import { Scene3D } from '@mg/scene';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { AdminPage, adminAllowed, persistConfig } from './admin.js';
+import { AdminPage, adminAllowed, persistConfig, savedCfg } from './admin.js';
 import { Auth, ROLES, SignIn, can } from './auth.js';
 import { AboutDialog, CorrectDialog, OffLineDialog, ReturnDialog, ScanDialog, VinSearchDialog } from './floor/dialogs.js';
 import { AlarmDrawer } from './floor/drawer.js';
@@ -108,7 +108,7 @@ export function boot() {
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
   if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
-  RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
+  RT.S = freshState(11, savedCfg()); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
   M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
   const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); createRoot(document.getElementById('app')).render(html`<${App} />`); };
   const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();

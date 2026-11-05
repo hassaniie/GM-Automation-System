@@ -4,5 +4,10 @@
   "private": true,
   "type": "module",
   "description": "Shared types: plant events, operator commands, engine state and snapshot. The contract between devices, the rules, the server and the screens.",
-  "exports": { ".": "./src/index.ts" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
 }
