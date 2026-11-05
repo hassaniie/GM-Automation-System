@@ -22,8 +22,32 @@ pnpm dev          # http://localhost:5173 with hot reload
 | `pnpm preview` | Serves the production build locally |
 | `pnpm test` | Engine checks (Vitest) |
 | `pnpm lint` / `pnpm typecheck` | ESLint and TypeScript |
+| `pnpm start:edge` / `pnpm dev:all` | Edge server with live screens (see below) |
 
 React 18.3.1, htm 3.1.1, three.js r128 (0.128.0) and SheetJS 0.18.5 are npm dependencies; SheetJS is a separate chunk loaded only on export. Only the Barlow and JetBrains Mono fonts come from Google Fonts. CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and both builds on every push and uploads the demo file.
+
+### Live screens with the edge server
+
+The edge server (`apps/edge`) runs one engine for the whole plant, and every screen shows the same state. On site it runs on a PC on the plant network; head office only reads from it.
+
+```sh
+pnpm start:edge   # builds the screens, then serves them and the API on http://localhost:8787
+```
+
+For development, `pnpm dev:all` runs the server with reload and Vite with `/api` proxied to it (open http://localhost:5173). Any build can also connect to a server with `?edge=1` (same origin) or `?edge=ws://host:8787/api/live`; `?edge=0` forces the in-browser engine.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/health` | Liveness, clock and number of connected screens |
+| `GET /api/snapshot` | Full state as JSON |
+| `WS /api/live` | Snapshot on connect, then a patch at most every 250 ms (about 2 KB); commands in, results out |
+| `POST /api/commands` | One command, same schema as over the WebSocket (for integrations) |
+
+Commands are validated against the zod schemas in `packages/contracts`. Simulator controls are refused unless the server runs in simulation mode. Settings: `PORT` (8787), `HOST`, `SIM_SEED`, `SIM_SPEED`, `SIM_SCENARIO`.
+
+> Phase 3 has no server-side sign-in: the user's name is sent by the screen. Run the edge server only on a trusted network until sign-in moves to the server.
+
+The top bar shows where data comes from: `SIMULATION` (engine in this browser), `SIM · EDGE` (live from the edge server) or `RECONNECTING` (server unreachable; the last data stays on screen).
 
 Sign in with one of the demo accounts listed on the sign-in screen (fictional people):
 
@@ -58,11 +82,13 @@ A pnpm workspace:
 | `packages/core` | The Andon rules, with no simulator and no browser code: plant model, tracking, scans, takt, cycle time, downtime, three-state Andon, buzzers, calls, shift calendar and targets, offline and return, corrections, alarms, root-cause analysis, audit. Plant events enter through `apply()` |
 | `packages/sim` | The line simulator: carrier movement, transfers, paint-shop feed, simulated teams and responders. It reports to the rules only through plant events |
 | `packages/engine` | Facade: the `MGE` object the screens and scene use, assembled from `core` and `sim`. Its tests are the 42 URD checks |
+| `packages/sync` | Snapshot and patch format between the edge server and the screens |
+| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, serves the screens |
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |
 | `apps/web/src/styles/app.css` | All CSS: themes, design system, Andon, sign-in, dashboard, line display, reports, print |
-| `apps/web/src/lib/` | `runtime.js` (engine handle, UI state, theme), `router.js` (hash routes), `ui-kit.js` (icons, chips, tones, sound), `misc.js` |
+| `apps/web/src/lib/` | `runtime.js` (engine handle, UI state, theme), `source.js` (in-browser or edge server), `act.js` (every action that changes the plant), `router.js` (hash routes), `ui-kit.js` (icons, chips, tones, sound), `misc.js` |
 | `apps/web/src/floor/` | Floor HMI: top-bar islands and line strip, station and vehicle inspectors, dialogs (scan, offline, return, correction, VIN search), alarm drawer, simulator console, 2D plan, scenarios |
 | `apps/web/src/app.js` | App shell: navigation, root component, `boot()` |
 | `apps/web/src/auth.js` | Sign-in, roles and permissions, user menu, idle lock |

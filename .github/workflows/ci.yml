@@ -30,6 +30,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm build:demo
+      - run: pnpm --filter @mg/web build:edge
       - name: Upload single-file demo
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
