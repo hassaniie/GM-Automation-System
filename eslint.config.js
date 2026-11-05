@@ -30,7 +30,11 @@ export default tseslint.config(
   {
     // TypeScript checks names itself (typescript-eslint recommends turning this off for .ts).
     files: ['**/*.{ts,tsx}'],
-    rules: { 'no-undef': 'off' },
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' }],
+    },
   },
   {
     files: ['apps/edge/**', '**/test/**', '*.config.{js,ts}', '**/vite.config.js'],
