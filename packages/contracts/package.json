@@ -1,0 +1,8 @@
+{
+  "name": "@mg/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared types: plant events, operator commands, engine state and snapshot. The contract between devices, the rules, the server and the screens.",
+  "exports": { ".": "./src/index.ts" }
+}
