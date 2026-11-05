@@ -1,0 +1,15 @@
+{
+  "name": "@mg/sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "State sync between the edge server and screens: JSON-safe snapshots, structural patches, Path rehydration",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@mg/core": "workspace:*",
+    "@mg/engine": "workspace:*",
+    "@mg/sim": "workspace:*"
+  }
+}

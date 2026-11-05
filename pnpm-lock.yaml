@@ -98,6 +98,18 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/sync:
+    devDependencies:
+      '@mg/core':
+        specifier: workspace:*
+        version: link:../core
+      '@mg/engine':
+        specifier: workspace:*
+        version: link:../engine
+      '@mg/sim':
+        specifier: workspace:*
+        version: link:../sim
+
 packages:
 
   '@babel/code-frame@7.29.7':
