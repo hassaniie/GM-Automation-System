@@ -4,7 +4,7 @@ An Andon system and 3D digital twin for the MG Motors Pakistan (MG JW Automobile
 
 Designed and built by **Bolt & Volt (Pvt) Ltd**.
 
-> **Status: simulation only.** No PLC, scanner or sensor is connected. Every value on screen comes from a deterministic simulator and is labelled `SIMULATION`. Accounts, settings and the audit log are stored in the browser.
+> **Status: simulation only.** No PLC, scanner or sensor is connected. Every value on screen comes from a deterministic simulator and is labelled `SIMULATION`. In the offline demo, accounts, settings and the audit log are stored in the browser; with the edge server they are stored in PostgreSQL.
 
 ## Run
 
@@ -28,24 +28,39 @@ React 18.3.1, htm 3.1.1, three.js r128 (0.128.0) and SheetJS 0.18.5 are npm depe
 
 ### Live screens with the edge server
 
-The edge server (`apps/edge`) runs one engine for the whole plant, and every screen shows the same state. On site it runs on a PC on the plant network; head office only reads from it.
+The edge server (`apps/edge`) runs one engine for the whole plant and stores everything in PostgreSQL. Every screen shows the same state, and people sign in on the server. On site it runs on a PC on the plant network; head office only reads from it.
 
 ```sh
-pnpm start:edge   # builds the screens, then serves them and the API on http://localhost:8787
+pnpm db:dev              # PostgreSQL 16 in Docker (or use your own and set DATABASE_URL)
+cp .env.example .env     # DATABASE_URL, DEMO=1 for the demo accounts, optional single sign-on
+pnpm start:edge          # builds the screens, then serves them and the API on http://localhost:8787
 ```
 
-For development, `pnpm dev:all` runs the server with reload and Vite with `/api` proxied to it (open http://localhost:5173). Any build can also connect to a server with `?edge=1` (same origin) or `?edge=ws://host:8787/api/live`; `?edge=0` forces the in-browser engine.
+For development, `pnpm dev:all` runs the server with reload and Vite with `/api` proxied to it (http://localhost:5173). `?edge=0` on any build forces the in-browser engine.
+
+**Data (URD req 28, 32).** Every 2 s the server writes new history in one transaction: production per line, cycle times per station, offline records, calls with response and clear times, shift summaries and downtime, vehicles, settings, the audit log, and every plant event and command. Writes are idempotent, so repeats are harmless. If the database is unreachable the line keeps running and the history is caught up when it returns (`/api/health` shows `db: down` meanwhile). A checkpoint of the whole plant state is saved every 30 s, at every shift change and on shutdown; a restart or power cut continues from it. History older than the previous production day leaves memory once stored; VIN search finds older units in the database. History is kept for `RETENTION_DAYS` (730 by default; to be confirmed with MG JW).
+
+**Sign-in (URD req 30).**
+- People sign in with their employee ID or email and a password (scrypt). Sessions are an httpOnly cookie; 5 wrong passwords lock that account from that address for 30 s. Every sign-in, failure and account change is logged.
+- Each command is checked against the person's role on the server (see `COMMAND_PERMISSION` in `packages/contracts`), and the name recorded in the audit log and on calls comes from the session, not from the screen.
+- Administrators manage people in Settings → Users. Disabling someone ends their open screens.
+- **Line TVs** use display links: Settings → Displays creates a one-time link per TV. Opened once on the TV, it gives that screen read-only access to its line for 180 days, until revoked.
+- First run: with `DEMO=1` the five demo accounts are created and the demo role switch is allowed; otherwise one administrator is created from `ADMIN_EMP_ID` and `ADMIN_PASSWORD`.
+
+**Single sign-on (off until configured).** OpenID Connect with PKCE, for Microsoft Entra ID, Google Workspace or Keycloak. People are matched by email to an existing account and keep its role. For Entra ID: register an app (web platform) with redirect URI `https://<server>/api/auth/oidc/callback`, create a client secret, then set `OIDC_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_REDIRECT_URI`. The sign-in screen then shows the company sign-in button.
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /api/health` | Liveness, clock and number of connected screens |
-| `GET /api/snapshot` | Full state as JSON |
-| `WS /api/live` | Snapshot on connect, then a patch at most every 250 ms (about 2 KB); commands in, results out |
+| `GET /api/health` | Liveness, clock, connected screens, database state, last save and checkpoint |
+| `WS /api/live` | Snapshot on connect, then a patch at most every 250 ms (about 2 KB); commands in, results out. Needs a session and a same-site origin |
 | `POST /api/commands` | One command, same schema as over the WebSocket (for integrations) |
+| `/api/auth/*` | Sign-in, sign-out, me, unlock, config, demo switch, display link exchange, single sign-on |
+| `/api/users`, `/api/displays` | Accounts and TV links (administrators) |
+| `GET /api/audit`, `GET /api/vehicles/:vin`, `GET /api/snapshot` | Audit log, vehicle record, full state |
 
-Commands are validated against the zod schemas in `packages/contracts`. Simulator controls are refused unless the server runs in simulation mode. Settings: `PORT` (8787), `HOST`, `SIM_SEED`, `SIM_SPEED`, `SIM_SCENARIO`.
+State-changing REST calls need the `X-MG-Client: web` header; responses carry a Content Security Policy and the usual security headers.
 
-> Phase 3 has no server-side sign-in: the user's name is sent by the screen. Run the edge server only on a trusted network until sign-in moves to the server.
+**Running it at the plant.** Serve it behind HTTPS (a reverse proxy such as Caddy or nginx with the plant's certificate) so cookies are marked Secure. Back up the database nightly (`pg_dump -Fc`) to another machine. Full installation and operations are Phase 7.
 
 The top bar shows where data comes from: `SIMULATION` (engine in this browser), `SIM · EDGE` (live from the edge server) or `RECONNECTING` (server unreachable; the last data stays on screen).
 
@@ -83,7 +98,7 @@ A pnpm workspace:
 | `packages/sim` | The line simulator: carrier movement, transfers, paint-shop feed, simulated teams and responders. It reports to the rules only through plant events |
 | `packages/engine` | Facade: the `MGE` object the screens and scene use, assembled from `core` and `sim`. Its tests are the 42 URD checks |
 | `packages/sync` | Snapshot and patch format between the edge server and the screens |
-| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, serves the screens |
+| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, sign-in and permissions (`src/auth`), PostgreSQL storage, migrations and checkpoints (`src/db`, `src/persist.ts`), serves the screens |
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |
