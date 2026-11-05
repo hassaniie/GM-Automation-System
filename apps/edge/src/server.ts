@@ -13,18 +13,48 @@ import fastifyStatic from '@fastify/static';
 import { ClientMessage, type ServerMessage } from '@mg/contracts';
 import { EngineHost, type HostOptions } from './engine-host.ts';
 import { CommandError, SYSTEM, runCommand } from './commands.ts';
+import { createDb, migrate, type Db } from './db/index.ts';
+import { Persistence, type PersistOptions } from './persist.ts';
 
 export const VERSION = '0.3.0';
 const MAX_BUFFERED = 8 * 1024 * 1024; // a client this far behind is dropped; it reconnects and resyncs
 
-export interface ServerOptions extends HostOptions { webDir?: string | null; logger?: boolean; autostart?: boolean }
+export interface ServerOptions extends HostOptions {
+  webDir?: string | null; logger?: boolean; autostart?: boolean;
+  /** PostgreSQL; without it the server keeps everything in memory (tests, quick demos). */
+  databaseUrl?: string; persist?: PersistOptions; retentionDays?: number;
+}
 
-export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost }> {
-  const host = new EngineHost(opts);
+export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost; db: Db | null; persistence: Persistence | null }> {
   const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 256 * 1024 });
+  let db: Db | null = null, persistence: Persistence | null = null, restored = false;
+  if (opts.databaseUrl) {
+    db = createDb(opts.databaseUrl);
+    const applied = await migrate(db);
+    if (applied.length) app.log.info(`database migrations applied: ${applied.join(', ')}`);
+    const state = await Persistence.latest(db);
+    if (state) { opts = { ...opts, state }; restored = true; }
+  }
+  const host = new EngineHost(opts);
+  if (db) {
+    persistence = new Persistence(db, host, { log: app.log, ...opts.persist });
+    if (restored) app.log.info(`restarted from checkpoint at plant time ${host.S.t}`);
+  }
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
-  app.get('/api/health', async () => ({ ok: true, version: VERSION, clock: host.clock, t: host.S.t, rev: host.rev, clients: host.listenerCount }));
+  app.get('/api/health', async () => ({
+    ok: true, version: VERSION, clock: host.clock, t: host.S.t, rev: host.rev, clients: host.listenerCount,
+    db: db ? (persistence!.dbUp ? 'up' : 'down') : 'none', lastSaved: persistence?.lastFlushAt ?? null, lastCheckpoint: persistence?.lastCheckpointAt ?? null,
+  }));
+  /** Vehicle record by VIN (URD req 5): in memory first, then the stored history. */
+  app.get<{ Params: { vin: string } }>('/api/vehicles/:vin', async (req, reply) => {
+    const vin = req.params.vin.trim().toUpperCase();
+    const live = host.S.vehOrder.map((id) => host.S.vehicles[id]).find((v) => v && v.vin === vin);
+    if (live) return { source: 'live', vehicle: live };
+    const row = db ? await db.one<{ record: unknown }>('SELECT record FROM vehicles WHERE vin = $1', [vin]) : null;
+    if (!row) { reply.code(404); return { error: 'That VIN is not known to the system.' }; }
+    return { source: 'history', vehicle: row.record };
+  });
   app.get('/api/snapshot', async () => ({ rev: host.rev, clock: host.clock, state: JSON.parse(JSON.stringify(host.S, (_k, v) => (typeof v === 'function' ? undefined : v))) }));
   app.post('/api/commands', async (req, reply) => {
     try { return { ok: true, value: await runCommand(host, req.body, SYSTEM) }; } // phase 4 step 5: the signed-in actor
@@ -61,7 +91,19 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
     await app.register(fastifyStatic, { root: webDir, index: ['index.html'] });
   }
 
-  app.addHook('onClose', async () => host.stop());
-  if (opts.autostart !== false) host.start();
-  return { app, host };
+  app.addHook('onClose', async () => {
+    host.stop();
+    if (persistence) await persistence.stop();
+    if (db) await db.close();
+  });
+  if (opts.autostart !== false) {
+    host.start();
+    if (persistence) {
+      persistence.start();
+      const purge = () => persistence!.purge(opts.retentionDays ?? 730).catch((e) => app.log.error(`purge failed: ${(e as Error).message}`));
+      const daily = setInterval(purge, 24 * 3600e3); daily.unref();
+      app.addHook('onClose', async () => clearInterval(daily));
+    }
+  }
+  return { app, host, db, persistence };
 }

@@ -185,6 +185,7 @@ export interface EngineState {
   xfers: { vehicleId: VehicleId; from: PositionId; to: PositionId; t0: Seconds; t1: Seconds }[];
   anims: { id: string; vehicleId: VehicleId; kind: string; t0: Seconds; t1: Seconds; [k: string]: unknown }[];
   recording: boolean;
+  stats: { completed: unknown[]; offline: unknown[]; segments: unknown[]; [k: string]: unknown };
   /** Opt-in log of every plant event applied (see apply() in @mg/core). */
   journal?: (PlantEvent & { t: Seconds })[];
   [k: string]: unknown;

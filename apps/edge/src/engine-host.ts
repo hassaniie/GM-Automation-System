@@ -4,9 +4,10 @@
 import type { Clock, EngineState } from '@mg/contracts';
 import { buildScenario, injectDemoDelay, DEMO_AFTER } from '@mg/sim';
 import { MGE } from '@mg/engine';
-import { diff, rehydrate, toWire, type Op } from '@mg/sync';
+import { diff, toWire, type Op } from '@mg/sync';
+import { freeze, thaw } from './checkpoint.ts';
 
-export interface HostOptions { seed?: number; speed?: number; scenario?: number; tickMs?: number; mode?: Clock['mode'] }
+export interface HostOptions { seed?: number; speed?: number; scenario?: number; tickMs?: number; mode?: Clock['mode']; /** start from a restored state instead of a scenario */ state?: EngineState }
 export type HostListener = { snapshot(rev: number, clock: Clock, state: unknown, hints?: Record<string, unknown>): void; patch(rev: number, clock: Clock, ops: Op[]): void };
 
 export class EngineHost {
@@ -24,12 +25,23 @@ export class EngineHost {
   /** Called after every command (allowed or refused); the persistence layer logs it. */
   onCommand?: (actor: import('./commands.ts').Actor, command: unknown, ok: boolean, error?: string) => void;
   readonly tickMs: number;
+  /** Runs after the plant has advanced, before the patch goes out (shift change → checkpoint, day change → trim). */
+  onAdvance?: (S: EngineState) => void;
+  /** Saves the state and loads it back (the database in deployment). Used by the power-cut demo. */
+  saveAndRestore?: (S: EngineState) => Promise<EngineState>;
 
   constructor(opts: HostOptions = {}) {
     this.seed = opts.seed ?? 11;
     this.tickMs = opts.tickMs ?? 250;
     this.clock = { speed: opts.speed ?? 15, running: true, mode: opts.mode ?? 'simulation' };
-    this.loadScenario(opts.scenario ?? 1);
+    if (opts.state) this.adopt(opts.state);
+    else this.loadScenario(opts.scenario ?? 1);
+  }
+
+  /** Takes over a state (restored from a checkpoint) and sends everyone a fresh snapshot. */
+  adopt(S: EngineState) {
+    this.S = S; this.hints = {}; this.demo = null; this.acc = 0;
+    this.resync();
   }
 
   /** Replaces the state with scenario n and sends everyone a fresh snapshot. */
@@ -69,6 +81,7 @@ export class EngineHost {
       let n = 0;
       while (this.acc >= 1 && n < 3600) { MGE.step(this.S, 1); this.acc -= 1; n++; }
       if (this.demo && !this.demo.fired && (this.demo.elapsed += dt) >= DEMO_AFTER) { this.demo.fired = true; injectDemoDelay(this.S); }
+      if (n) this.onAdvance?.(this.S);
     }
     this.publish();
   }
@@ -85,13 +98,10 @@ export class EngineHost {
   subscribe(l: HostListener) { this.listeners.add(l); this.snapshotFor(l); return () => this.listeners.delete(l); }
   get listenerCount() { return this.listeners.size; }
 
-  /** Demonstrates a restart (URD req 32): the state is copied, dropped and rebuilt from the copy.
-      In-memory for now (structuredClone keeps shared references); Phase 4 writes it to the database. */
-  powerCut() {
-    const { rng, ...data } = this.S as EngineState & { rng: () => number };
-    const restored = structuredClone(data) as EngineState;
-    restored.rng = rng; // the random generator is code, not data; it carries on
-    rehydrate(restored as Parameters<typeof rehydrate>[0], MGE.Path);
+  /** Demonstrates a restart (URD req 32): the state is saved, dropped and loaded back. With a database the
+      round trip goes through it; without one, through an in-memory copy in the same format. */
+  async powerCut() {
+    const restored = this.saveAndRestore ? await this.saveAndRestore(this.S) : thaw(freeze(this.S));
     this.S = restored;
     const n = Object.values(this.S.pos).filter((p) => p.occ && p.occ.vehicleId).length;
     MGE.logEvent(this.S, 'sim', `SIMULATION · restart · ${n} vehicle positions restored from the server's saved state`);

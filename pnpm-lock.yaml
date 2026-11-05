@@ -53,6 +53,9 @@ importers:
       '@mg/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@mg/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@mg/engine':
         specifier: workspace:*
         version: link:../../packages/engine

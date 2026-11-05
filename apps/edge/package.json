@@ -13,6 +13,7 @@
     "@fastify/static": "10.1.10",
     "@fastify/websocket": "11.3.7",
     "@mg/contracts": "workspace:*",
+    "@mg/core": "workspace:*",
     "@mg/engine": "workspace:*",
     "@mg/sim": "workspace:*",
     "@mg/sync": "workspace:*",

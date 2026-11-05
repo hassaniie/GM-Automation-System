@@ -52,3 +52,28 @@ export const Integration = {
   publish(ev) { for (const fn of this.subscribers) { try { fn(ev); } catch (e) { /* never break the sim */ } } },
   request(S, kind, payload) { const r = { t: S.t, kind, payload, mode: this.mode, note: 'Recorded only — no PLC connection' }; this.requests.push(r); if (this.requests.length > 200) this.requests.shift(); return r; },
 };
+
+/**
+ * Drops history older than `beforeT` from memory once it is stored elsewhere (the edge server's database):
+ * units lined off before then, their production / cycle-time / offline records, cleared calls and old
+ * shift downtime. Units still in the plant, open calls and anything newer are kept. Returns counts.
+ * @param {import('@mg/contracts').EngineState} S @param {number} beforeT
+ */
+export function trimHistory(S, beforeT) {
+  const gone = new Set();
+  for (const id of S.vehOrder) { const v = S.vehicles[id]; if (v && v.state === 'LINED_OFF' && v.lineOffT != null && v.lineOffT < beforeT) gone.add(id); }
+  for (const id of gone) delete S.vehicles[id];
+  S.vehOrder = S.vehOrder.filter((id) => !gone.has(id));
+  const keep = (r) => r.t >= beforeT;
+  const before = { prod: S.prod.length, segments: S.stats.segments.length, completed: S.stats.completed.length, offline: S.stats.offline.length, calls: S.calls.length };
+  S.prod = S.prod.filter(keep);
+  S.stats.segments = S.stats.segments.filter(keep);
+  S.stats.completed = S.stats.completed.filter(keep);
+  S.stats.offline = S.stats.offline.filter((r) => keep(r) || (S.vehicles[r.vehicleId] && S.vehicles[r.vehicleId].state !== 'LINED_OFF'));
+  S.calls = S.calls.filter((c) => c.clearedT == null || c.clearedT >= beforeT);
+  for (const h of S.history) if (h.key && h.end != null && h.end < beforeT) delete S.down[h.key];
+  return {
+    vehicles: gone.size, prod: before.prod - S.prod.length, segments: before.segments - S.stats.segments.length,
+    completed: before.completed - S.stats.completed.length, offline: before.offline - S.stats.offline.length, calls: before.calls - S.calls.length,
+  };
+}
