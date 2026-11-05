@@ -5,7 +5,7 @@ import { resolveAlarmsFor } from './alarms.js';
 import { audit } from './audit.js';
 import { curSeg } from './occupancy.js';
 import { takeOffLine } from './offline.js';
-import { LOOPS, POS, isLoopFirst, targetFor } from './plant.js';
+import { LOOPS, POS, WORK_POS, isLoopFirst, targetFor } from './plant.js';
 import { locationLabel } from './scans.js';
 import { findVehicleByVin, isActive, requiredFor } from './vehicles.js';
 
@@ -27,6 +27,9 @@ export function correctPosition(S, vin, toPos, by, reason) {
     occ.vehicleId = veh.id; carrier.vehicleId = veh.id; veh.carrierId = carrier.id; veh.posId = posId;
     if (occ.completeBy === 'PASS') { occ.completeT = null; occ.completeBy = null; occ.required = requiredFor(S, veh, posId); }
     veh.segments.push({ pos: posId, arriveT: occ.arriveT, completeT: occ.completeT, departT: null, work: 0, wait: 0, paused: 0, planned: 0, cycle: null, target: targetFor(posId, veh), credited: false, end: null, corrected: true });
+    // The unit is physically here, so it has passed every station before this one. Credit those whose
+    // work was not recorded, or line-off at FL7 would reject it as incomplete and hold the line.
+    for (const st of WORK_POS) if (POS[st].idx < POS[posId].idx && !veh.done[st]) veh.credited[st] = true;
   };
   if (other) reseat(other, from, cA);
   else { const o = S.pos[from].occ; o.vehicleId = null; cA.vehicleId = null; const seg = curSeg(v, from); if (seg) { seg.end = 'corrected'; seg.departT = S.t; } if (!isLoopFirst(from)) { o.completeT = S.t; o.completeBy = 'PASS'; } }
