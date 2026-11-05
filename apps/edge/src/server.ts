@@ -16,6 +16,7 @@ import { ClientMessage, type ServerMessage } from '@mg/contracts';
 import { EngineHost, type HostOptions } from './engine-host.ts';
 import { CommandError, SYSTEM, runCommand, type Actor } from './commands.ts';
 import { actorOf, registerAuth, seedUsers } from './auth/routes.ts';
+import { registerOidc, type OidcSettings } from './auth/oidc.ts';
 import { COOKIE, Sessions, type Session } from './auth/sessions.ts';
 import { createDb, migrate, type Db } from './db/index.ts';
 import { Persistence, type PersistOptions } from './persist.ts';
@@ -29,6 +30,8 @@ export interface ServerOptions extends HostOptions {
   databaseUrl?: string; persist?: PersistOptions; retentionDays?: number;
   /** Demo mode: seeds the demo accounts on first run and allows the role switch. */
   demo?: boolean; admin?: { empId?: string; password?: string };
+  /** Single sign-on; off when not given. */
+  sso?: OidcSettings | null;
 }
 
 export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost; db: Db | null; persistence: Persistence | null }> {
@@ -63,9 +66,10 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
   if (db && sessions) {
     const seeded = await seedUsers(db, !!opts.demo, opts.admin);
     if (seeded) app.log.info(`created ${seeded} first user account(s)${opts.demo ? ' (demo accounts)' : ''}`);
-    registerAuth(app, db, sessions, { demo: !!opts.demo }, {
+    registerAuth(app, db, sessions, { demo: !!opts.demo, sso: opts.sso ? { enabled: true, label: opts.sso.label || 'Company account' } : undefined }, {
       onRevoke: (match) => { for (const [sock, c] of live) if (c.session && match(c.session)) sock.close(4401, 'Signed out'); },
     });
+    if (opts.sso) await registerOidc(app, db, sessions, opts.sso);
     // sessions can expire or be revoked while a screen is connected
     const sweep = setInterval(async () => {
       for (const [sock, c] of live) if (c.token && !(await sessions.resolve(c.token))) sock.close(4401, 'Session ended');
