@@ -1,11 +1,12 @@
-#!/usr/bin/env node
-/* Headless checks for the simulation engine (src/02-engine.js) against the
-   Andon URD rules it models. Run: node test/engine.check.js            */
-'use strict';
-const loadEngine = require('./load-engine');
-let failed = 0, passed = 0;
-const ok = (cond, msg) => { if (cond) passed++; else { failed++; console.error('  ✗ ' + msg); } };
-const section = (name) => console.log('• ' + name);
+/* Engine checks against the Andon URD rules it models (Vitest). Each ok() is one check. */
+import { test, expect, vi } from 'vitest';
+
+// A fresh engine module per call, like the old vm-based loader: some config is module-level.
+const loadEngine = async () => {
+  vi.resetModules();
+  return (await import('../src/index.js')).MGE;
+};
+const ok = (cond, msg) => expect.soft(!!cond, msg).toBe(true);
 
 function warm(M, seed = 11) {
   const S = M.createState(seed, { delayRate: 0.04, mismatchRate: 0.03 });
@@ -14,9 +15,8 @@ function warm(M, seed = 11) {
 }
 
 /* 1. A full production day: two shifts, automatic reset, counts, downtime */
-{
-  section('full day: shifts, counts, downtime, breaks');
-  const M = loadEngine(), S = warm(M);
+test('full day: shifts, counts, downtime, breaks', async () => {
+  const M = (await loadEngine()), S = warm(M);
   M.runUntil(S, 23.25 * 3600);
   const shifts = S.history.filter((h) => h.name);
   ok(shifts.length === 2, `two shifts archived (got ${shifts.length})`);
@@ -38,20 +38,18 @@ function warm(M, seed = 11) {
   // cycle time recorded for every departed segment
   ok(S.stats.segments.length > 0 && S.stats.segments.every((s) => s.cycle >= s.work - 1), 'cycle time (dwell) recorded and ≥ work time (1 s step)');
   ok(Object.values(S.down).every((D) => Object.values(D.pos).every((x) => x >= 0)), 'station downtime ≥ 0');
-}
+});
 
 /* 2. Determinism */
-{
-  section('determinism');
-  const Ma = loadEngine(), Mb = loadEngine();
+test('determinism', async () => {
+  const Ma = (await loadEngine()), Mb = (await loadEngine());
   const A = warm(Ma), B = warm(Mb); Ma.runUntil(A, 10 * 3600); Mb.runUntil(B, 10 * 3600);
   ok(A.prod.length === B.prod.length && A.calls.length === B.calls.length, 'same seed → same production and calls');
-}
+});
 
 /* 3. Offline only at TL6 / FL1–FL7, with a scan; excluded from counts; return to line */
-{
-  section('offline and return to line');
-  const M = loadEngine(), S = warm(M); M.runUntil(S, 7 * 3600);
+test('offline and return to line', async () => {
+  const M = (await loadEngine()), S = warm(M); M.runUntil(S, 7 * 3600);
   const onChassis = Object.values(S.vehicles).find((v) => M.isActive(v) && v.carrierId && S.carriers[v.carrierId].mode === 'POS' && M.POS[S.carriers[v.carrierId].posId].area === 'CHASSIS' && M.POS[S.carriers[v.carrierId].posId].kind === 'work');
   ok(onChassis && !M.canTakeOffLine(S, onChassis.id).ok, 'cannot take a unit offline on the Chassis line');
   M.runWhile(S, () => !(S.pos.FL4.occ && S.pos.FL4.occ.vehicleId && S.pos.FL4.occ.completeT == null), 4000);
@@ -69,12 +67,11 @@ function warm(M, seed = 11) {
   const rec = S.prod.find((p) => p.vehicleId === v.id && p.area === 'FINAL');
   ok(v.state === 'LINED_OFF' && rec && rec.returned, 'returned unit counts once it completes the line');
   ok(S.prod.filter((p) => p.vehicleId === v.id && p.area === 'FINAL').length === 1, 'counted exactly once');
-}
+});
 
 /* 4. Assist calls: two types, one call per press, response and clear times */
-{
-  section('assist calls');
-  const M = loadEngine(), S = warm(M); S.cfg.callRate = 0; M.runUntil(S, 7 * 3600);
+test('assist calls', async () => {
+  const M = (await loadEngine()), S = warm(M); S.cfg.callRate = 0; M.runUntil(S, 7 * 3600);
   const c1 = M.raiseCall(S, 'CL2', 'SUP', 'Test operator');
   const again = M.raiseCall(S, 'CL2', 'SUP', 'Test operator');
   ok(c1 && again === c1, 'pressing a lit button again does not open a second call');
@@ -85,12 +82,11 @@ function warm(M, seed = 11) {
   ok(M.callResponse(c1) === 75 && M.callDuration(c1) === 195, `response 75 s and total 195 s recorded (got ${M.callResponse(c1)}, ${M.callDuration(c1)})`);
   ok(!M.callActive(S, 'SUP', 'CL2') && M.callActive(S, 'MNT', 'CL2'), 'clearing one call leaves the other lit');
   ok(!M.raiseCall(S, 'BUF', 'SUP', 'x'), 'no call buttons on the buffer');
-}
+});
 
 /* 5. Takt, targets, buzzer, corrections: audited */
-{
-  section('configuration, buzzer, corrections');
-  const M = loadEngine(), S = warm(M); S.cfg.callRate = 0; M.runUntil(S, 7 * 3600);
+test('configuration, buzzer, corrections', async () => {
+  const M = (await loadEngine()), S = warm(M); S.cfg.callRate = 0; M.runUntil(S, 7 * 3600);
   ok(M.setTakt(S, 'CHASSIS', 480, 'Planner', 'Rebalance') && M.POS.CL3.target === 480 && M.POS.FL3.target === 600, 'takt is per line');
   ok(S.audit.some((a) => a.action === 'Takt time changed' && a.by === 'Planner'), 'takt change audited');
   // with a 4:30 takt the 9:00 teams go over → buzzer on, off when the unit leaves
@@ -115,7 +111,4 @@ function warm(M, seed = 11) {
   M.setPlan(S, tomorrow, { targets: { 'Shift A': { TRIM: 20, CHASSIS: 20, FINAL: 20 } } }, 'Planner', 'Reduced plan');
   M.runUntil(S, 86400 + 6 * 3600 + 30);
   ok(S.shift.name === 'Shift A' && S.shift.targets.FINAL === 20, `scheduled target applied next day (got ${S.shift.targets.FINAL})`);
-}
-
-console.log(`\n${passed} passed, ${failed} failed`);
-process.exit(failed ? 1 : 0);
+});

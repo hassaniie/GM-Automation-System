@@ -1,0 +1,8 @@
+{
+  "name": "@mg/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic GA line simulator and Andon rules",
+  "exports": { ".": "./src/index.js" }
+}

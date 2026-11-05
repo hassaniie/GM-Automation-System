@@ -8,7 +8,6 @@
    The engine is the only source of truth. Deterministic: seeded PRNG,
    fixed 1-second steps.
    ════════════════════════════════════════════════════════════════════════ */
-'use strict';
 
 /* ── utilities ─────────────────────────────────────────────────────────── */
 function mulberry32(a) {
@@ -1290,7 +1289,7 @@ function lineStatus(S) {
 function runUntil(S, tEnd, max = 200000) { let n = 0; while (S.t < tEnd && n++ < max) step(S, 1); }
 function runWhile(S, pred, maxSec) { const t0 = S.t; while (pred() && S.t - t0 < maxSec) step(S, 1); }
 
-window.MGE = {
+export const MGE = {
   RH, RETURN_Y, AREAS, POS, POSITIONS, ROUTE, NEXT, WORK_POS, STATIONS, LOOPS, TRANSFERS, XFER_FROM, XFER_TO, EDGES, Path,
   hangerReturnPath, HANGER_FEED_PATH, hangerSlotX, HB_Z, LOOP_GEOM, H_TL6, H_FL1, BODY_BUFFER, STORAGE_PATH, OFFLINE_SLOTS, H_TRIM, H_CHASSIS, H_FINAL, H_BUFFER,
   VARIANTS, PAINTS, OFFLINE_REASONS, isLoopFirst, BUILD, buildFor, buildState, DEFAULT_CFG, DEFAULT_SHIFTS, SEV, Integration, targetFor, STATION_TARGET,
@@ -1306,3 +1305,7 @@ window.MGE = {
   dateKeyOf, dateKeyAt, dayOf, dayOfDate, shiftsFor, targetsFor, shiftAt, shiftKey, netElapsed, nextBoundary, summarizeShift, areaPaused,
   findVehicleByVin, isActive, logEvent, curSeg, fmtClock, fmtDur, shortVin, clamp, hash01,
 };
+
+// Exposed for console debugging in the browser.
+if (typeof window !== 'undefined') window.MGE = MGE;
+export default MGE;
