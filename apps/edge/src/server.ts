@@ -10,9 +10,13 @@ import { fileURLToPath } from 'node:url';
 import Fastify, { type FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
 import fastifyStatic from '@fastify/static';
+import cookie from '@fastify/cookie';
+import helmet from '@fastify/helmet';
 import { ClientMessage, type ServerMessage } from '@mg/contracts';
 import { EngineHost, type HostOptions } from './engine-host.ts';
-import { CommandError, SYSTEM, runCommand } from './commands.ts';
+import { CommandError, SYSTEM, runCommand, type Actor } from './commands.ts';
+import { actorOf, registerAuth, seedUsers } from './auth/routes.ts';
+import { COOKIE, Sessions, type Session } from './auth/sessions.ts';
 import { createDb, migrate, type Db } from './db/index.ts';
 import { Persistence, type PersistOptions } from './persist.ts';
 
@@ -23,6 +27,8 @@ export interface ServerOptions extends HostOptions {
   webDir?: string | null; logger?: boolean; autostart?: boolean;
   /** PostgreSQL; without it the server keeps everything in memory (tests, quick demos). */
   databaseUrl?: string; persist?: PersistOptions; retentionDays?: number;
+  /** Demo mode: seeds the demo accounts on first run and allows the role switch. */
+  demo?: boolean; admin?: { empId?: string; password?: string };
 }
 
 export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost; db: Db | null; persistence: Persistence | null }> {
@@ -41,6 +47,33 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
     if (restored) app.log.info(`restarted from checkpoint at plant time ${host.S.t}`);
   }
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
+  await app.register(cookie);
+  await app.register(helmet, {
+    contentSecurityPolicy: { directives: {
+      defaultSrc: ["'self'"], scriptSrc: ["'self'"], connectSrc: ["'self'", 'ws:', 'wss:'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'], fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'blob:'], workerSrc: ["'self'", 'blob:'], objectSrc: ["'none'"], frameAncestors: ["'none'"], upgradeInsecureRequests: null,
+    } },
+    hsts: false, // the plant PC may serve plain HTTP on the LAN; set HSTS at the TLS proxy
+  });
+
+  // sign-in (needs the database). Without a database the server is open: tests and local experiments only.
+  const sessions = db ? new Sessions(db) : null;
+  const live = new Map<{ close(code: number, reason: string): void }, { session: Session | null; token?: string }>();
+  if (db && sessions) {
+    const seeded = await seedUsers(db, !!opts.demo, opts.admin);
+    if (seeded) app.log.info(`created ${seeded} first user account(s)${opts.demo ? ' (demo accounts)' : ''}`);
+    registerAuth(app, db, sessions, { demo: !!opts.demo }, {
+      onRevoke: (match) => { for (const [sock, c] of live) if (c.session && match(c.session)) sock.close(4401, 'Signed out'); },
+    });
+    // sessions can expire or be revoked while a screen is connected
+    const sweep = setInterval(async () => {
+      for (const [sock, c] of live) if (c.token && !(await sessions.resolve(c.token))) sock.close(4401, 'Session ended');
+    }, 60_000);
+    sweep.unref();
+    app.addHook('onClose', async () => clearInterval(sweep));
+  }
+  const actorFor = (session: Session | null): Actor => (session ? actorOf(session) : SYSTEM);
 
   app.get('/api/health', async () => ({
     ok: true, version: VERSION, clock: host.clock, t: host.S.t, rev: host.rev, clients: host.listenerCount,
@@ -57,11 +90,20 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
   });
   app.get('/api/snapshot', async () => ({ rev: host.rev, clock: host.clock, state: JSON.parse(JSON.stringify(host.S, (_k, v) => (typeof v === 'function' ? undefined : v))) }));
   app.post('/api/commands', async (req, reply) => {
-    try { return { ok: true, value: await runCommand(host, req.body, SYSTEM) }; } // phase 4 step 5: the signed-in actor
+    try { return { ok: true, value: await runCommand(host, req.body, actorFor(req.session)) }; }
     catch (e) { const err = e as Error; reply.code(e instanceof CommandError ? e.status : 500); return { ok: false, error: err.message }; }
   });
 
-  app.get('/api/live', { websocket: true }, (socket) => {
+  app.get('/api/live', {
+    websocket: true,
+    // a browser page on another site must not open a live connection with this site's cookie
+    preValidation: async (req, reply) => {
+      const origin = req.headers.origin;
+      if (origin && new URL(origin).host !== req.headers.host) return reply.code(403).send({ ok: false, error: 'Wrong origin' });
+    },
+  }, (socket, req) => {
+    const session = req.session ?? null;
+    live.set(socket, { session, token: req.cookies?.[COOKIE] });
     const send = (m: ServerMessage) => {
       if (socket.readyState !== socket.OPEN) return;
       if (socket.bufferedAmount > MAX_BUFFERED) { socket.close(1013, 'Too far behind; reconnect'); return; }
@@ -77,13 +119,13 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
       try {
         const msg = ClientMessage.parse(JSON.parse(raw.toString()));
         id = msg.id;
-        const value = await runCommand(host, msg.command, SYSTEM);
+        const value = await runCommand(host, msg.command, actorFor(session));
         send({ type: 'result', id, ok: true, value });
       } catch (e) {
         send({ type: 'result', id, ok: false, error: (e as Error).message });
       }
     });
-    socket.on('close', () => off());
+    socket.on('close', () => { off(); live.delete(socket); });
   });
 
   const webDir = opts.webDir === undefined ? join(dirname(fileURLToPath(import.meta.url)), '../../web/dist-edge') : opts.webDir;

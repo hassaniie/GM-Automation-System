@@ -11,14 +11,8 @@ import { Icon, MgMark, tv } from './lib/ui-kit.js';
 
 export { ROLES } from '@mg/contracts';
 import { ROLES } from '@mg/contracts';
-// Demo accounts (fictional people). Shown on the sign-in screen.
-const DEMO_USERS = [
-  { id: 'u1', name: 'Hamza Siddiqui', empId: 'MG-1001', email: 'hamza.siddiqui@mgjw.pk', role: 'admin', pw: 'Admin@2026' },
-  { id: 'u2', name: 'Ayesha Malik', empId: 'MG-2040', email: 'ayesha.malik@mgjw.pk', role: 'authorised', pw: 'Plan@2026' },
-  { id: 'u3', name: 'Usman Tariq', empId: 'MG-3112', email: 'usman.tariq@mgjw.pk', role: 'supervisor', pw: 'Line@2026' },
-  { id: 'u4', name: 'Bilal Ahmed', empId: 'MG-4207', email: 'bilal.ahmed@mgjw.pk', role: 'maintenance', pw: 'Fix@2026' },
-  { id: 'u5', name: 'Head Office', empId: 'MG-9001', email: 'ho.viewer@mgjw.pk', role: 'viewer', pw: 'View@2026' },
-];
+// Demo accounts (fictional people), shared with the edge server's demo mode. Shown on the sign-in screen.
+import { DEMO_ACCOUNTS as DEMO_USERS } from '@mg/contracts';
 const IDLE_LOCK_MS = 15 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 30 * 1000;
 const sstore = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* unavailable */ } }, del(k) { try { sessionStorage.removeItem(k); } catch (e) { /* unavailable */ } } };
 export const jget = (k, d) => { try { const v = store.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };

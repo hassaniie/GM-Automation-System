@@ -10,6 +10,8 @@
     "dev:remote": "tsx watch src/main.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "11.1.5",
+    "@fastify/helmet": "13.2.0",
     "@fastify/static": "10.1.10",
     "@fastify/websocket": "11.3.7",
     "@mg/contracts": "workspace:*",
@@ -18,7 +20,8 @@
     "@mg/sim": "workspace:*",
     "@mg/sync": "workspace:*",
     "fastify": "5.12.8",
-    "pg": "8.23.1"
+    "pg": "8.23.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",

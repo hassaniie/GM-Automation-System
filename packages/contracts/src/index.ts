@@ -110,6 +110,14 @@ export const ROLES: Record<RoleId, RoleDef> = {
   maintenance: { label: 'Maintenance', short: 'Maintenance', home: 'floor', perms: ['call', 'respond.MNT', 'reports'], desc: 'Responds to and clears maintenance calls.' },
   viewer:      { label: 'View only · management', short: 'View only', home: 'dash', perms: ['reports'], desc: 'Dashboard, line displays, reports and VIN lookup.' },
 };
+/** Demo accounts (fictional people). Seeded by the edge server in demo mode; used by the offline demo. */
+export const DEMO_ACCOUNTS: { id: string; name: string; empId: string; email: string; role: RoleId; pw: string }[] = [
+  { id: 'u1', name: 'Hamza Siddiqui', empId: 'MG-1001', email: 'hamza.siddiqui@mgjw.pk', role: 'admin', pw: 'Admin@2026' },
+  { id: 'u2', name: 'Ayesha Malik', empId: 'MG-2040', email: 'ayesha.malik@mgjw.pk', role: 'authorised', pw: 'Plan@2026' },
+  { id: 'u3', name: 'Usman Tariq', empId: 'MG-3112', email: 'usman.tariq@mgjw.pk', role: 'supervisor', pw: 'Line@2026' },
+  { id: 'u4', name: 'Bilal Ahmed', empId: 'MG-4207', email: 'bilal.ahmed@mgjw.pk', role: 'maintenance', pw: 'Fix@2026' },
+  { id: 'u5', name: 'Head Office', empId: 'MG-9001', email: 'ho.viewer@mgjw.pk', role: 'viewer', pw: 'View@2026' },
+];
 export const ROLE_IDS = Object.keys(ROLES) as RoleId[];
 export const roleCan = (role: RoleId | undefined | null, perm: Permission) => {
   const P = role && ROLES[role] ? ROLES[role].perms : [];
