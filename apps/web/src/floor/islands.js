@@ -11,7 +11,11 @@ export function IdIsland() {
   return html`<div class="seg id-island">
     <div class="brand"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile</div></div></div>
     <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro" style=${{ color: S.planned ? 'var(--paused)' : null }}>${S.planned ? (S.planned.kind === 'OFF' ? 'No shift' : S.planned.label) : sh.name}</span></div>
-    <span class="sim-tag" title="All data is simulated. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>
+    ${RT.conn.mode === 'local'
+      ? html`<span class="sim-tag" title="All data is simulated in this browser. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>`
+      : RT.conn.state === 'live'
+        ? html`<span class="sim-tag edge" title=${`Live from the line server (edge ${RT.conn.server || ''}). Every screen shows the same plant. The plant itself is still simulated.`}><${Icon} n="flask" size=${10} />SIM · EDGE</span>`
+        : html`<span class="sim-tag down" role="status" title="Lost the line server. Showing the last data received; reconnecting."><${Icon} n="wifioff" size=${10} />RECONNECTING</span>`}
     <div class="shiftbar" title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;
 }

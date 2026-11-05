@@ -11,12 +11,13 @@ import { AlarmDrawer } from './floor/drawer.js';
 import { Anchors, HoverCard, Inspector, Legend } from './floor/inspector.js';
 import { ActIsland, IdIsland, StateIsland, Strip } from './floor/islands.js';
 import { Plan2D } from './floor/plan2d.js';
-import { DEMO_AFTER, SCENARIOS, freshState, injectDemoDelay, openAlarm, select, topAlarm } from './floor/scenarios.js';
+import { DEMO_AFTER, SCENARIOS, applyScenarioHints, freshState, injectDemoDelay, openAlarm, select, topAlarm } from './floor/scenarios.js';
+import { REMOTE, remoteAcc, startRemote } from './lib/source.js';
 import { SimConsole } from './floor/sim-console.js';
 import { HowPage } from './how.js';
 import { LineOffCard } from './lib/misc.js';
 import { go, parseHash } from './lib/router.js';
-import { M, RT, bump, effectiveTheme, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { M, RT, bump, effectiveTheme, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
 import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';
@@ -49,8 +50,11 @@ function App() {
     let last = performance.now(), lastRev = -1, lastPaint = 0;
     const loop = (now) => {
       const dt = Math.min(0.25, (now - last) / 1000); last = now;
-      if (RT.running && RT.demo && !RT.demo.fired && (RT.demo.elapsed += dt) >= DEMO_AFTER) { RT.demo.fired = true; injectDemoDelay(RT.S); }
-      if (RT.running) { RT.acc += dt * RT.speed; let n = 0; while (RT.acc >= 1 && n < 400) { M.step(RT.S, 1); RT.acc -= 1; n++; } }
+      if (REMOTE) RT.acc = remoteAcc(now); // the edge server runs the engine; draw between its updates
+      else {
+        if (RT.running && RT.demo && !RT.demo.fired && (RT.demo.elapsed += dt) >= DEMO_AFTER) { RT.demo.fired = true; injectDemoDelay(RT.S); }
+        if (RT.running) { RT.acc += dt * RT.speed; let n = 0; while (RT.acc >= 1 && n < 400) { M.step(RT.S, 1); RT.acc -= 1; n++; } }
+      }
       const floor = RT.route.page === 'floor';
       if (floor && !RT.ui.view2D) Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
       Horn.tick(now);
@@ -81,6 +85,7 @@ function App() {
   const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
   const gate = page !== 'display' && (!Auth.user || Auth.locked);
   return html`<main class="stage">
+    ${RT.conn.state === 'down' ? html`<div class="conn-banner" role="alert"><${Icon} n="wifioff" size=${14} /><b>Line server not reachable</b><span>Showing the last data received at ${fmtClock(RT.S.t)} · reconnecting…</span></div>` : null}
     <div id="scene" ref=${sceneRef} style=${{ visibility: floor && !RT.ui.view2D && !gate ? 'visible' : 'hidden' }}></div>
     ${gate ? html`<${SignIn} key=${Auth.locked ? 'lock' : 'in'} lock=${!!(Auth.user && Auth.locked)} />` : floor ? html`<${React.Fragment}>
     ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
@@ -102,15 +107,22 @@ function App() {
     ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}</${React.Fragment}>`}
   </main>`;
 }
-/* Called from src/08-boot.js once every UI module has been defined. */
+/* Called from main.js once every module is loaded. */
 export function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
   if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
-  RT.S = freshState(11, savedCfg()); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
-  M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
+  let first = Promise.resolve();
+  if (REMOTE) {
+    // live screens: wait for the edge server's first snapshot; scenario hints set the opening view
+    document.getElementById('app').innerHTML = '<div class="boot-wait">Connecting to the line server…</div>';
+    first = startRemote().then((hints) => { RT.demo = null; applyScenarioHints({ ...hints, speed: RT.speed }); RT.ui.selection = null; RT.ui.dialog = null; RT.ui.drawer = null; });
+  } else {
+    RT.S = freshState(11, savedCfg()); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
+    M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
+  }
   const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); createRoot(document.getElementById('app')).render(html`<${App} />`); };
   const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
-  Promise.all([fonts, Auth.init()]).then(start, start);
+  Promise.all([fonts, Auth.init(), first]).then(start, start);
 }

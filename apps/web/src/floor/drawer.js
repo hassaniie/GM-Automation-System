@@ -1,8 +1,9 @@
 /* ── alarm drawer ── */
 import { can } from '../auth.js';
 import { CallRow } from './inspector.js';
+import { Act } from '../lib/act.js';
 import { openAlarm, select } from './scenarios.js';
-import { M, RT, act, bump, dispId, fmtClock, fmtDur, html, setUI, shortVin } from '../lib/runtime.js';
+import { M, RT, dispId, fmtClock, fmtDur, html, setUI, shortVin } from '../lib/runtime.js';
 import { Icon, LEVEL_TONE, LevelChip, tv } from '../lib/ui-kit.js';
 
 export function AlarmDrawer() {
@@ -17,7 +18,7 @@ export function AlarmDrawer() {
   const evs = tab === 'log' ? S.events.filter((e) => RT.ui.logFilter === 'all' || e.cat === RT.ui.logFilter || (RT.ui.logFilter === 'move' && e.cat === 'work')).slice(-200).reverse() : [];
   return html`<aside class="glass drawer ticks in" aria-label="Alarms and events">
     <div class="head"><div style=${{ flex: 1 }}><div class="micro">Exceptions</div><div style=${{ fontWeight: 600, fontSize: 18 }}>Alarms & events</div></div>
-      ${tab === 'active' && un.some((a) => a.level !== 'WARNING') ? html`<button class="btn sm warn" onClick=${act(() => un.filter((a) => a.level !== 'WARNING').forEach((a) => M.ackAlarm(S, a.id)))}><${Icon} n="check" />Acknowledge all</button>` : null}
+      ${tab === 'active' && un.some((a) => a.level !== 'WARNING') ? html`<button class="btn sm warn" onClick=${() => un.filter((a) => a.level !== 'WARNING').forEach((a) => Act.ackAlarm(a.id))}><${Icon} n="check" />Acknowledge all</button>` : null}
       <button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ drawer: null })}><${Icon} n="x" /></button></div>
     <div class="tabs" role="tablist">${[['calls', 'Calls', openCalls.length], ['active', 'Alarms', un.length], ['acked', 'Acknowledged', ak.length], ['resolved', 'Resolved', resolved.length], ['offline', 'Offline', off.length], ['log', 'Log', null]].map(([k, l, n]) => html`<button key=${k} role="tab" aria-selected=${tab === k} onClick=${() => setUI({ drawer: k })}>${l}${n != null ? html`<span class="n">${n}</span>` : null}</button>`)}</div>
     ${tab === 'calls' ? html`<div class="alist" style=${{ padding: 12 }}>
@@ -33,7 +34,7 @@ export function AlarmDrawer() {
         <div class="top"><${LevelChip} a=${a} /><span class="mono" style=${{ fontWeight: 600 }}>${dispId(a.pos)}</span>${a.vin ? html`<span class="mono c-muted">${shortVin(a.vin)}</span>` : null}</div>
         <div>${a.msg}</div>
         <div class="meta"><span class="mono">${fmtClock(a.raisedT, false)}</span>${a.resolvedT == null ? html`<span class="mono">open ${fmtDur(S.t - a.raisedT)}</span>` : html`<span>resolved ${fmtClock(a.resolvedT, false)} · ${a.resolution}</span>`}${a.ackT != null ? html`<span>ack ${fmtClock(a.ackT, false)} · ${a.ackBy}</span>` : null}</div>
-        ${a.resolvedT == null ? html`<div class="actions">${a.ackT == null && a.level !== 'WARNING' ? html`<button class="btn sm warn" onClick=${(e) => { e.stopPropagation(); M.ackAlarm(S, a.id); bump(); }}><${Icon} n="check" />Acknowledge</button>` : null}<button class="btn sm ghost" onClick=${(e) => { e.stopPropagation(); openAlarm(a); }}><${Icon} n="target" />Locate</button></div>` : null}
+        ${a.resolvedT == null ? html`<div class="actions">${a.ackT == null && a.level !== 'WARNING' ? html`<button class="btn sm warn" onClick=${(e) => { e.stopPropagation(); Act.ackAlarm(a.id); }}><${Icon} n="check" />Acknowledge</button>` : null}<button class="btn sm ghost" onClick=${(e) => { e.stopPropagation(); openAlarm(a); }}><${Icon} n="target" />Locate</button></div>` : null}
       </div>`) : html`<div class="empty">${tab === 'active' ? 'No unacknowledged alarms. The line is running without exceptions.' : tab === 'acked' ? 'No acknowledged alarms are still open.' : 'Nothing resolved yet this shift.'}</div>`}</div>`
     : html`<div style=${{ display: 'flex', gap: 4, padding: '10px 12px 0', flexWrap: 'wrap' }}>${filters.map(([k, l]) => html`<button key=${k} class=${'btn sm ' + (RT.ui.logFilter === k ? '' : 'ghost')} onClick=${() => setUI({ logFilter: k })}>${l}</button>`)}</div>
       <div class="alist"><ul class="elog">${evs.map((e) => html`<li key=${e.id}><span class="mono c-muted">${fmtClock(e.t)}</span><span class=${'cat ' + e.cat}>${e.cat}</span><span>${e.pos ? html`<button class="linkish" onClick=${() => { setUI({ drawer: null }); select({ kind: 'pos', id: dispId(e.pos) }); }}>${dispId(e.pos)}</button> ` : null}${e.text}</span></li>`)}</ul></div>`}

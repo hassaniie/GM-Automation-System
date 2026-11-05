@@ -2,6 +2,7 @@
    Main dashboard (URD req 25–27) and line displays (req 23–24), plus the
    resilience demos: head-office link loss (req 33) and power cut (req 32).
    ════════════════════════════════════════════════════════════════════════ */
+import { REMOTE, onConnChange, send } from './lib/source.js';
 import { Auth, ROLES } from './auth.js';
 import { CallRow } from './floor/inspector.js';
 import { select } from './floor/scenarios.js';
@@ -15,15 +16,27 @@ import { CALL_ICON, Icon, MgMark } from './lib/ui-kit.js';
    carry on when the link drops. Head office keeps the last data it received
    until the link returns, then the buffered events sync.              */
 RT.link = { up: true, downAt: null, snap: null, evAt: 0, syncedAt: Date.now(), lastSync: null };
-export function setLink(up) {
+export function setLink(up, real = false) {
   const S = RT.S, L = RT.link;
-  if (!up && L.up) { L.up = false; L.downAt = S.t; L.snap = dashData(S); L.evAt = S.events.length ? S.events[S.events.length - 1].id : null; M.logEvent(S, 'sim', 'SIMULATION · head-office link down · line displays and data collection carry on locally'); }
-  else if (up && !L.up) { const n = S.events.filter((e) => e.t > L.downAt).length; L.up = true; L.lastSync = { n, dur: S.t - L.downAt }; L.snap = null; M.logEvent(S, 'sim', `SIMULATION · head-office link restored · ${n} buffered events synced, nothing lost`); }
+  // remote screens: the demo only changes this screen (no note in the shared log); a real drop is logged nowhere
+  const note = (text) => { if (!REMOTE) M.logEvent(S, 'sim', text); };
+  if (!up && L.up) { L.up = false; L.real = real; L.downAt = S.t; L.snap = dashData(S); L.evAt = S.events.length ? S.events[S.events.length - 1].id : null; note('SIMULATION · head-office link down · line displays and data collection carry on locally'); }
+  else if (up && !L.up) { const n = S.events.filter((e) => e.t > L.downAt).length; L.up = true; L.real = false; L.lastSync = { n, dur: S.t - L.downAt }; L.snap = null; note(`SIMULATION · head-office link restored · ${n} buffered events synced, nothing lost`); }
   bump();
 }
+// live screens: losing the line server looks like the head-office link going down, with the last data kept
+onConnChange((state) => { if (state === 'down') setLink(false, true); else if (state === 'live' && RT.link.real) setLink(true); });
 /* power cut: everything stops; on restart positions come back from the
    controllers' retained memory and a re-read of the carrier tags.     */
 export function powerCut() {
+  if (REMOTE) { // the edge server drops its state and rebuilds it from the saved copy
+    RT.power = { phase: 'off', t: RT.S.t }; bump();
+    setTimeout(() => { RT.power = { phase: 'boot', t: RT.S.t }; bump(); }, 2500);
+    const restored = send({ type: 'SIM_POWER_CUT' });
+    setTimeout(() => restored.then((r) => { RT.power = { phase: 'ok', n: r.restored }; bump(); }, () => { RT.power = null; bump(); }), 5000);
+    setTimeout(() => { RT.power = null; bump(); }, 8500);
+    return;
+  }
   const S = RT.S, was = RT.running;
   RT.running = false; RT.power = { phase: 'off', t: S.t }; M.logEvent(S, 'sim', 'SIMULATION · power cut · line servers on UPS, events kept in local storage'); bump();
   setTimeout(() => { RT.power = { phase: 'boot', t: S.t }; bump(); }, 3500);
@@ -126,7 +139,7 @@ export function LineDisplay() {
         <div class="lc-vin">${v ? v.vin.slice(-6) : 'no unit'} · ${M.stationCount(S, id)}</div></div>`; })}</section>`
     : html`<section class="lcd-scans"><div class="lcd-k">Recent scans</div>${scans.length ? scans.map((x) => html`<div key=${x.id} class="lcd-scan"><b>${fmtClock(x.t, false)}</b><span>${x.scanner === 'ENTRY' ? 'Line-in · TL1' : 'Offline · TL6'}</span><span class="mono">${x.vin || '—'}</span><span class=${x.ok ? 'good' : 'bad'}>${x.ok ? 'OK' : 'rejected'}</span></div>`) : html`<div class="lcd-scan">No scans yet this shift.</div>`}</section>`}
     <section class=${'lcd-calls' + (calls.length ? ' on' : '')}>${calls.length ? calls.slice(0, 4).map((c) => { const w = S.t - c.raisedT; return html`<div key=${c.id} class=${'lcd-call t-' + c.type.toLowerCase() + (c.respondedT == null && w > 180 ? ' late' : '')}><${Icon} n=${CALL_ICON[c.type]} /><b>${c.pos}</b><span>${M.CALL_TYPES[c.type].label}</span><span class="w">${c.respondedT == null ? `waiting ${fmtDur(w)}` : `${(c.respondedBy || '').split(' · ')[0]} at station · ${fmtDur(w)}`}</span></div>`; }) : html`<div class="lcd-none">No active calls</div>`}</section>
-    <footer class="lcd-foot"><span class="sim-tag"><${Icon} n="flask" size=${10} />SIMULATION</span>
+    <footer class="lcd-foot"><span class=${'sim-tag' + (RT.conn.mode === 'local' ? '' : RT.conn.state === 'live' ? ' edge' : ' down')}><${Icon} n="flask" size=${10} />${RT.conn.mode === 'local' ? 'SIMULATION' : RT.conn.state === 'live' ? 'SIM · EDGE' : 'RECONNECTING'}</span>
       <nav>${M.AREA_IDS.map((k) => html`<button key=${k} aria-current=${k === area ? 'page' : null} onClick=${() => go('display', k.toLowerCase())}>${AREAS[k].short}</button>`)}</nav>
       <span class="lcd-act"><button onClick=${fs} title="Full screen"><${Icon} n="max" /></button>${Auth.user ? html`<button onClick=${() => go(ROLES[Auth.user.role].home)} title="Back to the app"><${Icon} n="x" /></button>` : html`<button onClick=${() => go('dash')} title="Sign in"><${Icon} n="user" /></button>`}</span></footer>
   </div>`;

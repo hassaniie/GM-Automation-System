@@ -5,9 +5,10 @@
    ════════════════════════════════════════════════════════════════════════ */
 import { Scene3D } from '@mg/scene';
 import { PageHead } from './admin.js';
+import { Act } from './lib/act.js';
 import { loadScenario, select } from './floor/scenarios.js';
 import { go } from './lib/router.js';
-import { M, RT, html, setUI } from './lib/runtime.js';
+import { html, setUI } from './lib/runtime.js';
 import { Icon } from './lib/ui-kit.js';
 import { powerCut, setLink } from './screens.js';
 
@@ -42,7 +43,7 @@ const COVERAGE = [
   ['Assist calls', [
     [19, 'Two buttons per station: supervisor and maintenance, distinct colour and label', 'Violet SUPERVISOR and blue MAINTENANCE, illuminated, 40 mm, IP65.', 'demo', showFloor(7)],
     [20, 'Button lit while its call is active', 'Lit and blinking until someone responds; steady while help is at the station.', 'demo', showFloor(7)],
-    [21, 'Active calls on line display and dashboard with station, type, waiting time', 'Call bands on the line displays; active-call list on the dashboard and the floor.', 'demo', () => { go('display', 'chassis'); M.raiseCall(RT.S, 'CL2', 'SUP', 'Demo'); }],
+    [21, 'Active calls on line display and dashboard with station, type, waiting time', 'Call bands on the line displays; active-call list on the dashboard and the floor.', 'demo', () => { go('display', 'chassis'); Act.raiseCall('CL2', 'SUP', 'Demo'); }],
     [22, 'Cleared by the responder; response and clear times recorded', 'Respond on arrival, Clear when done; both durations kept and reported.', 'demo', showFloor(7)],
   ]],
   ['Displays and dashboard', [

@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/dist-demo/**', '**/node_modules/**', 'coverage/**'] },
+  { ignores: ['**/dist/**', '**/dist-demo/**', '**/dist-edge/**', '**/node_modules/**', 'coverage/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended.map((c) => ({ ...c, files: ['**/*.{ts,tsx}'] })),
   {

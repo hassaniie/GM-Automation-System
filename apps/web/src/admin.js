@@ -3,15 +3,17 @@
    scheduled in advance (req 13–15), buzzers (req 18), position correction
    (req 7), users (req 30) and the audit log. Saved on this device.
    ════════════════════════════════════════════════════════════════════════ */
+import { Act } from './lib/act.js';
+import { REMOTE } from './lib/source.js';
 import { Auth, ROLES, can, hashPw, initials, jget, jset, userName } from './auth.js';
 import { go } from './lib/router.js';
-import { AREAS, M, POS, RT, bump, fmtClock, fmtDur, html, setUI, useReducer, useState } from './lib/runtime.js';
+import { AREAS, M, POS, RT, fmtClock, fmtDur, html, setUI, useReducer, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 
 const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
 export function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
 export function persistConfig() {
-  const S = RT.S; if (!S) return;
+  const S = RT.S; if (!S || REMOTE) return; // remote: settings and audit live on the edge server
   jset('mg-andon-config', Object.fromEntries(CFG_KEYS.map((k) => [k, S.cfg[k]])));
   const log = jget('mg-andon-audit', []), from = S._auditSaved || 0;
   for (const a of S.audit.slice(from)) log.push({ at: Date.now(), t: a.t, date: a.date, by: a.by, action: a.action, target: a.target, before: String(a.before), after: String(a.after), reason: a.reason });
@@ -47,9 +49,9 @@ const AuditMini = ({ rows }) => rows.length ? html`<table class="data" style=${{
 function TaktAdmin() {
   const S = RT.S, [draft, setDraft] = useState(() => ({ ...S.cfg.takt })), [warn, setWarn] = useState(Math.round(S.cfg.warnPct * 100)), [why, setWhy] = useState(''), [msg, setMsg] = useState(null);
   const save = () => {
-    let n = 0; for (const a of M.AREA_IDS) if (draft[a] !== S.cfg.takt[a]) n += M.setTakt(S, a, draft[a], userName(), why) ? 1 : 0;
-    const w = M.clamp(warn, 50, 99) / 100; if (w !== S.cfg.warnPct) { M.audit(S, userName(), 'Close-to-limit threshold changed', 'All lines', `${Math.round(S.cfg.warnPct * 100)}%`, `${Math.round(w * 100)}%`, why); S.cfg.warnPct = w; n++; }
-    persistConfig(); bump(); setMsg(n ? { ok: true, text: `Saved ${n} change${n > 1 ? 's' : ''}. Stations use the new takt immediately.` } : { ok: false, text: 'Nothing changed.' }); setWhy('');
+    const w = M.clamp(warn, 50, 99) / 100;
+    const jobs = [...M.AREA_IDS.filter((a) => draft[a] !== S.cfg.takt[a]).map((a) => Act.setTakt(a, draft[a], userName(), why)), ...(w !== S.cfg.warnPct ? [Act.setWarnPct(w, userName(), why)] : [])];
+    Promise.all(jobs).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg(n ? { ok: true, text: `Saved ${n} change${n > 1 ? 's' : ''}. Stations use the new takt immediately.` } : { ok: false, text: 'Nothing changed.' }); setWhy(''); }, (e) => setMsg({ ok: false, text: e.message }));
   };
   const setPart = (a, m, s) => setDraft({ ...draft, [a]: M.clamp(m * 60 + s, 60, 3600) });
   return html`<div>
@@ -84,16 +86,16 @@ function PlanAdmin() {
     const targets = Object.fromEntries(base.filter((s) => d.runs[s.name]).map((s) => [s.name, d.targets[s.name]]));
     const sameT = base.filter((s) => d.runs[s.name]).every((s) => M.AREA_IDS.every((a) => d.targets[s.name][a] === S.cfg.targets[a]));
     const takt = Object.fromEntries(Object.entries(d.takt).filter(([, v]) => v));
-    M.setPlan(S, sel, { shifts: sameShifts ? null : shifts, targets: sameT ? null : targets, takt: Object.keys(takt).length ? takt : null, note: d.note || null }, userName(), why);
-    persistConfig(); bump(); setDraft(null); setMsg({ ok: true, text: `Plan for ${wd(sel)} saved.${sel === today ? ' Today’s targets update now.' : ''}` });
+    Act.setPlan(sel, { shifts: sameShifts ? null : shifts, targets: sameT ? null : targets, takt: Object.keys(takt).length ? takt : null, note: d.note || null }, userName(), why)
+      .then(() => { persistConfig(); setDraft(null); setMsg({ ok: true, text: `Plan for ${wd(sel)} saved.${sel === today ? ' Today’s targets update now.' : ''}` }); }, (e) => setMsg({ ok: false, text: e.message }));
   };
-  const reset = () => { M.setPlan(S, sel, { shifts: null, targets: null, takt: null, note: null }, userName(), 'Back to default plan'); persistConfig(); bump(); setDraft(null); setMsg({ ok: true, text: `${wd(sel)} uses the default plan again.` }); };
+  const reset = () => Act.setPlan(sel, { shifts: null, targets: null, takt: null, note: null }, userName(), 'Back to default plan').then(() => { persistConfig(); setDraft(null); setMsg({ ok: true, text: `${wd(sel)} uses the default plan again.` }); }, (e) => setMsg({ ok: false, text: e.message }));
   const [defT, setDefT] = useState(() => ({ ...S.cfg.targets }));
   return html`<div>
     <${PageHead} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
     <div class="adm-card" style=${{ marginBottom: 18 }}><div class="micro">Default target per shift</div>
       <div class="adm-row" style=${{ marginTop: 8 }}>${M.AREA_IDS.map((a) => html`<div key=${a} class="field" style=${{ maxWidth: 170 }}><label for=${'dt-' + a}>${AREAS[a].name}</label><input id=${'dt-' + a} type="number" min="0" max="999" value=${defT[a]} onInput=${(e) => setDefT({ ...defT, [a]: +e.target.value || 0 })} /></div>`)}
-        <button class="btn" style=${{ alignSelf: 'end' }} onClick=${() => { let n = 0; for (const a of M.AREA_IDS) n += M.setDefaultTarget(S, a, defT[a], userName()) ? 1 : 0; persistConfig(); bump(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }}><${Icon} n="check" />Save defaults</button></div></div>
+        <button class="btn" style=${{ alignSelf: 'end' }} onClick=${() => Promise.all(M.AREA_IDS.map((a) => Act.setDefaultTarget(a, defT[a], userName()))).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }, (e) => setMsg({ ok: false, text: e.message }))}><${Icon} n="check" />Save defaults</button></div></div>
     <div class="plan-grid">
       <div class="plan-days" role="listbox" aria-label="Dates">${days.map((k) => { const p = S.cfg.calendar[k], off = p && p.shifts && !p.shifts.length; return html`<button key=${k} role="option" aria-selected=${sel === k} class="plan-day" onClick=${() => { setSel(k); setDraft(null); setMsg(null); }}>
         <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><span class=${'chip ' + (off ? 'c-muted' : p ? 'c-hold' : 'c-muted')}>${off ? 'No production' : p ? 'Scheduled' : 'Default'}</span></button>`; })}</div>
@@ -136,7 +138,7 @@ function ShiftAdmin() {
       <button class="btn sm ghost" onClick=${() => set(i, { breaks: [...s.breaks, { label: 'Planned stop', start: s.start + 3600, end: s.start + 3600 + 600 }] })}><${Icon} n="plus" />Add break or planned stop</button></div>`)}
     <div class="actions"><button class="btn ghost" onClick=${() => { const l = draft[draft.length - 1]; setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: l.end, end: Math.min(24 * 3600 - 60, l.end + 8 * 3600), breaks: [] }]); }}><${Icon} n="plus" />Add shift</button></div>
     <div class="adm-row" style=${{ marginTop: 16 }}><div class="field" style=${{ flex: 1 }}><label for="sh-why">Reason (kept in the audit log)</label><input id="sh-why" value=${why} onInput=${(e) => setWhy(e.target.value)} placeholder="e.g. Ramadan timings" /></div>
-      <button class="btn primary" style=${{ alignSelf: 'end' }} disabled=${!valid} onClick=${() => { M.setShiftPattern(S, draft, userName(), why); persistConfig(); bump(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }}><${Icon} n="check" />Save shift pattern</button></div>
+      <button class="btn primary" style=${{ alignSelf: 'end' }} disabled=${!valid} onClick=${() => Act.setShiftPattern(draft, userName(), why).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message }))}><${Icon} n="check" />Save shift pattern</button></div>
     ${!valid ? html`<div class="result bad" style=${{ marginTop: 10 }}>Each shift needs a name and must end after it starts; breaks must sit inside their shift.</div>` : null}
     <${Saved} msg=${msg} />
     <p class="note" style=${{ marginTop: 10 }}>To change times for one day only, use <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
@@ -153,7 +155,7 @@ function BuzzerAdmin() {
         return html`<tr key=${id}><td class="mono">${id}</td><td style=${{ textAlign: 'left' }}>${AREAS[POS[id].area].name}${POS[id].area === 'TRIM' ? ' · preview' : ''}</td>
           <td><span class=${on ? 'c-crit' : 'c-muted'}>${!en ? 'Switched off' : on ? `Ringing ${fmtDur(S.t - S.buzzing[id])}` : 'Quiet'}</span></td>
           <td class="mono" style=${{ color: an.state === 'over' ? 'var(--crit)' : null }}>${an.state === 'idle' ? '—' : `${fmtDur(an.cycle)} / ${fmtDur(an.takt)}`}</td>
-          <td><button class="toggle" role="switch" aria-checked=${en} aria-label=${`Buzzer at ${id}`} onClick=${() => { M.setBuzzer(S, id, !en, userName()); persistConfig(); bump(); }}></button></td>
+          <td><button class="toggle" role="switch" aria-checked=${en} aria-label=${`Buzzer at ${id}`} onClick=${() => Act.setBuzzer(id, !en, userName()).then(() => persistConfig())}></button></td>
           <td><button class="btn sm ghost" onClick=${() => { Horn.ensure(); Horn.buzz([id]); }}><${Icon} n="vol" />Test</button></td></tr>`; })}
     </tbody></table>
     <p class="note" style=${{ marginTop: 10 }}>In the shop each buzzer is a local sounder at its station, about 85 dB at 1 m, directed at the work area so the next station is not disturbed. In this browser one speaker stands in for them: only the line in view sounds.</p>
@@ -217,7 +219,7 @@ function UserAdmin() {
 function AuditAdmin() {
   const [f, setF] = useState('all');
   persistConfig();
-  const cfg = jget('mg-andon-audit', []).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
+  const cfg = (REMOTE ? RT.S.audit.map((a) => ({ ...a, at: a.t, before: String(a.before), after: String(a.after) })) : jget('mg-andon-audit', [])).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
   const auth = Auth.log.map((r) => ({ when: new Date(r.at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'medium' }), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
   const rows = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort).slice(0, 300);
   const csv = () => downloadText('andon-audit-log.csv', 'text/csv', [['When', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...rows.map((r) => [r.when, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n'));

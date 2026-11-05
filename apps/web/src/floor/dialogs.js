@@ -3,8 +3,9 @@ import { BV_FULL, BV_ICON } from '@mg/scene/brand';
 import { userName } from '../auth.js';
 import { VSTATE } from './inspector.js';
 import { select } from './scenarios.js';
+import { Act } from '../lib/act.js';
 import { go } from '../lib/router.js';
-import { M, POS, RT, WORK_POS, bump, fmtClock, fmtDur, html, setUI, useEffect, useRef, useState } from '../lib/runtime.js';
+import { M, POS, RT, WORK_POS, fmtClock, fmtDur, html, setUI, useEffect, useRef, useState } from '../lib/runtime.js';
 import { Icon, VinText } from '../lib/ui-kit.js';
 
 /* Scanner 1 at TL1: line-in (URD req 1). The only routine scan on the line. */
@@ -13,7 +14,7 @@ export function ScanDialog({ d }) {
   const [vin, setVin] = useState(d.vin || ''), [res, setRes] = useState(null), [scanning, setScanning] = useState(false), inp = useRef(null);
   useEffect(() => { inp.current && inp.current.focus(); }, []);
   const head = M.bufferHead(S), headBody = head >= 0 ? S.bodyBuffer[head] : null;
-  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { const r = M.entryScan(S, vin.trim().toUpperCase(), 'MANUAL'); setRes(r); setScanning(false); bump(); }, 650); };
+  const doScan = () => { setScanning(true); setRes(null); setTimeout(() => { Act.entryScan(vin.trim().toUpperCase(), 'MANUAL').then((r) => { setRes(r); setScanning(false); }, (e) => { setRes({ ok: false, reason: e.message }); setScanning(false); }); }, 650); };
   const E0 = S.pos['TL1'];
   const activeV = S.vehOrder.map((id) => S.vehicles[id]).find((v) => v.state === 'IN_PROCESS' && v.carrierId && S.carriers[v.carrierId].posId && POS[S.carriers[v.carrierId].posId].kind === 'work');
   const entryState = !E0.carrierId ? (E0.reservedBy ? `skid ${E0.reservedBy} arriving` : 'no skid present') : E0.occ.vehicleId ? `occupied by ${S.vehicles[E0.occ.vehicleId].vin.slice(-6)}` : E0.occ.pendingBody ? 'body being placed' : `empty skid ${E0.carrierId} ready`;
@@ -43,7 +44,7 @@ export function OffLineDialog({ d }) {
   if (!v) return null;
   const scanner = at === 'TL6' ? 'Offline scanner at TL6 (end of Trim)' : at && ['FL1', 'FL2', 'FL3'].includes(at) ? 'Handheld scanner 1 (FL1–FL3)' : 'Handheld scanner 2 (FL4–FL7)';
   const doScan = () => { setScanning(true); setTimeout(() => { setScan(v.vin); setScanning(false); }, 550); };
-  const submit = () => { const r = M.takeOffLine(S, v.id, { reason, notes, by: userName(), scan }); if (!r.ok) { setErr(r.reason); bump(); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const submit = () => Act.takeOffLine(v.id, { reason, notes, by: userName(), scan }).then((r) => { if (!r.ok) { setErr(r.reason); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); }, (e) => setErr(e.message));
   const scanOk = scan && scan.trim().toUpperCase() === v.vin;
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="off-h">
     <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">${at || '—'} · ${scanner}</div><h3 id="off-h">Take unit offline</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
@@ -66,7 +67,7 @@ export function ReturnDialog({ d }) {
   const S = RT.S, v = S.vehicles[d.vehicleId], [note, setNote] = useState(''), [err, setErr] = useState(null);
   if (!v || !v.offline) return null;
   const pos = v.offline.pos, slot = M.stationCount(S, pos);
-  const submit = () => { const r = M.returnToLine(S, v.id, userName(), note); if (!r.ok) { setErr(r.reason); return; } bump(); setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); };
+  const submit = () => Act.returnToLine(v.id, userName(), note).then((r) => { if (!r.ok) { setErr(r.reason); return; } setUI({ dialog: null, selection: { kind: 'veh', id: v.id } }); }, (e) => setErr(e.message));
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="ret-h">
     <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Offline since ${fmtClock(v.offline.t, false)} · ${fmtDur(S.t - v.offline.t)}</div><h3 id="ret-h">Return ${v.vin.slice(-6)} to the line</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">
@@ -84,7 +85,7 @@ export function CorrectDialog({ d }) {
   const [mode, setMode] = useState('move'), [vin, setVin] = useState(d.vin || (cur ? cur.vin : '')), [to, setTo] = useState(''), [reason, setReason] = useState(''), [res, setRes] = useState(null);
   const active = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => M.isActive(v) && v.carrierId && S.carriers[v.carrierId].mode === 'POS');
   const targets = WORK_POS.filter((id) => S.pos[id].carrierId && id !== (cur && cur.posId));
-  const submit = () => { const r = mode === 'move' ? M.correctPosition(S, vin, to, userName(), reason) : M.clearGhost(S, d.pos, userName(), reason); setRes(r); bump(); if (r.ok) setTimeout(() => setUI({ dialog: null }), 900); };
+  const submit = () => (mode === 'move' ? Act.correctPosition(vin, to, userName(), reason) : Act.clearGhost(d.pos, userName(), reason)).then((r) => { setRes(r); if (r.ok) setTimeout(() => setUI({ dialog: null }), 900); }, (e) => setRes({ ok: false, reason: e.message }));
   return html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setUI({ dialog: null })}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="cor-h">
     <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Authorised · audited</div><h3 id="cor-h">Correct vehicle position</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setUI({ dialog: null })}><${Icon} n="x" /></button></div>
     <div class="dialog-body">

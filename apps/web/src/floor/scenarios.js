@@ -2,6 +2,7 @@
 import { Scene3D } from '@mg/scene';
 import { savedCfg } from '../admin.js';
 import { buildScenario } from '@mg/sim';
+import { REMOTE, send } from '../lib/source.js';
 import { M, POS, RT, dispId, setUI } from '../lib/runtime.js';
 
 export { DEMO_AFTER, SCENARIOS, freshState, injectDemoDelay } from '@mg/sim';
@@ -13,6 +14,8 @@ export function applyScenarioHints(r) {
   setTimeout(() => { if (r.select) focusSel(r.select); else if (Scene3D.ok) Scene3D.focusView(r.view || 'overview'); }, 30);
 }
 export function loadScenario(n) {
+  // live screens: the edge server rebuilds the plant and every screen gets the new state
+  if (REMOTE) { send({ type: 'SIM_SCENARIO', n }).then((hints) => applyScenarioHints({ ...hints, speed: hints.speed || RT.speed })); return; }
   const { S, hints } = buildScenario(n, savedCfg());
   RT.S = S;
   applyScenarioHints(hints);

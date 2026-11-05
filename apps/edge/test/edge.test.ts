@@ -102,6 +102,9 @@ describe('edge server', () => {
     expect(r.ok).toBe(true);
     await a.until(() => a.rev > before && a.state.calls.filter((c: { clearedT: number | null }) => c.clearedT == null).length >= 2);
     expect((await a.send({ type: 'SIM_SPEED', speed: 5 })).ok).toBe(true);
+    expect((await a.send({ type: 'SIM_CONFIG', key: 'autoRespond', value: false })).ok).toBe(true);
+    expect(srv.host.S.cfg.autoRespond).toBe(false);
+    expect((await a.send({ type: 'SIM_CONFIG', key: 'shiftStart', value: 0 })).ok).toBe(false); // not a console setting
     expect(srv.host.clock.speed).toBe(5);
     srv.host.clock.mode = 'live';
     const refused = await a.send({ type: 'SIM_SPEED', speed: 60 });

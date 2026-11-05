@@ -75,6 +75,8 @@ export const OperatorCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('RESCAN_ENGINE'), pos }),
   z.object({ type: z.literal('LOG_NOTE'), cat: z.enum(['sim', 'note']), text: z.string().max(500), extra: z.record(z.string(), z.unknown()).optional() }),
 ]);
+/** Settings the simulation console may change directly (not audited plant configuration). */
+export const SIM_CONFIG_KEYS = ['autoFeed', 'autoEntryScan', 'autoExitScan', 'autoComplete', 'autoRespond', 'trimAndon', 'useSchedule', 'engineCheck', 'callRate', 'warnPct', 'escalateAfter', 'blockedAlarmAfter', 'delayRate'] as const;
 /** Simulator controls: accepted only when the edge server runs in simulation mode. */
 export const SimCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SIM_SPEED'), speed: z.number().min(0.25).max(60) }),
@@ -88,6 +90,8 @@ export const SimCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SIM_EMERGENCY'), pos }),
   z.object({ type: z.literal('SIM_CLEAR_EMERGENCY'), pos }),
   z.object({ type: z.literal('SIM_POWER_CUT') }),
+  /** Simulator behaviour switches and rates from the simulation console. */
+  z.object({ type: z.literal('SIM_CONFIG'), key: z.enum(SIM_CONFIG_KEYS), value: z.union([z.boolean(), z.number().min(0).max(36000)]) }),
 ]);
 export const Command = z.union([OperatorCommand, SimCommand]);
 export type OperatorCommand = z.infer<typeof OperatorCommand>;

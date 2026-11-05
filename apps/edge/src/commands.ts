@@ -53,5 +53,6 @@ function exec(host: EngineHost, S: EngineHost['S'], c: Cmd): unknown {
     case 'SIM_EMERGENCY': return M.callEmergency(S, c.pos), true;
     case 'SIM_CLEAR_EMERGENCY': return M.clearEmergency(S, c.pos), true;
     case 'SIM_POWER_CUT': return host.powerCut();
+    case 'SIM_CONFIG': S.cfg[c.key] = c.value; return true;
   }
 }
