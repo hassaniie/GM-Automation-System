@@ -1,6 +1,6 @@
 /* ── state ─────────────────────────────────────────────────────────────── */
 import { DEFAULT_CFG, LOOPS, ROUTE, applyTakt } from './plant.js';
-import { mulberry32, pad2 } from './util.js';
+import { pad2, stateRng } from './util.js';
 
 /**
  * A fresh plant state at 22:00 the day before the base date (two hours of warm-up before Shift A).
@@ -8,7 +8,7 @@ import { mulberry32, pad2 } from './util.js';
  */
 export function createState(seed = 7, cfg = {}) {
   const S = {
-    seed, rng: mulberry32(seed), t: -2 * 3600, rev: 0, cfg: { ...DEFAULT_CFG, ...cfg },
+    seed, rng: null, rngState: seed, t: -2 * 3600, rev: 0, cfg: { ...DEFAULT_CFG, ...cfg },
     pos: {}, carriers: {}, loopBuf: { TRIM: [], CHASSIS: [], FINAL: [] }, vehicles: {}, vehOrder: [],
     bodyBuffer: [null, null, null, null, null, null], offlineBay: [], emergency: { TRIM: [], CHASSIS: [], FINAL: [] }, paused: { TRIM: false, CHASSIS: false, FINAL: false },
     alarms: [], alarmByKey: {}, events: [], scans: [], anims: [], xfers: [],
@@ -19,6 +19,7 @@ export function createState(seed = 7, cfg = {}) {
     shift: null, planned: null, shiftCheckT: -Infinity, history: [],
     prod: [], calls: [], audit: [], down: {}, buzzing: {}, returnQueue: [], lastEntryT: -Infinity,
   };
+  S.rng = stateRng(S);
   S.cfg.takt = { ...DEFAULT_CFG.takt, ...(cfg.takt || {}) };
   S.cfg.targets = { ...DEFAULT_CFG.targets, ...(cfg.targets || {}) };
   S.cfg.buzzer = { ...DEFAULT_CFG.buzzer, ...(cfg.buzzer || {}) };

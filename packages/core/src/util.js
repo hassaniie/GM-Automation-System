@@ -1,4 +1,13 @@
 /* ── utilities ─────────────────────────────────────────────────────────── */
+/** The same generator as mulberry32, but its position lives in S.rngState, so a checkpoint can resume it. */
+export function stateRng(S) {
+  return function () {
+    let a = S.rngState | 0; a = (a + 0x6D2B79F5) | 0; S.rngState = a;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 export function mulberry32(a) {
   return function () {
     a |= 0; a = (a + 0x6D2B79F5) | 0;

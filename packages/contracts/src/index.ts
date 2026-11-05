@@ -150,7 +150,7 @@ export interface Downtime { pos: Record<PositionId, Seconds>; line: Partial<Reco
 
 /** The rules' state. Fields marked as plant state are written by the simulator or device adapters. */
 export interface EngineState {
-  seed: number; t: Seconds; rev: number; cfg: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  seed: number; rngState: number; t: Seconds; rev: number; cfg: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   pos: Record<PositionId, PositionState>;
   carriers: Record<CarrierId, Carrier>;
   vehicles: Record<VehicleId, Vehicle>; vehOrder: VehicleId[];
