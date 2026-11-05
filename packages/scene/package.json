@@ -1,0 +1,9 @@
+{
+  "name": "@mg/scene",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "three.js digital twin of the GA shop",
+  "exports": { ".": "./src/index.js", "./brand": "./src/brand.js" },
+  "dependencies": { "@mg/engine": "workspace:*", "three": "0.128.0" }
+}
