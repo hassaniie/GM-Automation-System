@@ -149,7 +149,7 @@ window.addEventListener('pointerdown', () => { if (!RT.ui.muted) Horn.ensure(); 
 
 /* ── scenarios ── */
 function freshState(seed) {
-  const S = M.createState(seed, { delayRate: 0.04, mismatchRate: 0.03 });
+  const S = M.createState(seed, { ...savedCfg(), delayRate: 0.04, mismatchRate: 0.03 });
   S.recording = false; M.runUntil(S, S.cfg.shiftStart); S.recording = true;
   S.events = S.events.filter((e) => e.t >= S.cfg.shiftStart - 900);
   S.alarms = S.alarms.filter(M.alarmActive); S.alarmByKey = {}; S.alarms.forEach((a) => (S.alarmByKey[a.key] = a));
@@ -255,13 +255,14 @@ function ActIsland() {
   return html`<nav class="seg act-island" aria-label="Actions">
     <button class="ibtn" title="Find a vehicle by VIN (/)" aria-label="Find a vehicle by VIN" onClick=${() => setUI({ dialog: { type: 'vin' } })}><${Icon} n="search" /></button>
     <button class="ibtn" title="Scanner 1 · line-in scan at TL1" aria-label="Line-in scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
-    <button class="ibtn opt" title="Shift report" aria-label="Shift report" onClick=${() => setUI({ report: true })}><${Icon} n="chart" /></button>
     <button class="ibtn" title="X-ray build view (X)" aria-label="X-ray build view" aria-pressed=${RT.ui.xray} onClick=${() => setUI({ xray: !RT.ui.xray })}><${Icon} n="xray" /></button>
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
     <button class="ibtn opt" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
     <span class="sep"></span>
     <${CallsPill} />
     <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button>
+    <span class="sep"></span>
+    <${UserMenu} />
     <span class="sep"></span>
     <button class="bv-mark" onClick=${() => setUI({ dialog: { type: 'about' } })} title="Designed & built by Bolt & Volt"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /></button>
   </nav>`;

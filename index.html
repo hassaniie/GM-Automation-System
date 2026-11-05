@@ -759,6 +759,125 @@ svg.plan text { font-family: var(--font-mono); }
 .stimeline .cbar { display: block; height: 4px; background: var(--hair); position: relative; min-width: 60px; }
 .stimeline .cbar i { position: absolute; left: 0; top: 0; bottom: 0; }
 .stimeline .cbar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); }
+
+/* ═════════ navigation, pages, sign-in, settings ═════════ */
+.nav-island { gap: 0; padding: 0 6px; }
+.nav-b { display: inline-flex; align-items: center; gap: 7px; height: 100%; padding: 0 10px; background: transparent; border: 0; color: var(--text-2); font: 600 10.5px/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
+.nav-b .ico { width: 17px; height: 17px; }
+.nav-b:hover { color: var(--text); }
+.nav-b[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
+.nav-b span { display: none; }
+@media (min-width: 1880px) { .nav-b span { display: inline; } }
+.page-shell { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
+.page-shell > .hud { position: relative; flex: none; }
+.page-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
+.page-wrap { max-width: 1440px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 60px max(16px, env(safe-area-inset-left, 0px)); }
+.empty-page { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 120px 16px; color: var(--text-2); }
+.pg-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.pg-head h2 { margin: 4px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+.pg-sub { margin: 6px 0 0; color: var(--text-2); max-width: 74ch; line-height: 1.5; }
+/* avatars */
+.av { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; font: 600 12px/1 var(--font-ui); letter-spacing: .04em; color: #fff; background: var(--muted); border-radius: 50% !important; vertical-align: middle; }
+.av.sm { width: 24px; height: 24px; font-size: 10px; }
+.r-admin { background: #c8102e !important; } .r-authorised { background: #0f8ea6 !important; } .r-supervisor { background: var(--call-sup) !important; } .r-maintenance { background: var(--call-mnt) !important; } .r-viewer { background: #6e7b88 !important; }
+.umenu { position: relative; display: flex; align-items: center; padding: 0 12px; }
+.ubtn { width: 34px; height: 34px; border-radius: 50% !important; border: 0; color: #fff; font: 600 12px/1 var(--font-ui); cursor: pointer; }
+.ubtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.umenu-pop { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; padding: 14px; z-index: 60; display: grid; gap: 4px; }
+.um-head { display: flex; gap: 10px; align-items: center; }
+.um-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 8px; background: transparent; border: 0; color: var(--text); font: 500 13px/1.2 var(--font-ui); text-align: left; cursor: pointer; }
+.um-item:hover { background: var(--fill); }
+.um-item .c-muted { margin-left: auto; font-size: 11px; }
+.um-item .ico { width: 16px; height: 16px; }
+.um-sep { height: 1px; background: var(--hair); margin: 6px 0; }
+/* sign-in */
+.signin { position: absolute; inset: 0; z-index: 80; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr); background: var(--bg); overflow: auto; }
+.si-brand { position: relative; display: flex; flex-direction: column; gap: 28px; padding: 44px 52px; color: #e8edf2; background: radial-gradient(120% 90% at 0% 0%, #1d2731 0%, #0d1217 55%, #080b0e 100%); overflow: hidden; }
+.si-brand::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,.035) 39px 40px) 0 0 / 40px 40px, linear-gradient(0deg, transparent 0 39px, rgba(255,255,255,.035) 39px 40px) 0 0 / 40px 40px; pointer-events: none; }
+.si-brand > * { position: relative; z-index: 1; }
+.si-top { display: flex; align-items: center; gap: 12px; }
+.si-top .brand-name { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; }
+.si-top .brand-sub { font-size: 12px; color: #93a0ad; }
+.si-hero { margin-top: auto; }
+.si-hero .micro { color: #93a0ad; }
+.si-hero h1 { margin: 10px 0 12px; font-size: clamp(30px, 3.4vw, 46px); line-height: 1.08; font-weight: 600; letter-spacing: -.02em; max-width: 16ch; }
+.si-hero p { margin: 0; max-width: 52ch; color: #b5c0ca; line-height: 1.55; }
+.si-flow { width: 100%; max-width: 620px; height: auto; }
+.si-flow-l { font: 600 10px/1 var(--font-ui); letter-spacing: .16em; text-transform: uppercase; fill: #93a0ad; }
+.si-flow-rail { stroke: rgba(255,255,255,.12); stroke-width: 1; }
+.si-st { fill: rgba(255,255,255,.05); stroke: rgba(255,255,255,.18); transition: fill .4s; }
+.si-st.s-normal { fill: rgba(63,194,138,.32); stroke: #3fc28a; } .si-st.s-near { fill: rgba(240,169,42,.35); stroke: #f0a92a; } .si-st.s-over { fill: rgba(255,84,82,.42); stroke: #ff5452; }
+.si-call { animation: lamp-blink 1s steps(2, start) infinite; } .si-call.c-sup { fill: #b394ff; } .si-call.c-mnt { fill: #4fb4ff; }
+.si-live { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.1); }
+.si-live > div { display: grid; gap: 4px; } .si-live .micro { color: #93a0ad; } .si-live b { font-size: 16px; font-weight: 600; }
+.si-foot { display: flex; align-items: center; gap: 12px; color: #7f8b97; font-size: 12px; }
+.si-foot img { height: 20px; } .si-foot img.ink { display: none; }
+.si-form-wrap { display: grid; place-items: center; padding: 40px 24px; }
+.si-form { width: min(420px, 100%); display: grid; gap: 16px; }
+.si-form h2 { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -.01em; }
+.si-sub { margin: -8px 0 4px; color: var(--text-2); line-height: 1.5; }
+.si-avatar { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50% !important; background: var(--text); color: var(--bg); font: 600 18px/1 var(--font-ui); }
+.si-err { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--crit) 50%, transparent); background: color-mix(in srgb, var(--crit) 8%, transparent); color: var(--text); line-height: 1.4; }
+.si-err .ico { color: var(--crit); flex: none; margin-top: 1px; }
+.si-field { display: grid; gap: 6px; }
+.si-field label, .si-lab label { font: 600 11px/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+.si-lab { display: flex; justify-content: space-between; align-items: baseline; }
+.si-lab .linkish { font-size: 12px; }
+.si-input { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 6px 0 14px; border: 1px solid var(--hair-2); background: var(--fill); transition: border-color .12s; }
+.si-input:focus-within { border-color: var(--text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 12%, transparent); }
+.si-field.bad .si-input { border-color: var(--crit); }
+.si-input > .ico { color: var(--muted); width: 18px; height: 18px; flex: none; }
+.si-input input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--text); font: 500 16px/1 var(--font-ui); outline: none; }
+.si-eye { width: 40px; height: 40px; display: grid; place-items: center; background: transparent; border: 0; color: var(--text-2); cursor: pointer; }
+.si-eye:hover { color: var(--text); }
+.si-hint { font-size: 12.5px; display: flex; gap: 6px; align-items: center; } .si-hint.bad { color: var(--crit); } .si-hint.warn { color: var(--warn); } .si-hint .ico { width: 14px; height: 14px; }
+.si-check { display: flex; gap: 10px; align-items: center; color: var(--text-2); cursor: pointer; }
+.si-check input { width: 18px; height: 18px; accent-color: var(--text); }
+.si-go { height: 52px !important; justify-content: center; font-size: 13px !important; letter-spacing: .16em; }
+.si-go .ico { margin-left: 6px; }
+.si-or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .16em; }
+.si-or::before, .si-or::after { content: ""; flex: 1; height: 1px; background: var(--hair); }
+.si-alt { height: 48px !important; justify-content: center; position: relative; }
+.si-soon { position: absolute; right: 10px; top: -9px; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; padding: 2px 6px; background: var(--bg); border: 1px solid var(--hair-2); color: var(--muted); }
+.si-demo { border: 1px dashed var(--hair-2); }
+.si-demo-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; background: transparent; border: 0; color: var(--text); font: 600 12px/1 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+.si-demo-h span:first-child { display: inline-flex; align-items: center; gap: 8px; } .si-demo-h .c-muted { font: 400 12px/1 var(--font-ui); letter-spacing: 0; text-transform: none; }
+.si-accts { display: grid; gap: 2px; padding: 0 8px 8px; }
+.si-acct { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 8px 8px; background: transparent; border: 1px solid transparent; color: var(--text); text-align: left; cursor: pointer; }
+.si-acct:hover, .si-acct:focus-visible { border-color: var(--hair-2); background: var(--fill); }
+.si-acct .nm { display: grid; gap: 2px; } .si-acct small { color: var(--text-2); font-size: 12px; }
+.si-note { margin: 0; padding: 0 14px 12px; color: var(--text-2); font-size: 12.5px; }
+.si-fine { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+@media (max-width: 980px) { .signin { grid-template-columns: 1fr; } .si-brand { padding: 24px 20px; gap: 16px; } .si-hero h1 { font-size: 26px; } .si-hero p, .si-flow, .si-foot { display: none; } .si-hero { margin-top: 4px; } }
+/* settings */
+.admin { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 28px; align-items: start; }
+.adm-nav { position: sticky; top: 16px; display: grid; gap: 2px; }
+.adm-tab { display: flex; align-items: center; gap: 10px; padding: 10px; background: transparent; border: 0; color: var(--text-2); font: 500 14px/1 var(--font-ui); text-align: left; cursor: pointer; box-shadow: inset 2px 0 0 transparent; }
+.adm-tab:hover { color: var(--text); background: var(--fill); }
+.adm-tab[aria-current="page"] { color: var(--text); background: var(--fill); box-shadow: inset 2px 0 0 var(--text); }
+.adm-tab .ico { width: 16px; height: 16px; }
+.adm-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.adm-card { border: 1px solid var(--hair); background: var(--fill); padding: 16px; display: grid; gap: 10px; align-content: start; }
+.adm-card.changed { border-color: var(--text); }
+.adm-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.adm-body input[type="time"], .adm-body input[type="number"], .adm-body input:not([type]), .adm-body select { height: 36px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
+.takt-in { display: flex; align-items: center; gap: 6px; }
+.takt-in input { width: 74px !important; height: 52px !important; font: 400 30px/1 var(--font-mono) !important; text-align: center; }
+.takt-in span { font-size: 24px; } .takt-in span.c-muted { font-size: 12px; margin-left: 6px; }
+.plan-grid { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.plan-days { display: grid; gap: 2px; max-height: 620px; overflow: auto; }
+.plan-day { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px; background: transparent; border: 1px solid transparent; color: var(--text); font: 500 13px/1 var(--font-ui); cursor: pointer; text-align: left; }
+.plan-day:hover { background: var(--fill); }
+.plan-day[aria-selected="true"] { border-color: var(--text); background: var(--fill); }
+.plan-tbl input { height: 32px !important; }
+@media (max-width: 900px) { .admin, .plan-grid { grid-template-columns: 1fr; } .adm-nav { position: static; grid-auto-flow: column; overflow-x: auto; } .adm-tab { white-space: nowrap; } }
+
+.hud .nav-island, .hud .act-island, .bv-mark, .umenu { flex: none; }
+.hud .state-island { min-width: 0; overflow: hidden; }
+@media (max-width: 1760px) { .hud .brand > div { display: none; } }
+.si-brand { justify-content: space-between; gap: 18px; }
+.si-hero { margin-top: 0; }
+.si-flow { max-width: 560px; max-height: 26vh; }
 </style>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3075,7 +3194,7 @@ window.addEventListener('pointerdown', () => { if (!RT.ui.muted) Horn.ensure(); 
 
 /* ── scenarios ── */
 function freshState(seed) {
-  const S = M.createState(seed, { delayRate: 0.04, mismatchRate: 0.03 });
+  const S = M.createState(seed, { ...savedCfg(), delayRate: 0.04, mismatchRate: 0.03 });
   S.recording = false; M.runUntil(S, S.cfg.shiftStart); S.recording = true;
   S.events = S.events.filter((e) => e.t >= S.cfg.shiftStart - 900);
   S.alarms = S.alarms.filter(M.alarmActive); S.alarmByKey = {}; S.alarms.forEach((a) => (S.alarmByKey[a.key] = a));
@@ -3181,13 +3300,14 @@ function ActIsland() {
   return html`<nav class="seg act-island" aria-label="Actions">
     <button class="ibtn" title="Find a vehicle by VIN (/)" aria-label="Find a vehicle by VIN" onClick=${() => setUI({ dialog: { type: 'vin' } })}><${Icon} n="search" /></button>
     <button class="ibtn" title="Scanner 1 · line-in scan at TL1" aria-label="Line-in scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
-    <button class="ibtn opt" title="Shift report" aria-label="Shift report" onClick=${() => setUI({ report: true })}><${Icon} n="chart" /></button>
     <button class="ibtn" title="X-ray build view (X)" aria-label="X-ray build view" aria-pressed=${RT.ui.xray} onClick=${() => setUI({ xray: !RT.ui.xray })}><${Icon} n="xray" /></button>
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
     <button class="ibtn opt" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
     <span class="sep"></span>
     <${CallsPill} />
     <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button>
+    <span class="sep"></span>
+    <${UserMenu} />
     <span class="sep"></span>
     <button class="bv-mark" onClick=${() => setUI({ dialog: { type: 'about' } })} title="Designed & built by Bolt & Volt"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /></button>
   </nav>`;
@@ -3796,16 +3916,24 @@ function LineOffCard() {
    App shell: signed-in user and permissions, screen router, root and boot.
    ════════════════════════════════════════════════════════════════════════ */
 
-/* ── who is using the app (replaced by the sign-in module) ── */
-const Auth = { user: { name: 'Line supervisor', role: 'admin' } };
-function can() { return true; }
-function userName() { return Auth.user ? Auth.user.name : 'System'; }
-
 /* ── screens: #/floor, #/dash, #/display/<line>, #/reports, #/admin/<tab>, #/how ── */
 RT.route = { page: 'floor', sub: null };
 function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
 function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
-window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null }); });
+window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false, report: false }); });
+const PAGES = [
+  ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
+  ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
+];
+function NavIsland() {
+  const cur = RT.route.page;
+  return html`<nav class="seg nav-island" aria-label="Screens">${PAGES.filter((p) => p[3]()).map(([k, l, ic]) => html`<button key=${k} class="nav-b" aria-current=${cur === k ? 'page' : null} title=${l} onClick=${() => go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null)}><${Icon} n=${ic} /><span>${l}</span></button>`)}</nav>`;
+}
+/* Non-floor screens share the header and scroll their own body. */
+function PageShell({ children }) {
+  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
+}
+function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note">This screen is part of the next build step.</p></div></div>`; }
 
 /* ── root ── */
 function App() {
@@ -3828,6 +3956,7 @@ function App() {
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
       if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined && floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
       if (RT.ui.lineoff && now - RT.ui.lineoff.at > 6500) setUI({ lineoff: null });
+      if (now - (RT._persistAt || 0) > 10000) { RT._persistAt = now; if (Auth.user) persistConfig(); }
       if (now - lastPaint > (RT.ui.view2D || !floor ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
       requestAnimationFrame(loop);
     };
@@ -3848,35 +3977,439 @@ function App() {
     window.addEventListener('keydown', key);
     return () => { RT.listeners.delete(l); window.removeEventListener('keydown', key); };
   }, []);
-  const d = RT.ui.dialog;
+  const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
+  const gate = page !== 'display' && (!Auth.user || Auth.locked);
   return html`<main class="stage">
-    <div id="scene" ref=${sceneRef} style=${{ visibility: RT.ui.view2D ? 'hidden' : 'visible' }}></div>
+    <div id="scene" ref=${sceneRef} style=${{ visibility: floor && !RT.ui.view2D && !gate ? 'visible' : 'hidden' }}></div>
+    ${gate ? html`<${SignIn} key=${Auth.locked ? 'lock' : 'in'} lock=${!!(Auth.user && Auth.locked)} />` : floor ? html`<${React.Fragment}>
     ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
     ${!RT.ui.view2D ? html`<${HoverCard} />` : null}
-    <header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header>
+    <header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${StateIsland} /><${ActIsland} /></header>
     <${Strip} /><${SimConsole} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
-    ${RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
-    ${RT.ui.report ? html`<${Report} />` : null}
+    ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
+    : page === 'display' ? html`<${Placeholder} title="Line displays" />`
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
+    ${gate ? null : html`<${React.Fragment}>
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
     ${d && d.type === 'offline' ? html`<${OffLineDialog} key=${d.vehicleId} d=${d} />` : null}
     ${d && d.type === 'return' ? html`<${ReturnDialog} key=${d.vehicleId} d=${d} />` : null}
     ${d && d.type === 'correct' ? html`<${CorrectDialog} key=${d.pos} d=${d} />` : null}
     ${d && d.type === 'vin' ? html`<${VinSearchDialog} />` : null}
-    ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}
+    ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}</${React.Fragment}>`}
   </main>`;
 }
-(function boot() {
+/* Called from src/08-boot.js once every UI module has been defined. */
+function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
+  if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
   RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
   M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
-  const start = () => ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`);
+  const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`); };
   const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
-  fonts.then(start, start);
-})();
+  Promise.all([fonts, Auth.init()]).then(start, start);
+}
+/* ════════════════════════════════════════════════════════════════════════
+   Sign-in, users and roles (URD req 30).
+   PROTOTYPE: accounts, password hashes and sessions live in this browser.
+   A deployment signs in against the plant directory (SSO) with server-side
+   sessions; the screens and permission rules stay the same.
+   ════════════════════════════════════════════════════════════════════════ */
+const ROLES = {
+  admin:       { label: 'Administrator', short: 'Admin', home: 'dash', perms: ['*'], desc: 'Everything, including users and the audit log.' },
+  authorised:  { label: 'Authorised person', short: 'Authorised', home: 'floor', perms: ['call', 'offline', 'buzzer', 'takt', 'plan', 'correct', 'reports', 'audit'], desc: 'Sets takt, targets and shifts; corrects positions; switches buzzers.' },
+  supervisor:  { label: 'Line supervisor', short: 'Supervisor', home: 'floor', perms: ['call', 'respond.SUP', 'offline', 'reports'], desc: 'Responds to and clears supervisor calls; takes units offline.' },
+  maintenance: { label: 'Maintenance', short: 'Maintenance', home: 'floor', perms: ['call', 'respond.MNT', 'reports'], desc: 'Responds to and clears maintenance calls.' },
+  viewer:      { label: 'View only · management', short: 'View only', home: 'dash', perms: ['reports'], desc: 'Dashboard, line displays, reports and VIN lookup.' },
+};
+// Demo accounts (fictional people). Shown on the sign-in screen.
+const DEMO_USERS = [
+  { id: 'u1', name: 'Hamza Siddiqui', empId: 'MG-1001', email: 'hamza.siddiqui@mgjw.pk', role: 'admin', pw: 'Admin@2026' },
+  { id: 'u2', name: 'Ayesha Malik', empId: 'MG-2040', email: 'ayesha.malik@mgjw.pk', role: 'authorised', pw: 'Plan@2026' },
+  { id: 'u3', name: 'Usman Tariq', empId: 'MG-3112', email: 'usman.tariq@mgjw.pk', role: 'supervisor', pw: 'Line@2026' },
+  { id: 'u4', name: 'Bilal Ahmed', empId: 'MG-4207', email: 'bilal.ahmed@mgjw.pk', role: 'maintenance', pw: 'Fix@2026' },
+  { id: 'u5', name: 'Head Office', empId: 'MG-9001', email: 'ho.viewer@mgjw.pk', role: 'viewer', pw: 'View@2026' },
+];
+const IDLE_LOCK_MS = 15 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 30 * 1000;
+const sstore = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* unavailable */ } }, del(k) { try { sessionStorage.removeItem(k); } catch (e) { /* unavailable */ } } };
+const jget = (k, d) => { try { const v = store.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const jset = (k, v) => store.set(k, JSON.stringify(v));
+
+async function hashPw(salt, pw) {
+  const txt = `mg-andon:${salt}:${pw}`;
+  try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); return Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, '0')).join(''); }
+  catch (e) { let h = 5381; for (let i = 0; i < txt.length; i++) h = ((h << 5) + h + txt.charCodeAt(i)) | 0; return 'f' + (h >>> 0).toString(16); } // no SubtleCrypto (file://): weaker fallback
+}
+const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+
+const Auth = {
+  user: null, locked: false, lastActive: Date.now(), log: jget('mg-andon-authlog', []),
+  async init() {
+    let users = jget('mg-andon-users', null);
+    if (!users) { users = await Promise.all(DEMO_USERS.map(async (u) => ({ id: u.id, name: u.name, empId: u.empId, email: u.email, role: u.role, active: true, hash: await hashPw(u.id, u.pw), created: Date.now(), lastIn: null }))); jset('mg-andon-users', users); }
+    this.users = users;
+    const sess = JSON.parse(sstore.get('mg-andon-session') || store.get('mg-andon-session') || 'null');
+    if (sess && sess.exp > Date.now()) { const u = users.find((x) => x.id === sess.uid && x.active); if (u) this.user = u; }
+    ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, () => { this.lastActive = Date.now(); }, { capture: true, passive: true }));
+    setInterval(() => { if (this.user && !this.locked && !isKiosk() && Date.now() - this.lastActive > IDLE_LOCK_MS) { this.locked = true; this.record('Screen locked after inactivity', this.user.name); bump(); } }, 10000);
+  },
+  saveUsers() { jset('mg-andon-users', this.users); },
+  record(action, who, detail = '') { this.log.push({ at: Date.now(), action, who, detail }); if (this.log.length > 400) this.log.shift(); jset('mg-andon-authlog', this.log); },
+  find(idOrEmail) { const q = (idOrEmail || '').trim().toLowerCase(); return this.users.find((u) => u.empId.toLowerCase() === q || u.email.toLowerCase() === q) || null; },
+  tries() { return jget('mg-andon-tries', { n: 0, until: 0 }); },
+  async signIn(idOrEmail, pw, keep) {
+    const t = this.tries();
+    if (t.until > Date.now()) return { ok: false, reason: `Too many attempts. Try again in ${Math.ceil((t.until - Date.now()) / 1000)} s.`, locked: true };
+    const u = this.find(idOrEmail);
+    const good = u && u.active && (await hashPw(u.id, pw)) === u.hash;
+    if (!good) {
+      const n = t.n + 1, until = n >= MAX_TRIES ? Date.now() + LOCKOUT_MS : 0;
+      jset('mg-andon-tries', { n: until ? 0 : n, until });
+      this.record('Sign-in failed', idOrEmail || '(blank)', u && !u.active ? 'account disabled' : '');
+      if (u && !u.active) return { ok: false, reason: 'This account is disabled. Ask your administrator.' };
+      return { ok: false, reason: until ? `Too many attempts. Sign-in is paused for ${LOCKOUT_MS / 1000} s.` : `That ID and password don't match.${n >= 3 ? ` ${MAX_TRIES - n} tries left.` : ''}`, locked: !!until };
+    }
+    jset('mg-andon-tries', { n: 0, until: 0 });
+    this.start(u, keep, 'Signed in');
+    return { ok: true };
+  },
+  start(u, keep, how) {
+    this.user = u; this.locked = false; this.lastActive = Date.now(); u.lastIn = Date.now(); this.saveUsers();
+    const sess = JSON.stringify({ uid: u.id, exp: Date.now() + (keep ? 12 * 3600e3 : 10 * 3600e3) });
+    store.set('mg-andon-session', keep ? sess : ''); sstore.set('mg-andon-session', sess);
+    this.record(how, u.name, ROLES[u.role].label);
+  },
+  async unlock(pw) { const u = this.user; if (u && (await hashPw(u.id, pw)) === u.hash) { this.locked = false; this.lastActive = Date.now(); this.record('Screen unlocked', u.name); return true; } this.record('Unlock failed', u ? u.name : '?'); return false; },
+  signOut() { if (this.user) this.record('Signed out', this.user.name); this.user = null; this.locked = false; store.set('mg-andon-session', ''); sstore.del('mg-andon-session'); setUI({ dialog: null, drawer: null, selection: null, menu: false }); location.hash = '#/'; bump(); },
+  switchTo(u) { this.record('Demo user switch', u.name, `from ${this.user ? this.user.name : '—'}`); this.start(u, !!store.get('mg-andon-session'), 'Signed in (demo switch)'); setUI({ menu: false, dialog: null }); bump(); },
+};
+function can(perm) { const u = Auth.user; if (!u || Auth.locked) return false; const P = ROLES[u.role].perms; return P.includes('*') || P.includes(perm); }
+function userName() { const u = Auth.user; return u ? `${u.name} · ${ROLES[u.role].short}` : 'System'; }
+const isKiosk = () => RT.route && RT.route.page === 'display';
+
+/* ── sign-in screen ── */
+function SignIn({ lock }) {
+  const S = RT.S, p = M.pace(S), open = S.calls.filter((c) => c.clearedT == null).length, ls = M.lineStatus(S);
+  const [id, setId] = useState(lock && Auth.user ? Auth.user.empId : ''), [pw, setPw] = useState(''), [show, setShow] = useState(false), [keep, setKeep] = useState(true), [caps, setCaps] = useState(false);
+  const [busy, setBusy] = useState(false), [err, setErr] = useState(null), [touched, setTouched] = useState(false), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
+  const [, tick] = useReducer((x) => x + 1, 0);
+  useEffect(() => { (lock ? pwRef : idRef).current && (lock ? pwRef : idRef).current.focus(); const i = setInterval(tick, 1000); return () => clearInterval(i); }, []);
+  const t = Auth.tries(), waitS = t.until > Date.now() ? Math.ceil((t.until - Date.now()) / 1000) : 0;
+  const idErr = touched && !lock && !id.trim() ? 'Enter your employee ID or email.' : null, pwErr = touched && !pw ? 'Enter your password.' : null;
+  const submit = async (e) => {
+    e && e.preventDefault(); setTouched(true); setErr(null);
+    if ((!lock && !id.trim()) || !pw || waitS) return;
+    setBusy(true);
+    await new Promise((r) => setTimeout(r, 450));
+    if (lock) { const okU = await Auth.unlock(pw); setBusy(false); if (!okU) { setErr('Wrong password.'); setPw(''); } else bump(); return; }
+    const r = await Auth.signIn(id, pw, keep); setBusy(false);
+    if (!r.ok) { setErr(r.reason); setPw(''); pwRef.current && pwRef.current.focus(); return; }
+    const home = ROLES[Auth.user.role].home; if (!location.hash || location.hash === '#/' || location.hash === '#') go(home); else bump();
+  };
+  const fill = (u) => { setId(u.empId); setPw(u.pw); setErr(null); setTouched(false); pwRef.current && pwRef.current.focus(); };
+  const keyCaps = (e) => setCaps(!!(e.getModifierState && e.getModifierState('CapsLock')));
+  return html`<div class="signin">
+    <section class="si-brand" aria-hidden=${lock ? 'true' : 'false'}>
+      <div class="si-top"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile · General Assembly</div></div></div>
+      <div class="si-hero"><div class="micro">Andon · Trim → Chassis → Final</div><h1>Every station, every call, in real time.</h1>
+        <p>Cycle time against takt, buzzers, supervisor and maintenance calls, targets and downtime, on the floor, at each line and at head office.</p></div>
+      <${SignInFlow} />
+      <div class="si-live" role="status"><span class="sim-tag"><${Icon} n="flask" size=${10} />SIMULATION</span>
+        <div><span class="micro">Line</span><b style=${{ color: tv(ls.tone) }}>${ls.label}</b></div>
+        <div><span class="micro">Final · this shift</span><b class="mono">${p.done} / ${p.target}</b></div>
+        <div><span class="micro">Open calls</span><b class="mono">${open}</b></div>
+        <div><span class="micro">Shop time</span><b class="mono">${fmtClock(S.t, false)}</b></div></div>
+      <div class="si-foot"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /><span>Designed and built by Bolt & Volt</span></div>
+    </section>
+    <section class="si-form-wrap">
+      <form class="si-form" onSubmit=${submit} noValidate aria-labelledby="si-h">
+        ${lock ? html`<div class="si-avatar">${initials(Auth.user.name)}</div>` : null}
+        <h2 id="si-h">${lock ? 'Screen locked' : 'Sign in'}</h2>
+        <p class="si-sub">${lock ? html`Locked after ${IDLE_LOCK_MS / 60000} minutes without use. Enter the password for <b>${Auth.user.name}</b> to continue.` : 'Use your MG JW employee ID or work email.'}</p>
+        ${err ? html`<div class="si-err" role="alert"><${Icon} n="alert" />${err}</div>` : null}
+        ${waitS ? html`<div class="si-err" role="alert"><${Icon} n="lock" />Sign-in paused after ${MAX_TRIES} failed attempts. Try again in ${waitS} s.</div>` : null}
+        ${!lock ? html`<div class=${'si-field' + (idErr ? ' bad' : '')}><label for="si-id">Employee ID or email</label>
+          <div class="si-input"><${Icon} n="user" /><input id="si-id" ref=${idRef} autoComplete="username" spellCheck="false" value=${id} placeholder="MG-1234 or name@mgjw.pk" aria-invalid=${idErr ? 'true' : 'false'} aria-describedby=${idErr ? 'si-id-e' : null} onInput=${(e) => { setId(e.target.value); setErr(null); }} /></div>
+          ${idErr ? html`<div class="si-hint bad" id="si-id-e">${idErr}</div>` : null}</div>` : null}
+        <div class=${'si-field' + (pwErr ? ' bad' : '')}><div class="si-lab"><label for="si-pw">Password</label>${!lock ? html`<button type="button" class="linkish" onClick=${() => setErr('Passwords are reset by your administrator. Ask them for a temporary password.')}>Forgot password?</button>` : null}</div>
+          <div class="si-input"><${Icon} n="lock" /><input id="si-pw" ref=${pwRef} type=${show ? 'text' : 'password'} autoComplete="current-password" value=${pw} aria-invalid=${pwErr ? 'true' : 'false'} onInput=${(e) => { setPw(e.target.value); setErr(null); }} onKeyUp=${keyCaps} onKeyDown=${keyCaps} />
+            <button type="button" class="si-eye" aria-label=${show ? 'Hide password' : 'Show password'} aria-pressed=${show} onClick=${() => setShow(!show)}><${Icon} n=${show ? 'eyeoff' : 'eye'} /></button></div>
+          ${pwErr ? html`<div class="si-hint bad">${pwErr}</div>` : caps ? html`<div class="si-hint warn"><${Icon} n="alert" />Caps Lock is on</div>` : null}</div>
+        ${!lock ? html`<label class="si-check"><input type="checkbox" checked=${keep} onChange=${(e) => setKeep(e.target.checked)} /><span>Keep me signed in on this device</span></label>` : null}
+        <button type="submit" class="btn primary lg si-go" aria-busy=${busy ? 'true' : 'false'} disabled=${busy || waitS > 0}>${busy ? 'Checking…' : lock ? 'Unlock' : 'Sign in'}<${Icon} n="chev" /></button>
+        ${lock ? html`<button type="button" class="btn ghost si-alt" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign in as someone else</button>` : html`
+          <div class="si-or"><span>or</span></div>
+          <button type="button" class="btn si-alt" disabled title="Available when deployed on the plant network"><${Icon} n="building" />Sign in with MG JW account (SSO)<span class="si-soon">at deployment</span></button>`}
+        ${!lock ? html`<div class="si-demo"><button type="button" class="si-demo-h" aria-expanded=${demo} onClick=${() => setDemo(!demo)}><span><${Icon} n="key" />Demo access</span><span class="c-muted">${demo ? 'Hide' : 'Show'} the five role accounts</span></button>
+          ${demo ? html`<div class="si-accts">${DEMO_USERS.map((u) => html`<button type="button" key=${u.id} class="si-acct" onClick=${() => fill(u)} title=${ROLES[u.role].desc}>
+            <span class=${'av r-' + u.role}>${initials(u.name)}</span><span class="nm"><b>${u.name}</b><small>${ROLES[u.role].label}</small></span><span class="mono c-muted">${u.empId}</span></button>`)}</div>
+            <p class="si-note">Pick an account to fill the form, then sign in. Each role sees and can do different things.</p>` : null}</div>` : null}
+        <p class="si-fine">${lock ? null : html`Line displays don't need a sign-in: <a href="#/display/chassis" class="linkish">open a line display</a>. `}Prototype: accounts and sessions are kept in this browser only. The plant deployment signs in through the company directory.</p>
+      </form>
+    </section>
+  </div>`;
+}
+/* calm animated flow of the three lines, used on the sign-in brand panel */
+function SignInFlow() {
+  const S = RT.S, lines = [['TRIM', 'Trim', 6], ['CHASSIS', 'Chassis', 4], ['FINAL', 'Final', 7]];
+  return html`<svg class="si-flow" viewBox="0 0 520 150" role="img" aria-label="Live station states on the three lines">
+    ${lines.map(([a, name, n], li) => { const y = 24 + li * 46, ids = M.AREA_STATIONS[a]; return html`<g key=${a}>
+      <text x="0" y=${y + 4} class="si-flow-l">${name}</text>
+      <line x1="70" x2="510" y1=${y} y2=${y} class="si-flow-rail" />
+      ${ids.map((id, i) => { const st = M.andonState(S, id).state, x = 70 + (i + 0.5) * (440 / n), c = M.callsAt(S, id)[0]; return html`<g key=${id}><rect x=${x - 15} y=${y - 9} width="30" height="18" class=${'si-st s-' + st} />${c ? html`<circle cx=${x + 15} cy=${y - 9} r="4" class=${'si-call c-' + c.type.toLowerCase()} />` : null}</g>`; })}
+    </g>`; })}
+  </svg>`;
+}
+
+/* ── user menu (top bar) ── */
+function UserMenu() {
+  const u = Auth.user; if (!u) return null;
+  const open = RT.ui.menu;
+  return html`<div class="umenu"><button class=${'ubtn r-' + u.role} aria-haspopup="menu" aria-expanded=${!!open} title=${`${u.name} · ${ROLES[u.role].label}`} onClick=${() => setUI({ menu: !open })}>${initials(u.name)}</button>
+    ${open ? html`<div class="glass umenu-pop ticks" role="menu">
+      <div class="um-head"><span class=${'av r-' + u.role}>${initials(u.name)}</span><div><b>${u.name}</b><div class="c-muted" style=${{ fontSize: 12 }}>${ROLES[u.role].label} · ${u.empId}</div></div></div>
+      <p class="note">${ROLES[u.role].desc}</p>
+      <div class="micro" style=${{ margin: '8px 0 4px' }}>Switch demo user</div>
+      ${Auth.users.filter((x) => x.active && x.id !== u.id).map((x) => html`<button key=${x.id} class="um-item" role="menuitem" onClick=${() => Auth.switchTo(x)}><span class=${'av sm r-' + x.role}>${initials(x.name)}</span>${x.name}<span class="c-muted">${ROLES[x.role].short}</span></button>`)}
+      <div class="um-sep"></div>
+      <button class="um-item" role="menuitem" onClick=${() => { Auth.locked = true; Auth.record('Screen locked', u.name); setUI({ menu: false }); }}><${Icon} n="lock" />Lock screen</button>
+      <button class="um-item" role="menuitem" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign out</button>
+    </div>` : null}</div>`;
+}
+/* ════════════════════════════════════════════════════════════════════════
+   Settings for authorised users: takt (req 10), targets and shift plans
+   scheduled in advance (req 13–15), buzzers (req 18), position correction
+   (req 7), users (req 30) and the audit log. Saved on this device.
+   ════════════════════════════════════════════════════════════════════════ */
+const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
+function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
+function persistConfig() {
+  const S = RT.S; if (!S) return;
+  jset('mg-andon-config', Object.fromEntries(CFG_KEYS.map((k) => [k, S.cfg[k]])));
+  const log = jget('mg-andon-audit', []), from = S._auditSaved || 0;
+  for (const a of S.audit.slice(from)) log.push({ at: Date.now(), t: a.t, date: a.date, by: a.by, action: a.action, target: a.target, before: String(a.before), after: String(a.after), reason: a.reason });
+  S._auditSaved = S.audit.length;
+  jset('mg-andon-audit', log.slice(-800));
+}
+const toHM = (sec) => fmtClock(sec, false);
+const fromHM = (s) => { const [h, m] = (s || '0:0').split(':').map(Number); return (h || 0) * 3600 + (m || 0) * 60; };
+const ADMIN_TABS = [
+  ['takt', 'Takt time', 'clock', 'takt'], ['plan', 'Targets & plan', 'calendar', 'plan'], ['shifts', 'Shifts & breaks', 'hour', 'plan'],
+  ['buzzers', 'Buzzers', 'buzz', 'buzzer'], ['correct', 'Position correction', 'swap', 'correct'], ['users', 'Users', 'users', 'users'], ['audit', 'Audit log', 'shield', 'audit'],
+];
+const adminAllowed = () => ADMIN_TABS.some((t) => can(t[3]));
+const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), audit: (p) => AuditAdmin(p) };
+
+function AdminPage() {
+  const tabs = ADMIN_TABS.filter((t) => can(t[3]));
+  if (!tabs.length) return html`<${NoAccess} what="Settings" />`;
+  const cur = tabs.find((t) => t[0] === RT.route.sub) || tabs[0];
+  return html`<div class="page-wrap admin">
+    <aside class="adm-nav" aria-label="Settings sections"><div class="micro" style=${{ padding: '0 10px 8px' }}>Settings</div>
+      ${tabs.map(([k, l, ic]) => html`<button key=${k} class="adm-tab" aria-current=${cur[0] === k ? 'page' : null} onClick=${() => go('admin', k)}><${Icon} n=${ic} />${l}</button>`)}
+      <p class="note" style=${{ padding: '12px 10px' }}>Changes apply at once, are saved on this device and are written to the audit log with your name.</p></aside>
+    <section class="adm-body"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
+  </div>`;
+}
+const PageHead = ({ k, title, sub, children }) => html`<div class="pg-head"><div><div class="micro">${k}</div><h2>${title}</h2>${sub ? html`<p class="pg-sub">${sub}</p>` : null}</div>${children ? html`<div class="actions">${children}</div>` : null}</div>`;
+function Saved({ msg }) { return msg ? html`<div class=${'result ' + (msg.ok ? 'ok' : 'bad')} role="status" style=${{ marginTop: 10 }}>${msg.text}</div>` : null; }
+const auditFor = (pred) => jget('mg-andon-audit', []).filter(pred).slice(-8).reverse();
+const AuditMini = ({ rows }) => rows.length ? html`<table class="data" style=${{ marginTop: 10 }}><thead><tr><th>When</th><th>Change</th><th>Before → after</th><th>By</th><th>Reason</th></tr></thead><tbody>${rows.map((r, i) => html`<tr key=${i}><td class="mono">${r.date} ${fmtClock(r.t, false)}</td><td style=${{ textAlign: 'left' }}>${r.action} · ${r.target}</td><td class="mono" style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.before} → ${r.after}</td><td style=${{ textAlign: 'left' }}>${(r.by || '').split(' · ')[0]}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason || '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">No changes recorded yet.</p>`;
+
+/* Takt per line (req 10) */
+function TaktAdmin() {
+  const S = RT.S, [draft, setDraft] = useState(() => ({ ...S.cfg.takt })), [warn, setWarn] = useState(Math.round(S.cfg.warnPct * 100)), [why, setWhy] = useState(''), [msg, setMsg] = useState(null);
+  const save = () => {
+    let n = 0; for (const a of M.AREA_IDS) if (draft[a] !== S.cfg.takt[a]) n += M.setTakt(S, a, draft[a], userName(), why) ? 1 : 0;
+    const w = M.clamp(warn, 50, 99) / 100; if (w !== S.cfg.warnPct) { M.audit(S, userName(), 'Close-to-limit threshold changed', 'All lines', `${Math.round(S.cfg.warnPct * 100)}%`, `${Math.round(w * 100)}%`, why); S.cfg.warnPct = w; n++; }
+    persistConfig(); bump(); setMsg(n ? { ok: true, text: `Saved ${n} change${n > 1 ? 's' : ''}. Stations use the new takt immediately.` } : { ok: false, text: 'Nothing changed.' }); setWhy('');
+  };
+  const setPart = (a, m, s) => setDraft({ ...draft, [a]: M.clamp(m * 60 + s, 60, 3600) });
+  return html`<div>
+    <${PageHead} k="Takt time · URD req 10" title="Takt time per line" sub="The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime." />
+    <div class="adm-cards">${M.AREA_IDS.map((a) => { const m = Math.floor(draft[a] / 60), s = draft[a] % 60, ch = draft[a] !== S.cfg.takt[a];
+      return html`<div key=${a} class=${'adm-card' + (ch ? ' changed' : '')}><div class="micro">${AREAS[a].station} · ${AREAS[a].name}${a === 'TRIM' ? ' · preview' : ''}</div>
+        <div class="takt-in"><input type="number" min="1" max="60" value=${m} aria-label=${`${AREAS[a].name} takt minutes`} onInput=${(e) => setPart(a, +e.target.value || 0, s)} /><span>:</span><input type="number" min="0" max="59" value=${String(s).padStart(2, '0')} aria-label=${`${AREAS[a].name} takt seconds`} onInput=${(e) => setPart(a, m, M.clamp(+e.target.value || 0, 0, 59))} /><span class="c-muted">min : s</span></div>
+        <div class="note">Now ${fmtDur(S.cfg.takt[a])} · close to limit at ${fmtDur(draft[a] * warn / 100)}</div>
+        <div class="actions" style=${{ gap: 6 }}>${[-60, -30, 30, 60].map((d) => html`<button key=${d} class="btn sm ghost" onClick=${() => setDraft({ ...draft, [a]: M.clamp(draft[a] + d, 60, 3600) })}>${d > 0 ? '+' : '−'}${Math.abs(d) >= 60 ? '1:00' : '0:30'}</button>`)}</div></div>`; })}</div>
+    <div class="adm-row"><div class="field" style=${{ maxWidth: 260 }}><label for="tk-warn">Close to limit at (% of takt)</label><input id="tk-warn" type="number" min="50" max="99" value=${warn} onInput=${(e) => setWarn(+e.target.value || 95)} /></div>
+      <div class="field" style=${{ flex: 1 }}><label for="tk-why">Reason for the change (kept in the audit log)</label><input id="tk-why" value=${why} onInput=${(e) => setWhy(e.target.value)} placeholder="e.g. New line balance after adding CL3" /></div>
+      <button class="btn primary" style=${{ alignSelf: 'end' }} onClick=${save}><${Icon} n="check" />Save takt</button></div>
+    <${Saved} msg=${msg} />
+    <p class="note" style=${{ marginTop: 10 }}>To change takt from a future date, schedule it under <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
+    <div class="micro" style=${{ marginTop: 22 }}>Recent takt changes</div><${AuditMini} rows=${auditFor((r) => /takt|limit/i.test(r.action))} />
+  </div>`;
+}
+
+/* Targets and the production plan, scheduled by date (req 13–15) */
+function PlanAdmin() {
+  const S = RT.S, today = M.dateKeyAt(S, S.t), day0 = M.dayOf(S.t);
+  const days = Array.from({ length: 14 }, (_, i) => M.dateKeyOf(S, day0 + i));
+  const [sel, setSel] = useState(today), [msg, setMsg] = useState(null);
+  const plan = S.cfg.calendar[sel] || {}, pattern = M.shiftsFor(S, sel), base = S.cfg.shifts;
+  const [draft, setDraft] = useState(null);
+  const d = draft && draft.date === sel ? draft : { date: sel, runs: Object.fromEntries(base.map((s) => [s.name, !!pattern.find((p) => p.name === s.name)])), times: Object.fromEntries(base.map((s) => { const p = pattern.find((x) => x.name === s.name) || s; return [s.name, [p.start, p.end]]; })), targets: Object.fromEntries(base.map((s) => [s.name, M.targetsFor(S, sel, s.name)])), takt: { ...(plan.takt || {}) }, note: plan.note || '' };
+  const upd = (patch) => { setDraft({ ...d, ...patch }); setMsg(null); };
+  const wd = (k) => new Date(k + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const save = (why) => {
+    const shifts = base.filter((s) => d.runs[s.name]).map((s) => ({ ...s, start: d.times[s.name][0], end: d.times[s.name][1] }));
+    const sameShifts = JSON.stringify(shifts) === JSON.stringify(base);
+    const targets = Object.fromEntries(base.filter((s) => d.runs[s.name]).map((s) => [s.name, d.targets[s.name]]));
+    const sameT = base.filter((s) => d.runs[s.name]).every((s) => M.AREA_IDS.every((a) => d.targets[s.name][a] === S.cfg.targets[a]));
+    const takt = Object.fromEntries(Object.entries(d.takt).filter(([, v]) => v));
+    M.setPlan(S, sel, { shifts: sameShifts ? null : shifts, targets: sameT ? null : targets, takt: Object.keys(takt).length ? takt : null, note: d.note || null }, userName(), why);
+    persistConfig(); bump(); setDraft(null); setMsg({ ok: true, text: `Plan for ${wd(sel)} saved.${sel === today ? ' Today’s targets update now.' : ''}` });
+  };
+  const reset = () => { M.setPlan(S, sel, { shifts: null, targets: null, takt: null, note: null }, userName(), 'Back to default plan'); persistConfig(); bump(); setDraft(null); setMsg({ ok: true, text: `${wd(sel)} uses the default plan again.` }); };
+  const [defT, setDefT] = useState(() => ({ ...S.cfg.targets }));
+  return html`<div>
+    <${PageHead} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
+    <div class="adm-card" style=${{ marginBottom: 18 }}><div class="micro">Default target per shift</div>
+      <div class="adm-row" style=${{ marginTop: 8 }}>${M.AREA_IDS.map((a) => html`<div key=${a} class="field" style=${{ maxWidth: 170 }}><label for=${'dt-' + a}>${AREAS[a].name}</label><input id=${'dt-' + a} type="number" min="0" max="999" value=${defT[a]} onInput=${(e) => setDefT({ ...defT, [a]: +e.target.value || 0 })} /></div>`)}
+        <button class="btn" style=${{ alignSelf: 'end' }} onClick=${() => { let n = 0; for (const a of M.AREA_IDS) n += M.setDefaultTarget(S, a, defT[a], userName()) ? 1 : 0; persistConfig(); bump(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }}><${Icon} n="check" />Save defaults</button></div></div>
+    <div class="plan-grid">
+      <div class="plan-days" role="listbox" aria-label="Dates">${days.map((k) => { const p = S.cfg.calendar[k], off = p && p.shifts && !p.shifts.length; return html`<button key=${k} role="option" aria-selected=${sel === k} class="plan-day" onClick=${() => { setSel(k); setDraft(null); setMsg(null); }}>
+        <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><span class=${'chip ' + (off ? 'c-muted' : p ? 'c-hold' : 'c-muted')}>${off ? 'No production' : p ? 'Scheduled' : 'Default'}</span></button>`; })}</div>
+      <div class="adm-card">
+        <div class="micro">${wd(sel)} · ${sel}</div>
+        <table class="data plan-tbl" style=${{ marginTop: 10 }}><thead><tr><th>Shift</th><th>Runs</th><th>Start</th><th>End</th>${M.AREA_IDS.map((a) => html`<th key=${a}>${AREAS[a].short} target</th>`)}</tr></thead><tbody>
+          ${base.map((s) => html`<tr key=${s.name}><td style=${{ textAlign: 'left' }}>${s.name}</td>
+            <td><button class="toggle" role="switch" aria-checked=${!!d.runs[s.name]} aria-label=${`${s.name} runs`} onClick=${() => upd({ runs: { ...d.runs, [s.name]: !d.runs[s.name] } })}></button></td>
+            <td><input type="time" value=${toHM(d.times[s.name][0])} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ times: { ...d.times, [s.name]: [fromHM(e.target.value), d.times[s.name][1]] } })} /></td>
+            <td><input type="time" value=${toHM(d.times[s.name][1])} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ times: { ...d.times, [s.name]: [d.times[s.name][0], fromHM(e.target.value)] } })} /></td>
+            ${M.AREA_IDS.map((a) => html`<td key=${a}><input type="number" min="0" max="999" style=${{ width: 70 }} value=${d.targets[s.name][a]} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ targets: { ...d.targets, [s.name]: { ...d.targets[s.name], [a]: +e.target.value || 0 } } })} /></td>`)}</tr>`)}
+        </tbody></table>
+        <div class="adm-row" style=${{ marginTop: 12 }}>${M.AREA_IDS.map((a) => html`<div key=${a} class="field" style=${{ maxWidth: 170 }}><label>${AREAS[a].short} takt from this date</label><select value=${d.takt[a] || ''} onChange=${(e) => upd({ takt: { ...d.takt, [a]: +e.target.value || undefined } })}><option value="">Keep current (${fmtDur(S.cfg.takt[a])})</option>${[480, 510, 540, 570, 600, 630, 660, 720, 780, 840, 900].map((x) => html`<option key=${x} value=${x}>${fmtDur(x)}</option>`)}</select></div>`)}</div>
+        <div class="field" style=${{ marginTop: 10 }}><label for="pl-note">Note</label><input id="pl-note" value=${d.note} onInput=${(e) => upd({ note: e.target.value })} placeholder="e.g. Reduced plan: parts shortage on ZS rear bumpers" /></div>
+        <div class="actions" style=${{ marginTop: 12 }}><button class="btn primary" onClick=${() => save(d.note || 'Plan scheduled')}><${Icon} n="calendar" />Save plan for ${wd(sel)}</button>${S.cfg.calendar[sel] ? html`<button class="btn ghost" onClick=${reset}>Use default plan</button>` : null}</div>
+        <${Saved} msg=${msg} />
+        <p class="note" style=${{ marginTop: 10 }}>Breaks follow the shift pattern under <button class="linkish" onClick=${() => go('admin', 'shifts')}>Shifts & breaks</button>. A scheduled takt applies from that date's first shift.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Default shift pattern with breaks (req 11, 15) */
+function ShiftAdmin() {
+  const S = RT.S, [draft, setDraft] = useState(() => JSON.parse(JSON.stringify(S.cfg.shifts))), [why, setWhy] = useState(''), [msg, setMsg] = useState(null);
+  const set = (i, patch) => { const n = draft.slice(); n[i] = { ...n[i], ...patch }; setDraft(n); setMsg(null); };
+  const setB = (i, j, patch) => { const b = draft[i].breaks.slice(); b[j] = { ...b[j], ...patch }; set(i, { breaks: b }); };
+  const net = (s) => (s.end - s.start - s.breaks.reduce((a, b) => a + Math.max(0, b.end - b.start), 0)) / 3600;
+  const valid = draft.every((s) => s.name.trim() && s.end > s.start && s.breaks.every((b) => b.start >= s.start && b.end <= s.end && b.end > b.start));
+  return html`<div>
+    <${PageHead} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The default pattern for every day. Breaks and the time between shifts are planned stops: the line stops, and they are excluded from cycle time and downtime." />
+    ${draft.map((s, i) => html`<div key=${i} class="adm-card" style=${{ marginBottom: 12 }}>
+      <div class="adm-row"><div class="field" style=${{ maxWidth: 200 }}><label>Shift name</label><input value=${s.name} onInput=${(e) => set(i, { name: e.target.value })} /></div>
+        <div class="field" style=${{ maxWidth: 140 }}><label>Starts</label><input type="time" value=${toHM(s.start)} onInput=${(e) => set(i, { start: fromHM(e.target.value) })} /></div>
+        <div class="field" style=${{ maxWidth: 140 }}><label>Ends</label><input type="time" value=${toHM(s.end)} onInput=${(e) => set(i, { end: fromHM(e.target.value) })} /></div>
+        <div style=${{ alignSelf: 'end', paddingBottom: 8 }} class="note">${net(s).toFixed(2)} h productive</div>
+        ${draft.length > 1 ? html`<button class="btn sm ghost" style=${{ alignSelf: 'end' }} onClick=${() => setDraft(draft.filter((_, k) => k !== i))}><${Icon} n="trash" />Remove shift</button>` : null}</div>
+      <div class="micro" style=${{ margin: '10px 0 6px' }}>Breaks and planned stops</div>
+      ${s.breaks.map((b, j) => html`<div key=${j} class="adm-row" style=${{ marginBottom: 6 }}><input style=${{ maxWidth: 220 }} aria-label="Break name" value=${b.label} onInput=${(e) => setB(i, j, { label: e.target.value })} /><input type="time" aria-label="Break start" value=${toHM(b.start)} onInput=${(e) => setB(i, j, { start: fromHM(e.target.value) })} /><span class="c-muted">to</span><input type="time" aria-label="Break end" value=${toHM(b.end)} onInput=${(e) => setB(i, j, { end: fromHM(e.target.value) })} /><span class="note">${fmtDur(b.end - b.start)}</span><button class="btn sm ghost icon" aria-label="Remove break" onClick=${() => set(i, { breaks: s.breaks.filter((_, k) => k !== j) })}><${Icon} n="x" /></button></div>`)}
+      <button class="btn sm ghost" onClick=${() => set(i, { breaks: [...s.breaks, { label: 'Planned stop', start: s.start + 3600, end: s.start + 3600 + 600 }] })}><${Icon} n="plus" />Add break or planned stop</button></div>`)}
+    <div class="actions"><button class="btn ghost" onClick=${() => { const l = draft[draft.length - 1]; setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: l.end, end: Math.min(24 * 3600 - 60, l.end + 8 * 3600), breaks: [] }]); }}><${Icon} n="plus" />Add shift</button></div>
+    <div class="adm-row" style=${{ marginTop: 16 }}><div class="field" style=${{ flex: 1 }}><label for="sh-why">Reason (kept in the audit log)</label><input id="sh-why" value=${why} onInput=${(e) => setWhy(e.target.value)} placeholder="e.g. Ramadan timings" /></div>
+      <button class="btn primary" style=${{ alignSelf: 'end' }} disabled=${!valid} onClick=${() => { M.setShiftPattern(S, draft, userName(), why); persistConfig(); bump(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }}><${Icon} n="check" />Save shift pattern</button></div>
+    ${!valid ? html`<div class="result bad" style=${{ marginTop: 10 }}>Each shift needs a name and must end after it starts; breaks must sit inside their shift.</div>` : null}
+    <${Saved} msg=${msg} />
+    <p class="note" style=${{ marginTop: 10 }}>To change times for one day only, use <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
+  </div>`;
+}
+
+/* Buzzers per station (req 16–18) */
+function BuzzerAdmin() {
+  const S = RT.S, ids = M.WORK_POS.filter((id) => M.ANDON_AREAS.includes(POS[id].area) || S.cfg.trimAndon);
+  return html`<div>
+    <${PageHead} k="Station buzzers · URD req 16–18" title="Buzzers" sub="Each Chassis and Final station has its own buzzer. It rings when the unit passes takt and stops when the unit leaves. Switch a station off here, for example during maintenance work." />
+    <table class="data"><thead><tr><th>Station</th><th>Line</th><th>State now</th><th>Cycle / takt</th><th>Switch</th><th>Test</th></tr></thead><tbody>
+      ${ids.map((id) => { const en = M.buzzerEnabled(S, id), on = S.buzzing[id] != null, an = M.andonState(S, id);
+        return html`<tr key=${id}><td class="mono">${id}</td><td style=${{ textAlign: 'left' }}>${AREAS[POS[id].area].name}${POS[id].area === 'TRIM' ? ' · preview' : ''}</td>
+          <td><span class=${on ? 'c-crit' : 'c-muted'}>${!en ? 'Switched off' : on ? `Ringing ${fmtDur(S.t - S.buzzing[id])}` : 'Quiet'}</span></td>
+          <td class="mono" style=${{ color: an.state === 'over' ? 'var(--crit)' : null }}>${an.state === 'idle' ? '—' : `${fmtDur(an.cycle)} / ${fmtDur(an.takt)}`}</td>
+          <td><button class="toggle" role="switch" aria-checked=${en} aria-label=${`Buzzer at ${id}`} onClick=${() => { M.setBuzzer(S, id, !en, userName()); persistConfig(); bump(); }}></button></td>
+          <td><button class="btn sm ghost" onClick=${() => { Horn.ensure(); Horn.buzz([id]); }}><${Icon} n="vol" />Test</button></td></tr>`; })}
+    </tbody></table>
+    <p class="note" style=${{ marginTop: 10 }}>In the shop each buzzer is a local sounder at its station, about 85 dB at 1 m, directed at the work area so the next station is not disturbed. In this browser one speaker stands in for them: only the line in view sounds.</p>
+  </div>`;
+}
+
+/* Position correction (req 7) */
+function CorrectAdmin() {
+  const S = RT.S, rows = M.WORK_POS.map((id) => ({ id, occ: S.pos[id].occ })).filter((r) => r.occ && r.occ.vehicleId);
+  return html`<div>
+    <${PageHead} k="Tracking · URD req 7" title="Position correction" sub="If tracking gets out of step with the line, move a VIN to the station it is really at. If another unit is recorded there, the two are swapped. Every correction needs a reason and is audited." />
+    <table class="data"><thead><tr><th>Station</th><th>Recorded VIN</th><th>Model</th><th>Cycle</th><th></th></tr></thead><tbody>
+      ${rows.map(({ id, occ }) => { const v = S.vehicles[occ.vehicleId]; return html`<tr key=${id}><td class="mono">${id}</td><td class="mono">${v.vin}</td><td style=${{ textAlign: 'left' }}>${v.variant.name}</td><td class="mono">${fmtDur(M.occCycle(S, occ))}</td>
+        <td><button class="btn sm" onClick=${() => setUI({ dialog: { type: 'correct', pos: id, vin: v.vin } })}><${Icon} n="swap" />Correct…</button></td></tr>`; })}
+    </tbody></table>
+    <div class="micro" style=${{ marginTop: 22 }}>Recent corrections</div><${AuditMini} rows=${auditFor((r) => /corrected|removed from station/i.test(r.action))} />
+  </div>`;
+}
+
+/* Users (req 30): admin only */
+function UserAdmin() {
+  const [edit, setEdit] = useState(null), [msg, setMsg] = useState(null), [, tick] = useReducer((x) => x + 1, 0);
+  const saveUser = async (u) => {
+    if (!u.name.trim() || !u.empId.trim()) return setMsg({ ok: false, text: 'Name and employee ID are required.' });
+    const clash = Auth.users.find((x) => x.id !== u.id && (x.empId.toLowerCase() === u.empId.toLowerCase() || (u.email && x.email.toLowerCase() === u.email.toLowerCase())));
+    if (clash) return setMsg({ ok: false, text: 'That employee ID or email is already used.' });
+    const isNew = !u.id; if (isNew) u.id = 'u' + Date.now().toString(36);
+    if (u.newPw) { if (u.newPw.length < 8) return setMsg({ ok: false, text: 'Passwords need at least 8 characters.' }); u.hash = await hashPw(u.id, u.newPw); }
+    if (isNew && !u.hash) return setMsg({ ok: false, text: 'Set a temporary password for the new user.' });
+    const { newPw, ...clean } = u;
+    if (isNew) Auth.users.push({ ...clean, active: true, created: Date.now(), lastIn: null }); else Object.assign(Auth.users.find((x) => x.id === u.id), clean);
+    Auth.saveUsers(); Auth.record(isNew ? 'User added' : 'User updated', Auth.user.name, `${u.name} · ${ROLES[u.role].label}${newPw ? ' · password set' : ''}`);
+    setEdit(null); setMsg({ ok: true, text: `${u.name} ${isNew ? 'added' : 'updated'}.` }); tick();
+  };
+  const toggle = (u) => { if (u.id === Auth.user.id) return; u.active = !u.active; Auth.saveUsers(); Auth.record(u.active ? 'User enabled' : 'User disabled', Auth.user.name, u.name); tick(); };
+  return html`<div>
+    <${PageHead} k="Users · URD req 30" title="Users and roles" sub="Everyone signs in individually. Roles decide what each person can do.">
+      <button class="btn primary" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}><${Icon} n="plus" />Add user</button></${PageHead}>
+    <div class="adm-cards" style=${{ marginBottom: 16 }}>${Object.entries(ROLES).map(([k, r]) => html`<div key=${k} class="adm-card"><span class=${'av sm r-' + k}>${r.short[0]}</span> <b>${r.label}</b><p class="note">${r.desc}</p></div>`)}</div>
+    <table class="data"><thead><tr><th>Name</th><th>Employee ID</th><th>Role</th><th>Status</th><th>Last sign-in</th><th></th></tr></thead><tbody>
+      ${Auth.users.map((u) => html`<tr key=${u.id} style=${{ opacity: u.active ? 1 : 0.55 }}><td style=${{ textAlign: 'left' }}><span class=${'av sm r-' + u.role}>${initials(u.name)}</span> ${u.name}${u.id === Auth.user.id ? html` <span class="c-muted">(you)</span>` : null}</td><td class="mono">${u.empId}</td><td style=${{ textAlign: 'left' }}>${ROLES[u.role].label}</td><td>${u.active ? 'Active' : 'Disabled'}</td><td class="mono">${u.lastIn ? new Date(u.lastIn).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+        <td><span class="actions" style=${{ gap: 6, justifyContent: 'flex-end' }}><button class="btn sm ghost" onClick=${() => { setEdit({ ...u, newPw: '' }); setMsg(null); }}><${Icon} n="edit" />Edit</button><button class="btn sm ghost" disabled=${u.id === Auth.user.id} onClick=${() => toggle(u)}>${u.active ? 'Disable' : 'Enable'}</button></span></td></tr>`)}
+    </tbody></table>
+    <${Saved} msg=${msg} />
+    ${edit ? html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setEdit(null)}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="ue-h">
+      <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Users</div><h3 id="ue-h">${edit.id ? `Edit ${edit.name}` : 'Add a user'}</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setEdit(null)}><${Icon} n="x" /></button></div>
+      <div class="dialog-body">
+        <div class="field"><label for="ue-n">Full name</label><input id="ue-n" value=${edit.name} onInput=${(e) => setEdit({ ...edit, name: e.target.value })} /></div>
+        <div class="adm-row"><div class="field" style=${{ flex: 1 }}><label for="ue-i">Employee ID</label><input id="ue-i" value=${edit.empId} onInput=${(e) => setEdit({ ...edit, empId: e.target.value.toUpperCase() })} placeholder="MG-1234" /></div>
+          <div class="field" style=${{ flex: 1.4 }}><label for="ue-e">Work email</label><input id="ue-e" value=${edit.email} onInput=${(e) => setEdit({ ...edit, email: e.target.value })} /></div></div>
+        <div class="field"><label for="ue-r">Role</label><select id="ue-r" value=${edit.role} disabled=${edit.id === Auth.user.id} onChange=${(e) => setEdit({ ...edit, role: e.target.value })}>${Object.entries(ROLES).map(([k, r]) => html`<option key=${k} value=${k}>${r.label}</option>`)}</select><div class="note">${ROLES[edit.role].desc}</div></div>
+        <div class="field"><label for="ue-p">${edit.id ? 'Reset password (leave blank to keep)' : 'Temporary password'}</label><input id="ue-p" type="text" autoComplete="off" value=${edit.newPw} onInput=${(e) => setEdit({ ...edit, newPw: e.target.value })} placeholder="At least 8 characters" /></div>
+        <${Saved} msg=${msg && !msg.ok ? msg : null} />
+      </div>
+      <div class="dialog-foot"><button class="btn" onClick=${() => setEdit(null)}>Cancel</button><button class="btn primary" onClick=${() => saveUser({ ...edit })}><${Icon} n="check" />${edit.id ? 'Save' : 'Add user'}</button></div>
+    </div></div>` : null}
+  </div>`;
+}
+
+/* Audit log: configuration changes, corrections, sign-ins */
+function AuditAdmin() {
+  const [f, setF] = useState('all');
+  persistConfig();
+  const cfg = jget('mg-andon-audit', []).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
+  const auth = Auth.log.map((r) => ({ when: new Date(r.at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'medium' }), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
+  const rows = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort).slice(0, 300);
+  const csv = () => downloadText('andon-audit-log.csv', 'text/csv', [['When', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...rows.map((r) => [r.when, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n'));
+  return html`<div>
+    <${PageHead} k="Traceability" title="Audit log" sub="Every change to takt, targets, shifts and buzzers, every position correction and every sign-in, with who and when.">
+      <button class="btn" onClick=${csv}><${Icon} n="download" />Export CSV</button></${PageHead}>
+    <div class="actions" style=${{ marginBottom: 10 }}>${[['all', 'All'], ['change', 'Changes & corrections'], ['access', 'Sign-ins']].map(([k, l]) => html`<button key=${k} class=${'btn sm ' + (f === k ? '' : 'ghost')} onClick=${() => setF(k)}>${l}</button>`)}</div>
+    <table class="data"><thead><tr><th>When</th><th>What</th><th>Detail</th><th>By</th><th>Reason</th></tr></thead><tbody>
+      ${rows.length ? rows.map((r, i) => html`<tr key=${i}><td class="mono">${r.when}</td><td style=${{ textAlign: 'left' }}>${r.what}</td><td class="mono" style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.detail || '—'}</td><td style=${{ textAlign: 'left' }}>${(r.by || '').split(' · ')[0]}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason || '—'}</td></tr>`) : html`<tr><td colspan="5" class="c-muted">Nothing recorded yet.</td></tr>`}
+    </tbody></table>
+  </div>`;
+}
+function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
+function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+boot();
 </script>
 
 </body></html>

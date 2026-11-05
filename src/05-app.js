@@ -2,16 +2,24 @@
    App shell: signed-in user and permissions, screen router, root and boot.
    ════════════════════════════════════════════════════════════════════════ */
 
-/* ── who is using the app (replaced by the sign-in module) ── */
-const Auth = { user: { name: 'Line supervisor', role: 'admin' } };
-function can() { return true; }
-function userName() { return Auth.user ? Auth.user.name : 'System'; }
-
 /* ── screens: #/floor, #/dash, #/display/<line>, #/reports, #/admin/<tab>, #/how ── */
 RT.route = { page: 'floor', sub: null };
 function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
 function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
-window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null }); });
+window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false, report: false }); });
+const PAGES = [
+  ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
+  ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
+];
+function NavIsland() {
+  const cur = RT.route.page;
+  return html`<nav class="seg nav-island" aria-label="Screens">${PAGES.filter((p) => p[3]()).map(([k, l, ic]) => html`<button key=${k} class="nav-b" aria-current=${cur === k ? 'page' : null} title=${l} onClick=${() => go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null)}><${Icon} n=${ic} /><span>${l}</span></button>`)}</nav>`;
+}
+/* Non-floor screens share the header and scroll their own body. */
+function PageShell({ children }) {
+  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
+}
+function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note">This screen is part of the next build step.</p></div></div>`; }
 
 /* ── root ── */
 function App() {
@@ -34,6 +42,7 @@ function App() {
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
       if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined && floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
       if (RT.ui.lineoff && now - RT.ui.lineoff.at > 6500) setUI({ lineoff: null });
+      if (now - (RT._persistAt || 0) > 10000) { RT._persistAt = now; if (Auth.user) persistConfig(); }
       if (now - lastPaint > (RT.ui.view2D || !floor ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
       requestAnimationFrame(loop);
     };
@@ -54,32 +63,39 @@ function App() {
     window.addEventListener('keydown', key);
     return () => { RT.listeners.delete(l); window.removeEventListener('keydown', key); };
   }, []);
-  const d = RT.ui.dialog;
+  const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
+  const gate = page !== 'display' && (!Auth.user || Auth.locked);
   return html`<main class="stage">
-    <div id="scene" ref=${sceneRef} style=${{ visibility: RT.ui.view2D ? 'hidden' : 'visible' }}></div>
+    <div id="scene" ref=${sceneRef} style=${{ visibility: floor && !RT.ui.view2D && !gate ? 'visible' : 'hidden' }}></div>
+    ${gate ? html`<${SignIn} key=${Auth.locked ? 'lock' : 'in'} lock=${!!(Auth.user && Auth.locked)} />` : floor ? html`<${React.Fragment}>
     ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
     ${!RT.ui.view2D ? html`<${HoverCard} />` : null}
-    <header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header>
+    <header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${StateIsland} /><${ActIsland} /></header>
     <${Strip} /><${SimConsole} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
-    ${RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
-    ${RT.ui.report ? html`<${Report} />` : null}
+    ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
+    : page === 'display' ? html`<${Placeholder} title="Line displays" />`
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
+    ${gate ? null : html`<${React.Fragment}>
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
     ${d && d.type === 'offline' ? html`<${OffLineDialog} key=${d.vehicleId} d=${d} />` : null}
     ${d && d.type === 'return' ? html`<${ReturnDialog} key=${d.vehicleId} d=${d} />` : null}
     ${d && d.type === 'correct' ? html`<${CorrectDialog} key=${d.pos} d=${d} />` : null}
     ${d && d.type === 'vin' ? html`<${VinSearchDialog} />` : null}
-    ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}
+    ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}</${React.Fragment}>`}
   </main>`;
 }
-(function boot() {
+/* Called from src/08-boot.js once every UI module has been defined. */
+function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
+  if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
   RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
   M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
-  const start = () => ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`);
+  const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`); };
   const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
-  fonts.then(start, start);
-})();
+  Promise.all([fonts, Auth.init()]).then(start, start);
+}
