@@ -75,8 +75,9 @@ function App() {
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
     ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
-    : page === 'display' ? html`<${Placeholder} title="Line displays" />`
-    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    : page === 'display' ? html`<${LineDisplay} />`
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    <${PowerOverlay} />
     ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
     ${gate ? null : html`<${React.Fragment}>
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}

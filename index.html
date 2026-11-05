@@ -878,6 +878,88 @@ svg.plan text { font-family: var(--font-mono); }
 .si-brand { justify-content: space-between; gap: 18px; }
 .si-hero { margin-top: 0; }
 .si-flow { max-width: 560px; max-height: 26vh; }
+
+/* ═════════ dashboard ═════════ */
+.dash-live { display: flex; align-items: center; gap: 10px; max-width: 560px; font-size: 13px; color: var(--text-2); }
+.livedot { width: 9px; height: 9px; border-radius: 50% !important; background: var(--ok); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation: livep 2s infinite; flex: none; }
+@keyframes livep { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.dash-grid.stale .dash-lines, .dash-grid.stale .dash-side { filter: grayscale(.7); opacity: .75; }
+.dash-lines, .dash-side { display: grid; gap: 16px; }
+.pg-row { display: flex; justify-content: space-between; align-items: baseline; }
+.panel h3 { margin: 0 0 4px; }
+.dash-kv { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--hair); font-size: 13px; color: var(--text-2); }
+.lcard { display: grid; gap: 14px; border-left: 3px solid var(--hair-2); }
+.lcard.s-normal { border-left-color: var(--andon-ok); } .lcard.s-near { border-left-color: var(--warn); } .lcard.s-over, .lcard.s-STOP { border-left-color: var(--crit); } .lcard.s-PLANNED { border-left-color: var(--paused); }
+.lc-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.lc-title { display: inline-flex; align-items: baseline; gap: 10px; background: transparent; border: 0; padding: 0; color: var(--text); cursor: pointer; font: 600 20px/1 var(--font-ui); }
+.lc-title .ico { width: 16px; height: 16px; color: var(--muted); align-self: center; }
+.lc-title:hover .ico { color: var(--text); }
+.lc-kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.lc-kpis > div { display: grid; gap: 4px; align-content: start; }
+.lc-kpis .num { font-size: 28px; font-weight: 300; line-height: 1; }
+.lc-kpis .num small { font-size: 14px; color: var(--muted); margin-left: 4px; }
+.lc-kpis > div > span:last-child:not(.micro) { font-size: 12px; }
+.lc-prog { position: relative; height: 6px; background: var(--hair); }
+.lc-prog i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text); }
+.lc-prog b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--warn); }
+.lc-st { display: grid; gap: 4px; }
+.lc-cell { display: grid; gap: 4px; padding: 8px; text-align: left; background: var(--fill); border: 1px solid transparent; border-top: 3px solid var(--hair-2); color: var(--text); cursor: pointer; min-width: 0; }
+.lc-cell:hover { border-color: var(--hair-2); }
+.lc-cell .id { display: flex; align-items: center; gap: 4px; font: 600 12px/1 var(--font-mono); }
+.lc-cell .id .bz { color: var(--crit); margin-left: auto; } .lc-cell .id .ico { width: 12px; height: 12px; }
+.lc-cell .cy { font: 400 15px/1 var(--font-mono); color: var(--text-2); }
+.lc-cell.s-normal { border-top-color: var(--andon-ok); } .lc-cell.s-near { border-top-color: var(--warn); background: color-mix(in srgb, var(--warn) 10%, var(--fill)); }
+.lc-cell.s-over { border-top-color: var(--crit); background: color-mix(in srgb, var(--crit) 12%, var(--fill)); } .lc-cell.s-over .cy { color: var(--crit); }
+.lc-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.spark { display: inline-flex; align-items: end; gap: 3px; height: 26px; }
+.spark i { width: 10px; min-height: 2px; background: var(--chart-a); }
+.lc-foot .xp { margin-left: auto; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--hair-2); padding: 2px 6px; }
+@media (max-width: 1100px) { .dash-grid { grid-template-columns: 1fr; } .lc-kpis { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) { .lc-st { grid-template-columns: repeat(4, 1fr) !important; } }
+/* ═════════ line display (TV) ═════════ */
+.lcd { position: absolute; inset: 0; z-index: 70; display: grid; gap: 1.2vh; padding: 2vh 2vw; background: #07090b; color: #eef2f5; font-family: var(--font-ui); overflow: hidden; }
+.lcd-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2vw; }
+.lcd-brand { display: flex; align-items: center; gap: 1.2vw; }
+.lcd-brand .mg-mark { width: 4.2vh; height: 4.2vh; }
+.lcd-k { font-size: 1.6vh; letter-spacing: .2em; text-transform: uppercase; color: #8b97a3; }
+.lcd-line { font-size: 5.2vh; font-weight: 600; letter-spacing: -.01em; line-height: 1; }
+.lcd-pill { display: inline-block; padding: 1vh 2vw; font-size: 3vh; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; border: 2px solid currentColor; }
+.lcd-pill.s-normal { color: #3fc28a; } .lcd-pill.s-near { color: #f0a92a; } .lcd-pill.s-over, .lcd-pill.s-STOP { color: #ff5452; background: rgba(255,84,82,.12); } .lcd-pill.s-PLANNED { color: #9aa6b2; }
+.lcd-clock { justify-self: end; display: grid; justify-items: end; } .lcd-clock b { font: 300 6vh/1 var(--font-mono); } .lcd-clock span { font-size: 1.8vh; color: #8b97a3; letter-spacing: .14em; text-transform: uppercase; }
+.lcd-banner { display: flex; align-items: center; gap: 1vw; padding: 1vh 1.4vw; font-size: 2.2vh; background: rgba(240,169,42,.14); border: 1px solid rgba(240,169,42,.5); color: #f0c46a; }
+.lcd-banner .ico { width: 2.6vh; height: 2.6vh; }
+.lcd-kpis { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1vw; }
+.lcd-kpis > div { display: grid; gap: .6vh; padding: 1.4vh 1.4vw; background: #0f1418; border-top: 3px solid #26303a; }
+.lcd-kpis span { font-size: 1.9vh; letter-spacing: .18em; text-transform: uppercase; color: #8b97a3; }
+.lcd-kpis b { font: 300 9vh/1 var(--font-mono); } .lcd-kpis b.good { color: #3fc28a; } .lcd-kpis b.bad { color: #ff5452; }
+.lcd-st { display: grid; gap: .8vw; min-height: 0; }
+.lcd-cell { display: grid; grid-template-rows: auto 1fr auto auto; gap: 1vh; padding: 1.6vh 1vw; background: #0f1418; border-top: 1.2vh solid #26303a; min-width: 0; }
+.lcd-cell.s-normal { border-top-color: #2ecc71; } .lcd-cell.s-near { border-top-color: #f0a92a; background: rgba(240,169,42,.12); } .lcd-cell.s-over { border-top-color: #ff3b30; background: rgba(255,59,48,.16); } .lcd-cell.s-idle { opacity: .55; }
+.lcd-cell.buzz { animation: lcd-buzz 1s steps(2, start) infinite; } @keyframes lcd-buzz { 50% { background: rgba(255,59,48,.32); } }
+.lc-id { display: flex; justify-content: space-between; align-items: center; font: 600 3.2vh/1 var(--font-mono); }
+.lc-ic { display: inline-flex; gap: .4vw; align-items: center; } .lc-ic .lamp { width: 2.2vh; height: 2.2vh; } .lc-ic .ico { width: 2.6vh; height: 2.6vh; color: #ff5452; }
+.lc-cy { align-self: center; font: 300 7.2vh/1 var(--font-mono); white-space: nowrap; } .lcd-cell.s-over .lc-cy { color: #ff6b62; font-weight: 400; }
+.lc-bar { height: .8vh; background: #26303a; } .lc-bar i { display: block; height: 100%; background: #dbe3ea; } .s-near .lc-bar i { background: #f0a92a; } .s-over .lc-bar i { background: #ff3b30; }
+.lc-vin { font: 400 2vh/1 var(--font-mono); color: #8b97a3; }
+.lcd-scans { display: grid; align-content: start; gap: 1vh; } .lcd-scan { display: grid; grid-template-columns: 10vw 14vw 1fr 8vw; gap: 1vw; font-size: 2.6vh; padding: 1.2vh 1vw; background: #0f1418; } .lcd-scan .good { color: #3fc28a; } .lcd-scan .bad { color: #ff5452; }
+.lcd-calls { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1vw; min-height: 0; }
+.lcd-none { display: grid; place-items: center; font-size: 2.6vh; color: #5d6873; border: 1px dashed #26303a; }
+.lcd-call { display: grid; grid-template-columns: auto auto 1fr; grid-template-rows: 1fr 1fr; column-gap: 1.2vw; row-gap: .6vh; align-items: center; padding: 1.4vh 1.6vw; color: #fff; }
+.lcd-call span:not(.w) { align-self: end; } .lcd-call .w { align-self: start; }
+.lcd-call .ico { grid-row: span 2; width: 5vh; height: 5vh; }
+.lcd-call b { font: 600 5vh/1 var(--font-mono); grid-row: span 2; } .lcd-call span { font-size: 2.4vh; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; } .lcd-call .w { font: 400 3vh/1 var(--font-mono); letter-spacing: 0; text-transform: none; }
+.lcd-call.t-sup { background: #6c3fd8; } .lcd-call.t-mnt { background: #0a6fc2; }
+.lcd-call.late { animation: lcd-late 1s steps(2, start) infinite; } @keyframes lcd-late { 50% { filter: brightness(1.45); } }
+.lcd-foot { display: flex; align-items: center; justify-content: space-between; gap: 1vw; }
+.lcd-foot nav { display: flex; gap: 2px; } .lcd-foot nav button, .lcd-act button { background: transparent; border: 1px solid #26303a; color: #8b97a3; padding: .6vh 1.2vw; font: 600 1.5vh/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+.lcd-foot nav button[aria-current="page"] { color: #fff; border-color: #8b97a3; }
+.lcd-act { display: flex; gap: 4px; } .lcd-act .ico { width: 2vh; height: 2vh; }
+@media (max-width: 760px) and (orientation: portrait) { .lcd { grid-template-rows: auto auto auto auto auto auto; overflow: auto; } .lcd-top { grid-template-columns: 1fr auto; } .lcd-status { grid-column: 1 / -1; order: 3; } .lcd-kpis { grid-auto-flow: row; grid-template-columns: 1fr 1fr; } .lcd-kpis b { font-size: 5vh; } .lcd-st { grid-template-columns: 1fr 1fr !important; } .lc-cy { font-size: 4vh; } .lcd-calls { grid-auto-flow: row; } }
+/* power cut overlay */
+.power-ov { position: absolute; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(4,6,8,.78); }
+.power-ov.off { background: rgba(0,0,0,.92); }
+.pw-bar { height: 3px; background: var(--hair); overflow: hidden; } .pw-bar i { display: block; height: 100%; width: 40%; background: var(--text); animation: pw 1.2s ease-in-out infinite; } @keyframes pw { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
 </style>
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3291,7 +3373,7 @@ function StateIsland() {
 function CallsPill() {
   const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
   return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
-    <span class=${'lamp sup' + (sup ? ' blink' : '')} style=${{ opacity: sup ? 1 : 0.25 }}></span><span class=${'lamp mnt' + (mnt ? ' blink' : '')} style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
+    <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
 }
 function ActIsland() {
   const S = RT.S;
@@ -3393,6 +3475,7 @@ function SimConsole() {
         <label for="cfg-rate">Random team delay rate (%)</label><input id="cfg-rate" type="number" min="0" max="30" value=${Math.round(C.delayRate * 100)} onChange=${(e) => setC('delayRate', M.clamp(+e.target.value || 0, 0, 30) / 100)} />
       </div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Simulated line stop</div><div class="actions">${['TRIM', 'CHASSIS', 'FINAL'].map((a) => html`<button key=${a} class="btn sm sim" onClick=${act(() => M.setPaused(S, a, !S.paused[a]))}><${Icon} n=${S.paused[a] ? 'play' : 'pause'} />${S.paused[a] ? 'Restart ' : 'Stop '}${AREAS[a].short}</button>`)}</div></div>
+      <div><div class="micro" style=${{ marginBottom: 8 }}>Resilience (URD req 32–33)</div><div class="actions"><button class="btn sm sim" onClick=${() => setLink(!RT.link.up)}><${Icon} n=${RT.link.up ? 'wifioff' : 'wifi'} />${RT.link.up ? 'Drop head-office link' : 'Restore head-office link'}</button><button class="btn sm sim" disabled=${!!RT.power} onClick=${powerCut}><${Icon} n="power" />Power cut and restart</button></div></div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Time</div><div class="actions"><button class="btn sm sim" title="Fast-forward the simulation to the next shift, break or restart" onClick=${() => skipAhead()}><${Icon} n="skip" />Skip to ${S.planned ? 'restart' : 'next break or shift change'} · ${fmtClock(M.nextBoundary(S, S.t), false)}</button></div></div>
       <p class="note">Adapter: <b>${M.Integration.mode}</b>. Nothing is sent to any PLC, conveyor, scanner or sensor. Permissives shown in the HMI are simulated interlocks.</p>
     </div>` : null}
@@ -3989,8 +4072,9 @@ function App() {
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}
     ${RT.ui.report ? html`<${Report} />` : null}</${React.Fragment}>`
-    : page === 'display' ? html`<${Placeholder} title="Line displays" />`
-    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    : page === 'display' ? html`<${LineDisplay} />`
+    : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : html`<${Placeholder} title=${(PAGES.find((x) => x[0] === page) || [0, 'Screen'])[1]} />`}</${PageShell}>`}
+    <${PowerOverlay} />
     ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
     ${gate ? null : html`<${React.Fragment}>
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
@@ -4409,6 +4493,132 @@ function AuditAdmin() {
 }
 function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
 function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+/* ════════════════════════════════════════════════════════════════════════
+   Main dashboard (URD req 25–27) and line displays (req 23–24), plus the
+   resilience demos: head-office link loss (req 33) and power cut (req 32).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── shop-to-head-office link (simulated) ──
+   Line displays and data collection run on the local line server, so they
+   carry on when the link drops. Head office keeps the last data it received
+   until the link returns, then the buffered events sync.              */
+RT.link = { up: true, downAt: null, snap: null, evAt: 0, syncedAt: Date.now(), lastSync: null };
+function setLink(up) {
+  const S = RT.S, L = RT.link;
+  if (!up && L.up) { L.up = false; L.downAt = S.t; L.snap = dashData(S); L.evAt = S.events.length ? S.events[S.events.length - 1].id : null; M.logEvent(S, 'sim', 'SIMULATION · head-office link down · line displays and data collection carry on locally'); }
+  else if (up && !L.up) { const n = S.events.filter((e) => e.t > L.downAt).length; L.up = true; L.lastSync = { n, dur: S.t - L.downAt }; L.snap = null; M.logEvent(S, 'sim', `SIMULATION · head-office link restored · ${n} buffered events synced, nothing lost`); }
+  bump();
+}
+/* power cut: everything stops; on restart positions come back from the
+   controllers' retained memory and a re-read of the carrier tags.     */
+function powerCut() {
+  const S = RT.S, was = RT.running;
+  RT.running = false; RT.power = { phase: 'off', t: S.t }; M.logEvent(S, 'sim', 'SIMULATION · power cut · line servers on UPS, events kept in local storage'); bump();
+  setTimeout(() => { RT.power = { phase: 'boot', t: S.t }; bump(); }, 3500);
+  setTimeout(() => { const n = Object.values(S.pos).filter((p) => p.occ && p.occ.vehicleId).length; RT.power = { phase: 'ok', n }; M.logEvent(S, 'sim', `SIMULATION · restart · ${n} vehicle positions restored from controller memory and confirmed by tag re-read`); RT.running = was; bump(); }, 7000);
+  setTimeout(() => { RT.power = null; bump(); }, 10500);
+}
+function PowerOverlay() {
+  const P = RT.power; if (!P) return null;
+  const txt = P.phase === 'off' ? ['Power lost', 'Line controllers are on UPS. Every event up to the cut is already stored locally.'] : P.phase === 'boot' ? ['Restarting', 'Servers and displays come back by themselves. Reading carrier tags at each station…'] : ['Back online', `${P.n} vehicle positions restored and confirmed. No data lost; the line carries on where it stopped.`];
+  return html`<div class=${'power-ov ' + P.phase} role="alert"><div class="glass dialog ticks" style=${{ width: 'min(520px, 100%)' }}><div class="dialog-body" style=${{ gap: 10 }}><div class="micro">Simulation · URD req 32</div><h3 style=${{ margin: 0, display: 'flex', gap: 10, alignItems: 'center' }}><${Icon} n=${P.phase === 'ok' ? 'checkc' : 'power'} />${txt[0]}</h3><p style=${{ margin: 0, color: 'var(--text-2)' }}>${txt[1]}</p>${P.phase !== 'ok' ? html`<div class="pw-bar"><i></i></div>` : null}</div></div></div>`;
+}
+
+/* everything the dashboard shows, as plain data (so head office can hold a frozen copy) */
+function dashData(S) {
+  const lines = M.AREA_IDS.map((a) => {
+    const p = M.linePace(S, a), la = M.lineAndon(S, a);
+    const st = M.AREA_STATIONS[a].map((id) => { const an = M.andonState(S, id), o = S.pos[id].occ, v = o && o.vehicleId && S.vehicles[o.vehicleId]; return { id, state: an.state, cycle: an.cycle, takt: an.takt, vin: v ? v.vin : null, buzz: S.buzzing[id] != null, calls: M.callsAt(S, id).map((c) => c.type) }; });
+    const hours = []; const sh = S.shift; if (sh && sh.name) for (let h = sh.start; h < Math.min(sh.end, S.t + 3600); h += 3600) hours.push(S.prod.filter((r) => r.area === a && r.shiftKey === sh.key && r.t >= h && r.t < h + 3600).length);
+    return { a, ...p, state: la.state, over: la.over, near: la.near, calls: la.calls, takt: S.cfg.takt[a], st, hours };
+  });
+  const D = (S.shift && S.down[S.shift.key]) || { cause: {} };
+  const causes = Object.entries(D.cause || {}).sort((x, y) => y[1] - x[1]).slice(0, 6);
+  const calls = S.calls.filter((c) => c.clearedT == null).map((c) => ({ ...c })).sort((x, y) => x.raisedT - y.raisedT);
+  const sk = S.shift ? S.shift.key : '', shiftCalls = S.calls.filter((c) => c.shiftKey === sk && c.clearedT != null);
+  const avgResp = shiftCalls.length ? shiftCalls.reduce((s, c) => s + M.callResponse(c), 0) / shiftCalls.length : null;
+  const offline = S.stats.offline.filter((o) => o.shiftKey === sk);
+  return { t: S.t, shift: S.shift, planned: S.planned, lines, causes, calls, avgResp, nCalls: S.calls.filter((c) => c.shiftKey === sk).length, offline, status: M.lineStatus(S) };
+}
+const STATE_LABEL = { normal: 'Running', near: 'Close to limit', over: 'Over takt', STOP: 'Stopped', PLANNED: 'Planned stop', idle: 'No unit' };
+const STATE_TONE = { normal: 'ok', near: 'warn', over: 'crit', STOP: 'crit', PLANNED: 'paused', idle: 'muted' };
+
+function DashboardPage() {
+  const S = RT.S, L = RT.link, d = L.up ? dashData(S) : L.snap, live = L.up;
+  const sh = d.shift || {};
+  return html`<div class="page-wrap dash">
+    <div class="pg-head"><div><div class="micro">Main dashboard · all lines</div><h2>General Assembly · ${sh.name || 'No shift'}${d.planned ? html` <span class="chip c-paused" style=${{ verticalAlign: 'middle' }}>${d.planned.label}</span>` : null}</h2>
+      <p class="pg-sub">${sh.name ? `${sh.date} · ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)}` : 'Between shifts'} · counts reset at each shift start.</p></div>
+      <div class="dash-live">${live ? html`<span class="livedot"></span><span>Live · updated ${fmtClock(d.t)}</span>` : html`<span class="c-crit"><${Icon} n="wifioff" /></span><span><b>Link to the shop is down</b> since ${fmtClock(L.downAt, false)}. Showing the last data received (${fmtClock(d.t, false)}). Line displays on the floor are unaffected.</span>`}</div></div>
+    ${L.lastSync && live ? html`<div class="result ok" style=${{ marginBottom: 14 }}><${Icon} n="wifi" /> Link restored after ${fmtDur(L.lastSync.dur)}. ${L.lastSync.n} events recorded during the outage have synced; nothing was lost. <button class="linkish" onClick=${() => { L.lastSync = null; bump(); }}>Dismiss</button></div>` : null}
+    <div class=${'dash-grid' + (live ? '' : ' stale')}>
+      <div class="dash-lines">${d.lines.map((l) => html`<${LineCard} key=${l.a} l=${l} />`)}</div>
+      <aside class="dash-side">
+        <section class="panel ticks"><div class="pg-row"><h3>Active calls</h3><span class="mono">${d.calls.length}</span></div>
+          ${d.calls.length ? d.calls.map((c) => live ? html`<${CallRow} key=${c.id} c=${S.calls.find((x) => x.id === c.id) || c} compact />` : html`<div key=${c.id} class="callrow"><span class=${'lamp ' + c.type.toLowerCase()}></span><div>${M.CALL_TYPES[c.type].label} · ${c.pos}</div><span class="wait">${fmtDur(d.t - c.raisedT)}</span></div>`) : html`<p class="note">No open calls. Each one appears here with its station and waiting time the moment it is pressed.</p>`}
+          <div class="dash-kv"><span>Calls this shift</span><b class="mono">${d.nCalls}</b><span>Average response</span><b class="mono">${d.avgResp != null ? fmtDur(d.avgResp) : '—'}</b></div></section>
+        <section class="panel ticks"><h3>Downtime by cause</h3><div class="q">Time stations spent over takt this shift, put down to the station that caused it.</div>
+          ${d.causes.length ? html`<ul class="mix" style=${{ marginTop: 8 }}>${d.causes.map(([id, sec]) => html`<li key=${id}><button class="linkish mono" onClick=${() => drillStation(id)}>${id}</button><span class="mbar"><i style=${{ width: `${(sec / d.causes[0][1]) * 100}%`, background: 'var(--crit)' }}></i></span><span class="mono">${fmtDur(sec)}</span></li>`)}</ul>` : html`<p class="note">No downtime yet this shift.</p>`}</section>
+        <section class="panel ticks"><h3>Offlined this shift</h3>${d.offline.length ? html`<table class="data"><tbody>${d.offline.slice(-6).reverse().map((o) => html`<tr key=${o.vin + o.t}><td class="mono">${shortVin(o.vin)}</td><td class="mono">${o.pos}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${o.reason}</td><td>${o.returnedT ? html`<span class="c-ok">returned</span>` : 'offline'}</td></tr>`)}</tbody></table>` : html`<p class="note">None. Offlined units are removed from counts and the target.</p>`}</section>
+      </aside>
+    </div>
+  </div>`;
+}
+function drillStation(id) { go('floor'); setTimeout(() => select({ kind: 'pos', id }), 60); }
+function LineCard({ l }) {
+  const pct = l.target ? Math.min(1, l.done / l.target) : 0, planPct = l.target ? Math.min(1, l.plan / l.target) : 0, mx = Math.max(1, ...l.hours);
+  const preview = l.a === 'TRIM';
+  return html`<section class=${'panel ticks lcard s-' + l.state}>
+    <div class="lc-head"><button class="lc-title" onClick=${() => go('display', l.a.toLowerCase())} title="Open the line display"><span class="micro">${AREAS[l.a].station}</span><span>${AREAS[l.a].name}</span><${Icon} n="tv" /></button>
+      <span class=${'andon-state c-' + STATE_TONE[l.state]}>${STATE_LABEL[l.state]}</span></div>
+    <div class="lc-kpis">
+      <div><span class="micro">Completed</span><b class="num">${l.done}<small>/ ${l.target}</small></b><span class=${l.delta < 0 ? 'c-warn' : 'c-ok'}>${l.delta === 0 ? 'on plan' : l.delta > 0 ? `+${l.delta} ahead` : `${-l.delta} behind`}</span></div>
+      <div><span class="micro">Remaining</span><b class="num">${l.remaining}</b></div>
+      <div><span class="micro">Downtime</span><b class="num" style=${{ color: l.down ? 'var(--crit)' : null }}>${fmtDur(l.down)}</b></div>
+      <div><span class="micro">Takt</span><b class="num">${fmtDur(l.takt)}</b></div>
+      <div><span class="micro">In line</span><b class="num">${l.wip}</b></div>
+      <div><span class="micro">Calls</span><b class="num" style=${{ color: l.calls ? 'var(--call-sup)' : null }}>${l.calls}</b></div>
+    </div>
+    <div class="lc-prog" title=${`Plan now ${l.plan.toFixed(1)}`}><i style=${{ width: `${pct * 100}%` }}></i><b style=${{ left: `${planPct * 100}%` }}></b></div>
+    <div class="lc-st" style=${{ gridTemplateColumns: `repeat(${l.st.length}, 1fr)` }}>${l.st.map((s) => html`<button key=${s.id} class=${'lc-cell s-' + s.state} onClick=${() => drillStation(s.id)} title=${`${s.id} · ${STATE_LABEL[s.state]}${s.vin ? ` · ${s.vin}` : ''}${s.state !== 'idle' ? ` · ${fmtDur(s.cycle)} / ${fmtDur(s.takt)}` : ''}`}>
+      <span class="id">${s.id}${s.calls.map((t, i) => html`<i key=${i} class=${'lamp ' + t.toLowerCase()}></i>`)}${s.buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : null}</span><span class="cy">${s.state === 'idle' ? '—' : fmtDur(s.cycle)}</span></button>`)}</div>
+    <div class="lc-foot"><span class="micro">Completed per hour</span><span class="spark">${l.hours.map((n, i) => html`<i key=${i} style=${{ height: `${(n / mx) * 100}%` }} title=${`Hour ${i + 1}: ${n}`}></i>`)}</span><span class="mono c-muted">${l.lastHour} last hour</span>${preview ? html`<span class="xp">Trim Andon preview</span>` : null}</div>
+  </section>`;
+}
+
+/* ── line display (LCD at each line, req 23–24): read from 10 m ── */
+function LineDisplay() {
+  const S = RT.S, a = (RT.route.sub || 'chassis').toUpperCase(), area = AREAS[a] ? a : 'CHASSIS';
+  const [, tick] = useReducer((x) => x + 1, 0);
+  useEffect(() => { const i = setInterval(tick, 1000); return () => clearInterval(i); }, []);
+  const p = M.linePace(S, area), la = M.lineAndon(S, area), calls = S.calls.filter((c) => c.area === area && c.clearedT == null).sort((x, y) => x.raisedT - y.raisedT);
+  const st = M.AREA_STATIONS[area], fs = () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); };
+  const trim = area === 'TRIM', sk = S.shift ? S.shift.key : '';
+  const entered = S.vehOrder.filter((id) => S.vehicles[id].entryT >= (S.shift ? S.shift.start : 0)).length, offT = S.stats.offline.filter((o) => o.shiftKey === sk && o.pos === 'TL6').length;
+  const scans = S.scans.filter((x) => x.scanner === 'ENTRY' || (x.scanner === 'OFFLINE' && x.pos === 'TL6')).slice(-6).reverse();
+  const showStations = !trim || S.cfg.trimAndon;
+  return html`<div class=${'lcd s-' + la.state} style=${{ gridTemplateRows: `auto${RT.link.up ? '' : ' auto'} auto 1fr 17vh auto` }}>
+    <header class="lcd-top"><div class="lcd-brand"><${MgMark} /><div><div class="lcd-k">${AREAS[area].station}</div><div class="lcd-line">${AREAS[area].name}</div></div></div>
+      <div class="lcd-status"><span class=${'lcd-pill s-' + la.state}>${S.planned ? S.planned.label : STATE_LABEL[la.state]}</span></div>
+      <div class="lcd-clock"><b>${fmtClock(S.t, false)}</b><span>${S.shift && S.shift.name ? S.shift.name : 'No shift'}</span></div></header>
+    ${!RT.link.up ? html`<div class="lcd-banner"><${Icon} n="wifioff" />Head-office link down · this display and data collection carry on locally</div>` : null}
+    <section class="lcd-kpis">
+      ${trim ? html`<div><span>Entered</span><b>${entered}</b></div><div><span>Offlined (TL6)</span><b>${offT}</b></div><div><span>In Trim now</span><b>${p.wip}</b></div><div><span>To Chassis</span><b>${p.done}</b></div>`
+      : html`<div><span>Target</span><b>${p.target}</b></div><div><span>Completed</span><b class=${p.delta < 0 ? 'bad' : 'good'}>${p.done}</b></div><div><span>Remaining</span><b>${p.remaining}</b></div><div><span>Downtime</span><b class=${p.down ? 'bad' : ''}>${fmtDur(p.down)}</b></div><div><span>Takt</span><b>${fmtDur(S.cfg.takt[area])}</b></div>`}
+    </section>
+    ${showStations ? html`<section class="lcd-st" style=${{ gridTemplateColumns: `repeat(${st.length}, 1fr)` }}>${st.map((id) => { const an = M.andonState(S, id), o = S.pos[id].occ, v = o && o.vehicleId && S.vehicles[o.vehicleId], cs = M.callsAt(S, id), bz = S.buzzing[id] != null;
+      return html`<div key=${id} class=${'lcd-cell s-' + an.state + (bz ? ' buzz' : '')}>
+        <div class="lc-id"><span>${id}</span><span class="lc-ic">${cs.map((c) => html`<i key=${c.id} class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></i>`)}${bz ? html`<${Icon} n="buzz" />` : null}</span></div>
+        <div class="lc-cy">${an.state === 'idle' ? '—' : an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)}` : fmtDur(an.cycle)}</div>
+        <div class="lc-bar"><i style=${{ width: `${Math.min(1, an.ratio) * 100}%` }}></i></div>
+        <div class="lc-vin">${v ? v.vin.slice(-6) : 'no unit'} · ${M.stationCount(S, id)}</div></div>`; })}</section>`
+    : html`<section class="lcd-scans"><div class="lcd-k">Recent scans</div>${scans.length ? scans.map((x) => html`<div key=${x.id} class="lcd-scan"><b>${fmtClock(x.t, false)}</b><span>${x.scanner === 'ENTRY' ? 'Line-in · TL1' : 'Offline · TL6'}</span><span class="mono">${x.vin || '—'}</span><span class=${x.ok ? 'good' : 'bad'}>${x.ok ? 'OK' : 'rejected'}</span></div>`) : html`<div class="lcd-scan">No scans yet this shift.</div>`}</section>`}
+    <section class=${'lcd-calls' + (calls.length ? ' on' : '')}>${calls.length ? calls.slice(0, 4).map((c) => { const w = S.t - c.raisedT; return html`<div key=${c.id} class=${'lcd-call t-' + c.type.toLowerCase() + (c.respondedT == null && w > 180 ? ' late' : '')}><${Icon} n=${CALL_ICON[c.type]} /><b>${c.pos}</b><span>${M.CALL_TYPES[c.type].label}</span><span class="w">${c.respondedT == null ? `waiting ${fmtDur(w)}` : `${(c.respondedBy || '').split(' · ')[0]} at station · ${fmtDur(w)}`}</span></div>`; }) : html`<div class="lcd-none">No active calls</div>`}</section>
+    <footer class="lcd-foot"><span class="sim-tag"><${Icon} n="flask" size=${10} />SIMULATION</span>
+      <nav>${M.AREA_IDS.map((k) => html`<button key=${k} aria-current=${k === area ? 'page' : null} onClick=${() => go('display', k.toLowerCase())}>${AREAS[k].short}</button>`)}</nav>
+      <span class="lcd-act"><button onClick=${fs} title="Full screen"><${Icon} n="max" /></button>${Auth.user ? html`<button onClick=${() => go(ROLES[Auth.user.role].home)} title="Back to the app"><${Icon} n="x" /></button>` : html`<button onClick=${() => go('dash')} title="Sign in"><${Icon} n="user" /></button>`}</span></footer>
+  </div>`;
+}
 boot();
 </script>
 

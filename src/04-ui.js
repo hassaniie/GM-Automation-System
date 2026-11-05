@@ -246,7 +246,7 @@ function StateIsland() {
 function CallsPill() {
   const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
   return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
-    <span class=${'lamp sup' + (sup ? ' blink' : '')} style=${{ opacity: sup ? 1 : 0.25 }}></span><span class=${'lamp mnt' + (mnt ? ' blink' : '')} style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
+    <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
 }
 function ActIsland() {
   const S = RT.S;
@@ -348,6 +348,7 @@ function SimConsole() {
         <label for="cfg-rate">Random team delay rate (%)</label><input id="cfg-rate" type="number" min="0" max="30" value=${Math.round(C.delayRate * 100)} onChange=${(e) => setC('delayRate', M.clamp(+e.target.value || 0, 0, 30) / 100)} />
       </div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Simulated line stop</div><div class="actions">${['TRIM', 'CHASSIS', 'FINAL'].map((a) => html`<button key=${a} class="btn sm sim" onClick=${act(() => M.setPaused(S, a, !S.paused[a]))}><${Icon} n=${S.paused[a] ? 'play' : 'pause'} />${S.paused[a] ? 'Restart ' : 'Stop '}${AREAS[a].short}</button>`)}</div></div>
+      <div><div class="micro" style=${{ marginBottom: 8 }}>Resilience (URD req 32–33)</div><div class="actions"><button class="btn sm sim" onClick=${() => setLink(!RT.link.up)}><${Icon} n=${RT.link.up ? 'wifioff' : 'wifi'} />${RT.link.up ? 'Drop head-office link' : 'Restore head-office link'}</button><button class="btn sm sim" disabled=${!!RT.power} onClick=${powerCut}><${Icon} n="power" />Power cut and restart</button></div></div>
       <div><div class="micro" style=${{ marginBottom: 8 }}>Time</div><div class="actions"><button class="btn sm sim" title="Fast-forward the simulation to the next shift, break or restart" onClick=${() => skipAhead()}><${Icon} n="skip" />Skip to ${S.planned ? 'restart' : 'next break or shift change'} · ${fmtClock(M.nextBoundary(S, S.t), false)}</button></div></div>
       <p class="note">Adapter: <b>${M.Integration.mode}</b>. Nothing is sent to any PLC, conveyor, scanner or sensor. Permissives shown in the HMI are simulated interlocks.</p>
     </div>` : null}
