@@ -137,7 +137,7 @@ export class Persistence {
       const sig = `${v.state}|${v.segments.length}|${v.offlines.length}|${v.returns.length}|${v.lineOffT}|${v.posId}`;
       if (this.vehSig.get(v.vin) === sig) continue;
       this.vehSig.set(v.vin, sig);
-      const { history: _h, ...record } = v as typeof v & { history?: unknown }; // eslint-disable-line @typescript-eslint/no-unused-vars
+      const { history: _h, ...record } = v as typeof v & { history?: unknown };
       rows.push([v.vin, v.id, v.variant.code, v.variant.model, v.paint.name, v.state, v.entryT, v.lineOffT, v.totalDur, JSON.stringify(record)]);
     }
     for (let i = 0; i < rows.length; i += 200)

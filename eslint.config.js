@@ -14,7 +14,7 @@ export default tseslint.config(
     rules: {
       // The safety net for the module migration: every name must be imported or declared.
       'no-undef': 'error',
-      'no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none' }],
+      'no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' }],
       'no-empty': ['error', { allowEmptyCatch: true }],
       'react-hooks/rules-of-hooks': 'error',
     },

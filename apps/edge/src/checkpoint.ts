@@ -9,7 +9,7 @@ import { rehydrate } from '@mg/sync';
 export function freeze(S: EngineState): Buffer {
   // code (rng) and the event journal (flushed to the database separately) stay out; the last analysis is kept,
   // since the next simulated second reads it before working out a new one
-  const { rng: _rng, journal: _j, ...data } = S as EngineState & { rng: unknown }; // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { rng: _rng, journal: _j, ...data } = S as EngineState & { rng: unknown };
   return serialize(data);
 }
 
