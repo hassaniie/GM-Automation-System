@@ -4,6 +4,8 @@ import { userName } from '../auth.js';
 import { VSTATE } from './inspector.js';
 import { select } from './scenarios.js';
 import { Act } from '../lib/act.js';
+import { api } from '../lib/api.js';
+import { REMOTE } from '../lib/source.js';
 import { go } from '../lib/router.js';
 import { M, POS, RT, WORK_POS, fmtClock, fmtDur, html, setUI, useEffect, useRef, useState } from '../lib/runtime.js';
 import { Icon, VinText } from '../lib/ui-kit.js';
@@ -103,8 +105,16 @@ export function CorrectDialog({ d }) {
 }
 /* VIN lookup (URD req 5): type part of a VIN and open its record. */
 export function VinSearchDialog() {
-  const S = RT.S, [q, setQ] = useState(''), [i, setI] = useState(0), inp = useRef(null);
+  const S = RT.S, [q, setQ] = useState(''), [i, setI] = useState(0), [hist, setHist] = useState(null), inp = useRef(null);
   useEffect(() => { inp.current && inp.current.focus(); }, []);
+  // live screens: units from earlier days are in the server's stored history, not in memory
+  const lookUp = async () => {
+    setHist('…');
+    const r = await api(`/api/vehicles/${encodeURIComponent(Q)}`);
+    if (!r.ok) return setHist(r.error || 'Not found.');
+    const v = { history: [], ...r.vehicle }; // the event history of old units stays in the events table
+    RT.archive = RT.archive || {}; RT.archive[v.id] = v; setHist(null); open(v);
+  };
   const Q = q.trim().toUpperCase();
   const all = S.vehOrder.map((id) => S.vehicles[id]);
   const hits = (Q ? all.filter((v) => v.vin.includes(Q)) : all.slice().reverse()).slice(0, 30);
@@ -117,7 +127,8 @@ export function VinSearchDialog() {
       <div class="vresults" role="listbox">${hits.length ? hits.map((v, k) => { const [lbl, tone] = VSTATE[v.state]; return html`<button key=${v.id} class="vresult" role="option" aria-selected=${k === i} onClick=${() => open(v)}>
         <span><${VinText} vin=${v.vin} /></span><span class=${'chip c-' + tone}>${lbl}</span>
         <span class="sub">${v.variant.name} · ${M.locationLabel(S, v)}</span><span class="sub mono">in ${fmtClock(v.entryT, false)}${v.lineOffT ? ` · done ${fmtClock(v.lineOffT, false)}` : ''}</span></button>`; }) : html`<div class="empty">No vehicle with “${Q}” in its VIN in this session.</div>`}</div>
-      <p class="note">Searches every vehicle registered at Scanner 1 in this session: on the line, offlined and completed.</p>
+      ${REMOTE && !hits.length && Q.length === 17 ? html`<div class="actions" style=${{ marginTop: 8 }}><button class="btn sm" onClick=${lookUp}><${Icon} n="search" />Search stored history</button>${hist ? html`<span class="note">${hist}</span>` : null}</div>` : null}
+      <p class="note">${REMOTE ? 'Searches vehicles from today and yesterday here; for older ones, type the full 17-character VIN and search the stored history.' : 'Searches every vehicle registered at Scanner 1 in this session: on the line, offlined and completed.'}</p>
     </div></div></div>`;
 }
 export function AboutDialog() {

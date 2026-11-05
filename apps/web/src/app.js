@@ -107,22 +107,44 @@ function App() {
     ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}</${React.Fragment}>`}
   </main>`;
 }
+/* A TV opened without a valid display link (live screens only). */
+function DisplayNotAuthorised() {
+  return html`<div class="lcd" style=${{ display: 'grid', placeItems: 'center', minHeight: '100vh' }}><div style=${{ textAlign: 'center', maxWidth: 560, padding: 24 }}>
+    <${Icon} n="tv" size=${40} /><h2 style=${{ margin: '16px 0 8px' }}>This display is not authorised</h2>
+    <p class="note">${Auth.displayError || 'Line displays connect with a display link. Ask an administrator to create one in Settings → Displays, then open it on this screen once.'}</p>
+  </div></div>`;
+}
 /* Called from main.js once every module is loaded. */
 export function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
   if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
-  let first = Promise.resolve();
-  if (REMOTE) {
-    // live screens: wait for the edge server's first snapshot; scenario hints set the opening view
-    document.getElementById('app').innerHTML = '<div class="boot-wait">Connecting to the line server…</div>';
-    first = startRemote().then((hints) => { RT.demo = null; applyScenarioHints({ ...hints, speed: RT.speed }); RT.ui.selection = null; RT.ui.dialog = null; RT.ui.drawer = null; });
-  } else {
+  const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
+  const el = document.getElementById('app');
+  if (!REMOTE) {
     RT.S = freshState(11, savedCfg()); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
     M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
+    const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); createRoot(el).render(html`<${App} />`); };
+    Promise.all([fonts, Auth.init()]).then(start, start);
+    return;
   }
-  const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); createRoot(document.getElementById('app')).render(html`<${App} />`); };
-  const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
-  Promise.all([fonts, Auth.init(), first]).then(start, start);
+  // live screens: sign-in is checked by the edge server first; only then does the live connection open
+  el.innerHTML = '<div class="boot-wait">Connecting to the line server…</div>';
+  const root = createRoot(el);
+  const goLive = async () => {
+    const hints = await startRemote();
+    RT.demo = null; applyScenarioHints({ ...hints, speed: RT.speed }); RT.ui.selection = null; RT.ui.dialog = null; RT.ui.drawer = null;
+    if (Auth.display) go('display', Auth.display.line); // a line display shows its own line
+    else if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home);
+    root.render(html`<${App} />`);
+  };
+  Promise.all([fonts, Auth.init()]).then(() => {
+    RT.route = parseHash();
+    if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
+    if (Auth.user || Auth.display) return goLive();
+    if (RT.route.page === 'display') { root.render(html`<${DisplayNotAuthorised} />`); return; }
+    Auth.onSignedIn = goLive;
+    root.render(html`<${SignIn} />`);
+  }, (e) => { el.innerHTML = `<div class="boot-wait">Line server not reachable · ${String(e && e.message || e)}</div>`; });
 }

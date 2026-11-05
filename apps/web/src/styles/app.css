@@ -1000,3 +1000,4 @@ svg.plan text { font-family: var(--font-mono); }
   .panel, .rsec { break-inside: avoid; box-shadow: none !important; }
   .ticks::before, .ticks::after { display: none !important; }
 }
+.si-wait { margin: 18px 0; color: var(--muted); font-size: 13px; }

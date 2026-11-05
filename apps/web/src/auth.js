@@ -8,6 +8,8 @@ import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { go } from './lib/router.js';
 import { M, RT, bump, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Icon, MgMark, tv } from './lib/ui-kit.js';
+import { api } from './lib/api.js';
+import { REMOTE, reconnect } from './lib/source.js';
 
 export { ROLES } from '@mg/contracts';
 import { ROLES } from '@mg/contracts';
@@ -25,7 +27,8 @@ export async function hashPw(salt, pw) {
 }
 export const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
 
-export const Auth = {
+/* Offline demo: accounts and sessions in this browser. */
+const LocalAuth = {
   user: null, locked: false, lastActive: Date.now(), log: jget('mg-andon-authlog', []),
   async init() {
     let users = jget('mg-andon-users', null);
@@ -66,15 +69,69 @@ export const Auth = {
   signOut() { if (this.user) this.record('Signed out', this.user.name); this.user = null; this.locked = false; store.set('mg-andon-session', ''); sstore.del('mg-andon-session'); setUI({ dialog: null, drawer: null, selection: null, menu: false }); location.hash = '#/'; bump(); },
   switchTo(u) { this.record('Demo user switch', u.name, `from ${this.user ? this.user.name : '—'}`); this.start(u, !!store.get('mg-andon-session'), 'Signed in (demo switch)'); setUI({ menu: false, dialog: null }); bump(); },
 };
+/* Live screens: the edge server signs people in and keeps the accounts; this mirrors its answers.
+   Same fields and methods as LocalAuth, so the screens don't care which one they use. */
+const toClient = (u) => ({ id: u.id, name: u.name, empId: u.empId, email: u.email, role: u.role, active: u.active, lastIn: u.lastSignIn ? Date.parse(u.lastSignIn) : null, created: u.created ? Date.parse(u.created) : null });
+const SSO_ERRORS = { 'no-account': 'Your company account is not set up for this system. Ask your administrator to add you.', disabled: 'This account is disabled. Ask your administrator.', failed: 'Single sign-on did not complete. Try again, or use your employee ID and password.', expired: 'The sign-on took too long. Try again.' };
+const RemoteAuth = {
+  user: null, display: null, locked: false, lastActive: Date.now(), log: [], users: [], cfg: { demo: false, sso: null }, waitUntil: 0, ssoError: null,
+  /** Called by boot after a successful sign-in, to connect the live screens. */
+  onSignedIn: null,
+  apply(me) {
+    this.user = me && me.kind === 'user' ? toClient(me.user) : null;
+    this.display = me && me.kind === 'display' ? me.display : null;
+  },
+  async init() {
+    // a line display opened from its link: trade the one-time token for the display's session
+    const m = location.hash.match(/[?&]display=([^&]+)/);
+    if (m) {
+      history.replaceState(null, '', location.pathname + location.search + location.hash.replace(/[?&]display=[^&]+/, ''));
+      const r = await api('/api/auth/display', { body: { token: decodeURIComponent(m[1]) } });
+      if (!r.ok) this.displayError = r.reason || 'This display link is not valid.';
+    }
+    const q = new URLSearchParams(location.search), err = q.get('sso_error');
+    if (err) { this.ssoError = SSO_ERRORS[err] || SSO_ERRORS.failed; q.delete('sso_error'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); }
+    const [cfg, me] = await Promise.all([api('/api/auth/config'), api('/api/auth/me')]);
+    this.cfg = cfg.ok ? cfg : this.cfg;
+    this.users = (this.cfg.demoAccounts || []).map((u) => ({ ...u, active: true }));
+    this.apply(me.me);
+    ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, () => { this.lastActive = Date.now(); }, { capture: true, passive: true }));
+    setInterval(() => { if (this.user && !this.locked && !isKiosk() && Date.now() - this.lastActive > IDLE_LOCK_MS) { this.locked = true; bump(); } }, 10000);
+  },
+  saveUsers() {},
+  record() {}, // the server keeps the sign-in log
+  find() { return null; },
+  tries() { return { n: 0, until: this.waitUntil }; },
+  async signIn(id, pw, keep) {
+    const r = await api('/api/auth/sign-in', { body: { id, password: pw, keep } });
+    if (r.waitMs) this.waitUntil = Date.now() + r.waitMs;
+    if (!r.ok) return { ok: false, reason: r.reason || r.error || 'Sign-in failed.', locked: !!r.locked };
+    this.apply(r.me); this.locked = false; this.lastActive = Date.now();
+    if (this.onSignedIn) await this.onSignedIn();
+    return { ok: true };
+  },
+  async unlock(pw) { const r = await api('/api/auth/unlock', { body: { password: pw } }); if (r.ok) { this.locked = false; this.lastActive = Date.now(); } return r.ok; },
+  async signOut() { await api('/api/auth/sign-out', { body: {} }); location.replace(location.pathname); },
+  async switchTo(u) {
+    const r = await api('/api/auth/switch', { body: { userId: u.id } });
+    if (!r.ok) return;
+    this.apply(r.me); this.locked = false;
+    reconnect(); // the live connection carries the new person's session
+    setUI({ menu: false, dialog: null }); bump();
+  },
+  async loadUsers() { const r = await api('/api/users'); if (r.ok) this.users = r.users.map(toClient); return r; },
+};
+export const Auth = REMOTE ? RemoteAuth : LocalAuth;
 export function can(perm) { const u = Auth.user; if (!u || Auth.locked) return false; const P = ROLES[u.role].perms; return P.includes('*') || P.includes(perm); }
 export function userName() { const u = Auth.user; return u ? `${u.name} · ${ROLES[u.role].short}` : 'System'; }
 const isKiosk = () => RT.route && RT.route.page === 'display';
 
 /* ── sign-in screen ── */
 export function SignIn({ lock }) {
-  const S = RT.S, p = M.pace(S), open = S.calls.filter((c) => c.clearedT == null).length, ls = M.lineStatus(S);
+  // live screens show this before connecting, so there may be no plant state yet
+  const S = RT.S, p = S && M.pace(S), open = S ? S.calls.filter((c) => c.clearedT == null).length : 0, ls = S && M.lineStatus(S);
   const [id, setId] = useState(lock && Auth.user ? Auth.user.empId : ''), [pw, setPw] = useState(''), [show, setShow] = useState(false), [keep, setKeep] = useState(true), [caps, setCaps] = useState(false);
-  const [busy, setBusy] = useState(false), [err, setErr] = useState(null), [touched, setTouched] = useState(false), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
+  const [busy, setBusy] = useState(false), [err, setErr] = useState(() => (Auth.ssoError || null)), [touched, setTouched] = useState(false), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
   const [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => { (lock ? pwRef : idRef).current && (lock ? pwRef : idRef).current.focus(); const i = setInterval(tick, 1000); return () => clearInterval(i); }, []);
   const t = Auth.tries(), waitS = t.until > Date.now() ? Math.ceil((t.until - Date.now()) / 1000) : 0;
@@ -96,12 +153,12 @@ export function SignIn({ lock }) {
       <div class="si-top"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile · General Assembly</div></div></div>
       <div class="si-hero"><div class="micro">Andon · Trim → Chassis → Final</div><h1>Every station, every call, in real time.</h1>
         <p>Cycle time against takt, buzzers, supervisor and maintenance calls, targets and downtime, on the floor, at each line and at head office.</p></div>
-      <${SignInFlow} />
-      <div class="si-live" role="status"><span class="sim-tag"><${Icon} n="flask" size=${10} />SIMULATION</span>
+      ${S ? html`<${SignInFlow} />
+      <div class="si-live" role="status"><span class="sim-tag"><${Icon} n="flask" size=${10} />${REMOTE ? 'SIM · EDGE' : 'SIMULATION'}</span>
         <div><span class="micro">Line</span><b style=${{ color: tv(ls.tone) }}>${ls.label}</b></div>
         <div><span class="micro">Final · this shift</span><b class="mono">${p.done} / ${p.target}</b></div>
         <div><span class="micro">Open calls</span><b class="mono">${open}</b></div>
-        <div><span class="micro">Shop time</span><b class="mono">${fmtClock(S.t, false)}</b></div></div>
+        <div><span class="micro">Shop time</span><b class="mono">${fmtClock(S.t, false)}</b></div></div>` : html`<p class="si-wait">Live line status appears after you sign in.</p>`}
       <div class="si-foot"><img class="full" src=${BV_FULL} alt="Bolt & Volt" /><img class="ink" src=${BV_FULL_INK} alt="Bolt & Volt" /><span>Designed and built by Bolt & Volt</span></div>
     </section>
     <section class="si-form-wrap">
@@ -122,12 +179,14 @@ export function SignIn({ lock }) {
         <button type="submit" class="btn primary lg si-go" aria-busy=${busy ? 'true' : 'false'} disabled=${busy || waitS > 0}>${busy ? 'Checking…' : lock ? 'Unlock' : 'Sign in'}<${Icon} n="chev" /></button>
         ${lock ? html`<button type="button" class="btn ghost si-alt" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign in as someone else</button>` : html`
           <div class="si-or"><span>or</span></div>
-          <button type="button" class="btn si-alt" disabled title="Available when deployed on the plant network"><${Icon} n="building" />Sign in with MG JW account (SSO)<span class="si-soon">at deployment</span></button>`}
-        ${!lock ? html`<div class="si-demo"><button type="button" class="si-demo-h" aria-expanded=${demo} onClick=${() => setDemo(!demo)}><span><${Icon} n="key" />Demo access</span><span class="c-muted">${demo ? 'Hide' : 'Show'} the five role accounts</span></button>
+          ${REMOTE && Auth.cfg.sso ? html`<a class="btn si-alt" href="/api/auth/oidc/start"><${Icon} n="building" />Sign in with ${Auth.cfg.sso.label}</a>`
+            : html`<button type="button" class="btn si-alt" disabled title="Available when deployed on the plant network"><${Icon} n="building" />Sign in with MG JW account (SSO)<span class="si-soon">at deployment</span></button>`}`}
+        ${!lock && (!REMOTE || Auth.cfg.demo) ? html`<div class="si-demo"><button type="button" class="si-demo-h" aria-expanded=${demo} onClick=${() => setDemo(!demo)}><span><${Icon} n="key" />Demo access</span><span class="c-muted">${demo ? 'Hide' : 'Show'} the five role accounts</span></button>
           ${demo ? html`<div class="si-accts">${DEMO_USERS.map((u) => html`<button type="button" key=${u.id} class="si-acct" onClick=${() => fill(u)} title=${ROLES[u.role].desc}>
             <span class=${'av r-' + u.role}>${initials(u.name)}</span><span class="nm"><b>${u.name}</b><small>${ROLES[u.role].label}</small></span><span class="mono c-muted">${u.empId}</span></button>`)}</div>
             <p class="si-note">Pick an account to fill the form, then sign in. Each role sees and can do different things.</p>` : null}</div>` : null}
-        <p class="si-fine">${lock ? null : html`Line displays don't need a sign-in: <a href="#/display/chassis" class="linkish">open a line display</a>. `}Prototype: accounts and sessions are kept in this browser only. The plant deployment signs in through the company directory.</p>
+        <p class="si-fine">${REMOTE ? 'Accounts are managed by your administrator. Line displays connect with a display link from Settings → Displays.'
+          : html`${lock ? null : html`Line displays don't need a sign-in: <a href="#/display/chassis" class="linkish">open a line display</a>. `}Prototype: accounts and sessions are kept in this browser only. The plant deployment signs in through the company directory.`}</p>
       </form>
     </section>
   </div>`;

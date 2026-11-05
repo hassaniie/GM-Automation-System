@@ -137,7 +137,7 @@ function StationInspector({ id }) {
 export const VSTATE = { IN_PROCESS: ['On line', 'text', 'clock'], AWAITING_LINE_OFF: ['On line · driving off', 'text', 'arrow'], LINED_OFF: ['Completed', 'ok', 'checkc'], OFF_LINE: ['Offlined', 'warn', 'exit'], RETURN_QUEUED: ['Offlined · return queued', 'warn', 'ret'], RETURNING: ['Returning to line', 'transit', 'ret'] };
 /* Vehicle record (URD req 5): where it is, its status, and its full history. */
 function VehicleInspector({ id }) {
-  const S = RT.S, v = S.vehicles[id]; if (!v) return null;
+  const S = RT.S, v = S.vehicles[id] || (RT.archive && RT.archive[id]); if (!v) return null; // archive: from stored history
   const [lbl, tone, ic] = VSTATE[v.state], c = v.carrierId && S.carriers[v.carrierId], at = c && c.mode === 'POS' ? c.posId : null;
   let tl, tval;
   if (v.state === 'LINED_OFF') { tl = 'Total time in the line · line-in to completion'; tval = v.totalDur; }

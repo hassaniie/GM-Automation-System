@@ -4,10 +4,11 @@
    (req 7), users (req 30) and the audit log. Saved on this device.
    ════════════════════════════════════════════════════════════════════════ */
 import { Act } from './lib/act.js';
+import { api } from './lib/api.js';
 import { REMOTE } from './lib/source.js';
 import { Auth, ROLES, can, hashPw, initials, jget, jset, userName } from './auth.js';
 import { go } from './lib/router.js';
-import { AREAS, M, POS, RT, fmtClock, fmtDur, html, setUI, useReducer, useState } from './lib/runtime.js';
+import { AREAS, M, POS, RT, fmtClock, fmtDur, html, setUI, useEffect, useReducer, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 
 const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
@@ -24,10 +25,11 @@ const toHM = (sec) => fmtClock(sec, false);
 const fromHM = (s) => { const [h, m] = (s || '0:0').split(':').map(Number); return (h || 0) * 3600 + (m || 0) * 60; };
 const ADMIN_TABS = [
   ['takt', 'Takt time', 'clock', 'takt'], ['plan', 'Targets & plan', 'calendar', 'plan'], ['shifts', 'Shifts & breaks', 'hour', 'plan'],
-  ['buzzers', 'Buzzers', 'buzz', 'buzzer'], ['correct', 'Position correction', 'swap', 'correct'], ['users', 'Users', 'users', 'users'], ['audit', 'Audit log', 'shield', 'audit'],
+  ['buzzers', 'Buzzers', 'buzz', 'buzzer'], ['correct', 'Position correction', 'swap', 'correct'], ['users', 'Users', 'users', 'users'],
+  ...(REMOTE ? [['displays', 'Displays', 'tv', 'users']] : []), ['audit', 'Audit log', 'shield', 'audit'],
 ];
 export const adminAllowed = () => ADMIN_TABS.some((t) => can(t[3]));
-const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), audit: (p) => AuditAdmin(p) };
+const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), displays: (p) => DisplayAdmin(p), audit: (p) => AuditAdmin(p) };
 
 export function AdminPage() {
   const tabs = ADMIN_TABS.filter((t) => can(t[3]));
@@ -36,7 +38,7 @@ export function AdminPage() {
   return html`<div class="page-wrap admin">
     <aside class="adm-nav" aria-label="Settings sections"><div class="micro" style=${{ padding: '0 10px 8px' }}>Settings</div>
       ${tabs.map(([k, l, ic]) => html`<button key=${k} class="adm-tab" aria-current=${cur[0] === k ? 'page' : null} onClick=${() => go('admin', k)}><${Icon} n=${ic} />${l}</button>`)}
-      <p class="note" style=${{ padding: '12px 10px' }}>Changes apply at once, are saved on this device and are written to the audit log with your name.</p></aside>
+      <p class="note" style=${{ padding: '12px 10px' }}>${REMOTE ? 'Changes apply at once on every screen, are stored on the line server and are written to the audit log with your name.' : 'Changes apply at once, are saved on this device and are written to the audit log with your name.'}</p></aside>
     <section class="adm-body"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
   </div>`;
 }
@@ -178,7 +180,14 @@ function CorrectAdmin() {
 /* Users (req 30): admin only */
 function UserAdmin() {
   const [edit, setEdit] = useState(null), [msg, setMsg] = useState(null), [, tick] = useReducer((x) => x + 1, 0);
+  useEffect(() => { if (REMOTE) Auth.loadUsers().then(tick); }, []);
   const saveUser = async (u) => {
+    if (REMOTE) { // the server checks, hashes the password, ends sessions on role change, and logs it
+      const body = u.id ? { name: u.name, email: u.email, role: u.role, ...(u.newPw ? { password: u.newPw } : {}) } : { name: u.name, empId: u.empId, email: u.email, role: u.role, password: u.newPw };
+      const r = await api(u.id ? `/api/users/${u.id}` : '/api/users', { method: u.id ? 'PATCH' : 'POST', body });
+      if (!r.ok) return setMsg({ ok: false, text: r.error || 'Could not save.' });
+      await Auth.loadUsers(); setEdit(null); setMsg({ ok: true, text: `${u.name} ${u.id ? 'updated' : 'added'}.` }); tick(); return;
+    }
     if (!u.name.trim() || !u.empId.trim()) return setMsg({ ok: false, text: 'Name and employee ID are required.' });
     const clash = Auth.users.find((x) => x.id !== u.id && (x.empId.toLowerCase() === u.empId.toLowerCase() || (u.email && x.email.toLowerCase() === u.email.toLowerCase())));
     if (clash) return setMsg({ ok: false, text: 'That employee ID or email is already used.' });
@@ -190,7 +199,10 @@ function UserAdmin() {
     Auth.saveUsers(); Auth.record(isNew ? 'User added' : 'User updated', Auth.user.name, `${u.name} · ${ROLES[u.role].label}${newPw ? ' · password set' : ''}`);
     setEdit(null); setMsg({ ok: true, text: `${u.name} ${isNew ? 'added' : 'updated'}.` }); tick();
   };
-  const toggle = (u) => { if (u.id === Auth.user.id) return; u.active = !u.active; Auth.saveUsers(); Auth.record(u.active ? 'User enabled' : 'User disabled', Auth.user.name, u.name); tick(); };
+  const toggle = async (u) => {
+    if (u.id === Auth.user.id) return;
+    if (REMOTE) { const r = await api(`/api/users/${u.id}`, { method: 'PATCH', body: { active: !u.active } }); if (!r.ok) setMsg({ ok: false, text: r.error }); await Auth.loadUsers(); tick(); return; }
+    u.active = !u.active; Auth.saveUsers(); Auth.record(u.active ? 'User enabled' : 'User disabled', Auth.user.name, u.name); tick(); };
   return html`<div>
     <${PageHead} k="Users · URD req 30" title="Users and roles" sub="Everyone signs in individually. Roles decide what each person can do.">
       <button class="btn primary" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}><${Icon} n="plus" />Add user</button></${PageHead}>
@@ -217,10 +229,13 @@ function UserAdmin() {
 
 /* Audit log: configuration changes, corrections, sign-ins */
 function AuditAdmin() {
-  const [f, setF] = useState('all');
+  const [f, setF] = useState('all'), [remote, setRemote] = useState(null);
+  useEffect(() => { if (REMOTE) api('/api/audit?limit=500').then((r) => setRemote(r.ok ? r : { changes: [], access: [], error: r.error })); }, []);
   persistConfig();
-  const cfg = (REMOTE ? RT.S.audit.map((a) => ({ ...a, at: a.t, before: String(a.before), after: String(a.after) })) : jget('mg-andon-audit', [])).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
-  const auth = Auth.log.map((r) => ({ when: new Date(r.at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'medium' }), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
+  const whenOf = (at) => new Date(at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'medium' });
+  // live screens: the server's stored log (configuration changes, corrections, sign-ins, account changes)
+  const cfg = (REMOTE ? (remote ? remote.changes.map((a) => ({ ...a, at: Date.parse(a.at) })) : []) : jget('mg-andon-audit', [])).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
+  const auth = (REMOTE ? (remote ? remote.access.map((a) => ({ at: Date.parse(a.at), action: a.action, detail: a.detail, who: a.who })) : []) : Auth.log).map((r) => ({ when: whenOf(r.at), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
   const rows = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort).slice(0, 300);
   const csv = () => downloadText('andon-audit-log.csv', 'text/csv', [['When', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...rows.map((r) => [r.when, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n'));
   return html`<div>
@@ -234,3 +249,33 @@ function AuditAdmin() {
 }
 export function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
 export function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+/* Line display links (live screens): each TV opens its link once and stays connected, read-only, until revoked. */
+function DisplayAdmin() {
+  const [list, setList] = useState(null), [name, setName] = useState(''), [line, setLine] = useState('chassis'), [made, setMade] = useState(null), [msg, setMsg] = useState(null);
+  const load = () => api('/api/displays').then((r) => setList(r.ok ? r.displays : []));
+  useEffect(() => { load(); }, []);
+  const create = async () => {
+    const r = await api('/api/displays', { body: { name: name.trim(), line } });
+    if (!r.ok) return setMsg({ ok: false, text: r.error || 'Could not create the link.' });
+    setMade({ name: name.trim(), url: `${location.origin}${location.pathname}${r.path}` }); setName(''); setMsg(null); load();
+  };
+  const revoke = async (d) => { const r = await api(`/api/displays/${d.id}`, { method: 'DELETE' }); setMsg(r.ok ? { ok: true, text: `${d.name} disconnected. Its link no longer works.` } : { ok: false, text: r.error }); load(); };
+  const copy = () => { try { navigator.clipboard.writeText(made.url); setMsg({ ok: true, text: 'Link copied.' }); } catch (e) { setMsg({ ok: false, text: 'Copy the link by hand.' }); } };
+  const when = (t) => (t ? new Date(t).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—');
+  return html`<div>
+    <${PageHead} k="Line displays · URD req 23" title="Display links" sub="Create one link per TV. Open it once on the TV: it then shows its line, read-only, with no sign-in. Revoke a link to disconnect that TV." />
+    <div class="adm-row" style=${{ alignItems: 'end' }}>
+      <div class="field" style=${{ flex: 1 }}><label for="dp-n">Display name</label><input id="dp-n" value=${name} onInput=${(e) => setName(e.target.value)} placeholder="e.g. Chassis line TV" /></div>
+      <div class="field"><label for="dp-l">Line</label><select id="dp-l" value=${line} onChange=${(e) => setLine(e.target.value)}><option value="trim">Trim</option><option value="chassis">Chassis</option><option value="final">Final</option></select></div>
+      <button class="btn primary" disabled=${name.trim().length < 2} onClick=${create}><${Icon} n="plus" />Create link</button>
+    </div>
+    ${made ? html`<div class="result good" style=${{ marginTop: 12 }}><b>Link for ${made.name}</b> · shown once; open it on the TV.<div class="mono" style=${{ wordBreak: 'break-all', margin: '6px 0' }}>${made.url}</div><button class="btn sm" onClick=${copy}><${Icon} n="copy" />Copy link</button></div>` : null}
+    <${Saved} msg=${msg} />
+    <table class="data" style=${{ marginTop: 16 }}><thead><tr><th>Display</th><th>Line</th><th>Created</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>
+      ${list == null ? html`<tr><td colspan="6">Loading…</td></tr>` : !list.length ? html`<tr><td colspan="6" class="c-muted">No display links yet.</td></tr>` : list.map((d) => html`<tr key=${d.id} style=${{ opacity: d.revoked_at ? 0.55 : 1 }}>
+        <td style=${{ textAlign: 'left' }}>${d.name}</td><td>${d.line}</td><td class="mono">${when(d.created_at)} · ${d.created_by}</td><td class="mono">${when(d.last_seen)}</td>
+        <td>${d.revoked_at ? 'Revoked' : 'Active'}</td><td>${d.revoked_at ? null : html`<button class="btn sm ghost" onClick=${() => revoke(d)}>Revoke</button>`}</td></tr>`)}
+    </tbody></table>
+  </div>`;
+}

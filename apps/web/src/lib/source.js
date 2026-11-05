@@ -14,7 +14,7 @@ const WS_URL = q && /^wss?:\/\//.test(q) ? q : `${location.protocol === 'https:'
 /** Connection status, shown in the top bar and on the line displays. */
 RT.conn = { mode: REMOTE ? 'remote' : 'local', state: REMOTE ? 'connecting' : 'local', since: Date.now(), lastAt: 0, rev: 0, server: null, retries: 0 };
 
-let ws = null, nextId = 0, onFirst = null, hold = false, retryTimer = null;
+let ws = null, nextId = 0, onFirst = null, hold = false, retryTimer = null, quiet = false;
 const pending = new Map();
 const listeners = new Set();
 /** Called on connect/disconnect, so screens can react (e.g. the head-office link banner). */
@@ -46,14 +46,21 @@ function connect() {
   clearTimeout(retryTimer);
   ws = new WebSocket(WS_URL);
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
-  ws.onclose = () => {
+  ws.onclose = (e) => {
     for (const p of pending.values()) p.reject(new Error('Connection to the line server lost'));
     pending.clear();
+    // the server ended this session (signed out elsewhere, account disabled, display revoked): back to sign-in
+    if (e.code === 4401) { location.reload(); return; }
+    if (quiet) { quiet = false; connect(); return; } // deliberate reconnect (e.g. demo user switch)
     if (RT.S) setConn('down');
     const wait = Math.min(10000, 500 * 2 ** RT.conn.retries++);
     retryTimer = setTimeout(connect, wait);
+    // a refused connection looks like any other drop; after a couple of tries, check the session is still valid
+    if (RT.conn.retries === 3) fetch('/api/auth/me', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => { if (d && d.ok && !d.me) location.reload(); }, () => {});
   };
 }
+/** Reconnect at once without the "line server not reachable" state: the session cookie has changed. */
+export function reconnect() { if (ws && ws.readyState <= 1) { quiet = true; ws.close(); } }
 /** Drop and reconnect, which brings a fresh snapshot. */
 function resync() { try { ws && ws.close(); } catch (e) { /* closing */ } }
 
