@@ -18,7 +18,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md,yml,yaml}\"",
     "dev:edge": "pnpm --filter @mg/edge dev",
     "start:edge": "pnpm --filter @mg/web build:edge && pnpm --filter @mg/edge start",
-    "dev:all": "pnpm --parallel --filter @mg/edge --filter @mg/web run dev:remote"
+    "dev:all": "pnpm --parallel --filter @mg/edge --filter @mg/web run dev:remote",
+    "db:dev": "docker compose up -d --wait db"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

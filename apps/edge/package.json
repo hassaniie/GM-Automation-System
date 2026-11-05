@@ -16,9 +16,11 @@
     "@mg/engine": "workspace:*",
     "@mg/sim": "workspace:*",
     "@mg/sync": "workspace:*",
-    "fastify": "5.12.8"
+    "fastify": "5.12.8",
+    "pg": "8.23.1"
   },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "@types/ws": "^8.18.2",
     "tsx": "4.23.15",
     "ws": "8.22.1"

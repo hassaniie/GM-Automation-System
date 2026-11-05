@@ -1,0 +1,17 @@
+# Local PostgreSQL for development and tests: `pnpm db:dev` (needs Docker).
+# Same credentials as .env.example and the test helper's default.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: mg
+      POSTGRES_PASSWORD: mg
+      POSTGRES_DB: mg_andon
+    ports: ["5432:5432"]
+    volumes: ["mg-pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mg -d mg_andon"]
+      interval: 2s
+      retries: 30
+volumes:
+  mg-pgdata:
