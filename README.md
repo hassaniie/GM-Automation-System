@@ -8,13 +8,22 @@ Designed and built by **Bolt & Volt (Pvt) Ltd**.
 
 ## Run
 
-`index.html` is a single self-contained page. Open it in a browser, or serve the folder:
+Needs Node 22 and pnpm 10 (`corepack enable` sets up the pinned pnpm).
 
 ```sh
-python3 -m http.server 8080   # then open http://localhost:8080
+pnpm install
+pnpm dev          # http://localhost:5173 with hot reload
 ```
 
-It loads three.js r128, React 18.3.1, htm 3.1.1 and the Barlow and JetBrains Mono fonts from public CDNs. SheetJS 0.18.5 is loaded only when a report is exported to Excel.
+| Command | What it does |
+|---|---|
+| `pnpm build` | Production build in `apps/web/dist/` (what Vercel serves) |
+| `pnpm build:demo` | One self-contained `apps/web/dist-demo/index.html` for quotations; opens straight from disk, Excel export included |
+| `pnpm preview` | Serves the production build locally |
+| `pnpm test` | Engine checks (Vitest) |
+| `pnpm lint` / `pnpm typecheck` | ESLint and TypeScript |
+
+React 18.3.1, htm 3.1.1, three.js r128 (0.128.0) and SheetJS 0.18.5 are npm dependencies; SheetJS is a separate chunk loaded only on export. Only the Barlow and JetBrains Mono fonts come from Google Fonts. CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and both builds on every push and uploads the demo file.
 
 Sign in with one of the demo accounts listed on the sign-in screen (fictional people):
 
@@ -41,25 +50,26 @@ Line displays need no sign-in: open `#/display/trim`, `#/display/chassis` or `#/
 
 ## Source layout
 
-| File | Contents |
-|---|---|
-| `src/01-head.html` | Title, fonts, all CSS: themes, design system, Andon, sign-in, dashboard, line display, reports, print |
-| `src/02-engine.js` | Deterministic line simulator (`window.MGE`): stations, carriers, hangers, transfers, alarms, root-cause analysis, scans, offline and return, takt, cycle time, downtime, buzzers, assist calls, shift calendar, targets, corrections, audit |
-| `src/03-scene.js` | three.js scene (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye |
-| `src/04-ui.js` | Floor HMI: top bar, line strip, station and vehicle panels, dialogs (scan, offline, return, correction, VIN search), drawer, simulator console |
-| `src/05-app.js` | App shell: router, navigation, root component |
-| `src/06-auth.js` | Sign-in, roles and permissions, user menu, idle lock |
-| `src/07-admin.js` | Settings screens and on-device persistence |
-| `src/08-screens.js` | Dashboard, line displays, link-loss and power-cut demos |
-| `src/08b-reports.js` | Reports and Excel/PDF export |
-| `src/08c-how.js` | How it works / URD coverage |
-| `src/90-boot.js` | Starts the app once every module is defined |
-| `src/00-shell-open.html`, `src/99-shell-close.html` | Document wrapper |
-| `build.sh` | Concatenates `src/` into `index.html` |
-| `test/engine.check.js` | Headless engine checks (Node, no dependencies) |
-| `docs/ga-layout-reference.png` | Plant GA layout drawing the floor plan was traced from |
+A pnpm workspace:
 
-Edit files in `src/`, then run `./build.sh`. Run `node test/engine.check.js` after engine changes.
+| Path | Contents |
+|---|---|
+| `packages/engine` | Deterministic line simulator and Andon rules (`MGE`): stations, carriers, hangers, transfers, alarms, root-cause analysis, scans, offline and return, takt, cycle time, downtime, buzzers, assist calls, shift calendar, targets, corrections, audit. `test/` holds the Vitest checks |
+| `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
+| `apps/web/index.html` | Page shell and fonts |
+| `apps/web/src/main.js` | Entry: styles, then `boot()` |
+| `apps/web/src/styles/app.css` | All CSS: themes, design system, Andon, sign-in, dashboard, line display, reports, print |
+| `apps/web/src/lib/` | `runtime.js` (engine handle, UI state, theme), `router.js` (hash routes), `ui-kit.js` (icons, chips, tones, sound), `misc.js` |
+| `apps/web/src/floor/` | Floor HMI: top-bar islands and line strip, station and vehicle inspectors, dialogs (scan, offline, return, correction, VIN search), alarm drawer, simulator console, 2D plan, scenarios |
+| `apps/web/src/app.js` | App shell: navigation, root component, `boot()` |
+| `apps/web/src/auth.js` | Sign-in, roles and permissions, user menu, idle lock |
+| `apps/web/src/admin.js` | Settings screens and on-device persistence |
+| `apps/web/src/screens.js` | Dashboard, line displays, link-loss and power-cut demos |
+| `apps/web/src/reports.js` | Reports and Excel/PDF export |
+| `apps/web/src/how.js` | How it works / URD coverage |
+| `docs/` | Plant GA layout drawing the floor plan was traced from; URD clarification questions |
+
+UI files are plain ES modules using htm templates; new code can be TypeScript. In the browser console, `MGE` (engine) and `__mg` (`RT`, `go`, `setUI`) are available for debugging.
 
 ## Line model
 
