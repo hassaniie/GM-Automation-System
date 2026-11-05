@@ -3,6 +3,14 @@
    the five points the supplier must propose (§6), and a coverage matrix of
    all 36 requirements with a "Show me" link into the running system.
    ════════════════════════════════════════════════════════════════════════ */
+import { Scene3D } from '@mg/scene';
+import { PageHead } from './admin.js';
+import { loadScenario, select } from './floor/scenarios.js';
+import { go } from './lib/router.js';
+import { M, RT, html, setUI } from './lib/runtime.js';
+import { Icon } from './lib/ui-kit.js';
+import { powerCut, setLink } from './screens.js';
+
 const showFloor = (n, after) => () => { go('floor'); setTimeout(() => { if (n) loadScenario(n); if (after) after(); }, 80); };
 const COVERAGE = [
   ['Scanning & tracking', [
@@ -65,7 +73,7 @@ const SIX = [
   ['Number and placement of Final line scanners', 'Two wireless handheld scanners with charging docks at FL2 (covers FL1–FL3) and FL5 (covers FL4–FL7), plus fixed scanners at TL1 (line-in) and TL6 (end of Trim). Four in total. The scan is checked against the VIN tracked at that station.', 'Shown: the docks are marked on the 3D floor.', showFloor(0, () => { setUI({ view: 'FINAL' }); Scene3D.focusView('FINAL'); })],
   ['The downtime calculation (req 11)', 'Station downtime = Σ max(0, cycle time − takt), where cycle time is arrival to departure less planned stops. Line downtime = time during which at least one station on that line is over takt, so overlaps are not double-counted. Breaks and time between shifts are excluded. Each second is also put down to the station that caused it, using the blockage chain.', 'Example: takt 10:00, unit leaves CL2 at 12:30 → CL2 has 2:30 downtime; if CL1 waited behind it, those seconds are attributed to CL2.', () => go('dash')],
 ];
-function HowPage() {
+export function HowPage() {
   const all = COVERAGE.flatMap(([, rows]) => rows), demo = all.filter((r) => r[3] === 'demo').length;
   return html`<div class="page-wrap how">
     <${PageHead} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />

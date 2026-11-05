@@ -2,13 +2,20 @@
    Main dashboard (URD req 25–27) and line displays (req 23–24), plus the
    resilience demos: head-office link loss (req 33) and power cut (req 32).
    ════════════════════════════════════════════════════════════════════════ */
+import { Auth, ROLES } from './auth.js';
+import { CallRow } from './floor/inspector.js';
+import { select } from './floor/scenarios.js';
+import { go } from './lib/router.js';
+import { AREAS, M, RT, bump, fmtClock, fmtDur, html, shortVin, useEffect, useReducer } from './lib/runtime.js';
+import { CALL_ICON, Icon, MgMark } from './lib/ui-kit.js';
+
 
 /* ── shop-to-head-office link (simulated) ──
    Line displays and data collection run on the local line server, so they
    carry on when the link drops. Head office keeps the last data it received
    until the link returns, then the buffered events sync.              */
 RT.link = { up: true, downAt: null, snap: null, evAt: 0, syncedAt: Date.now(), lastSync: null };
-function setLink(up) {
+export function setLink(up) {
   const S = RT.S, L = RT.link;
   if (!up && L.up) { L.up = false; L.downAt = S.t; L.snap = dashData(S); L.evAt = S.events.length ? S.events[S.events.length - 1].id : null; M.logEvent(S, 'sim', 'SIMULATION · head-office link down · line displays and data collection carry on locally'); }
   else if (up && !L.up) { const n = S.events.filter((e) => e.t > L.downAt).length; L.up = true; L.lastSync = { n, dur: S.t - L.downAt }; L.snap = null; M.logEvent(S, 'sim', `SIMULATION · head-office link restored · ${n} buffered events synced, nothing lost`); }
@@ -16,14 +23,14 @@ function setLink(up) {
 }
 /* power cut: everything stops; on restart positions come back from the
    controllers' retained memory and a re-read of the carrier tags.     */
-function powerCut() {
+export function powerCut() {
   const S = RT.S, was = RT.running;
   RT.running = false; RT.power = { phase: 'off', t: S.t }; M.logEvent(S, 'sim', 'SIMULATION · power cut · line servers on UPS, events kept in local storage'); bump();
   setTimeout(() => { RT.power = { phase: 'boot', t: S.t }; bump(); }, 3500);
   setTimeout(() => { const n = Object.values(S.pos).filter((p) => p.occ && p.occ.vehicleId).length; RT.power = { phase: 'ok', n }; M.logEvent(S, 'sim', `SIMULATION · restart · ${n} vehicle positions restored from controller memory and confirmed by tag re-read`); RT.running = was; bump(); }, 7000);
   setTimeout(() => { RT.power = null; bump(); }, 10500);
 }
-function PowerOverlay() {
+export function PowerOverlay() {
   const P = RT.power; if (!P) return null;
   const txt = P.phase === 'off' ? ['Power lost', 'Line controllers are on UPS. Every event up to the cut is already stored locally.'] : P.phase === 'boot' ? ['Restarting', 'Servers and displays come back by themselves. Reading carrier tags at each station…'] : ['Back online', `${P.n} vehicle positions restored and confirmed. No data lost; the line carries on where it stopped.`];
   return html`<div class=${'power-ov ' + P.phase} role="alert"><div class="glass dialog ticks" style=${{ width: 'min(520px, 100%)' }}><div class="dialog-body" style=${{ gap: 10 }}><div class="micro">Simulation · URD req 32</div><h3 style=${{ margin: 0, display: 'flex', gap: 10, alignItems: 'center' }}><${Icon} n=${P.phase === 'ok' ? 'checkc' : 'power'} />${txt[0]}</h3><p style=${{ margin: 0, color: 'var(--text-2)' }}>${txt[1]}</p>${P.phase !== 'ok' ? html`<div class="pw-bar"><i></i></div>` : null}</div></div></div>`;
@@ -48,7 +55,7 @@ function dashData(S) {
 const STATE_LABEL = { normal: 'Running', near: 'Close to limit', over: 'Over takt', STOP: 'Stopped', PLANNED: 'Planned stop', idle: 'No unit' };
 const STATE_TONE = { normal: 'ok', near: 'warn', over: 'crit', STOP: 'crit', PLANNED: 'paused', idle: 'muted' };
 
-function DashboardPage() {
+export function DashboardPage() {
   const S = RT.S, L = RT.link, d = L.up ? dashData(S) : L.snap, live = L.up;
   const sh = d.shift || {};
   return html`<div class="page-wrap dash">
@@ -92,7 +99,7 @@ function LineCard({ l }) {
 }
 
 /* ── line display (LCD at each line, req 23–24): read from 10 m ── */
-function LineDisplay() {
+export function LineDisplay() {
   const S = RT.S, a = (RT.route.sub || 'chassis').toUpperCase(), area = AREAS[a] ? a : 'CHASSIS';
   const [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => { const i = setInterval(tick, 1000); return () => clearInterval(i); }, []);

@@ -4,6 +4,12 @@
    generated deterministically from the seed and labelled as simulated
    history, so the date filter has something to show.
    ════════════════════════════════════════════════════════════════════════ */
+import { NoAccess, PageHead, downloadText } from './admin.js';
+import { can, userName } from './auth.js';
+import { go } from './lib/router.js';
+import { AREAS, M, POS, RT, fmtClock, fmtDur, html, useEffect, useReducer, useState } from './lib/runtime.js';
+import { Icon } from './lib/ui-kit.js';
+
 const REPORT_SECTIONS = [['prod', 'Production summary'], ['cycle', 'Station cycle times'], ['down', 'Downtime'], ['off', 'Offlined vehicles'], ['calls', 'Assist calls']];
 function shiftStarted(S, date, name) { const sh = M.shiftsFor(S, date).find((x) => x.name === name); return sh && M.dayOfDate(S, date) * 86400 + sh.start <= S.t; }
 function liveKey(S, key) { return (S.shift && S.shift.key === key) || S.history.some((h) => h.key === key); }
@@ -67,9 +73,9 @@ function reportSheets(d, meta) {
     About: [['MG GA Andon · report'], ['Date', meta.date], ['Shift', meta.shift], ['Line', meta.line], ['Exported', new Date().toLocaleString('en-GB')], ['By', userName()], ['Data', meta.sources], ['Note', 'SIMULATION: no PLC, scanner or sensor is connected.']],
   };
 }
+// SheetJS is loaded only when a report is exported (separate chunk).
 function loadXLSX() {
-  if (window.XLSX) return Promise.resolve(window.XLSX);
-  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = () => (window.XLSX ? res(window.XLSX) : rej(new Error('no XLSX'))); s.onerror = () => rej(new Error('blocked')); document.head.appendChild(s); });
+  return import('xlsx').then((m) => m.default || m);
 }
 async function exportExcel(d, meta) {
   const sheets = reportSheets(d, meta), name = `MG-GA-Andon_${meta.date}_${meta.shift}_${meta.line}`.replace(/\s+/g, '-');
@@ -85,7 +91,7 @@ async function exportExcel(d, meta) {
   }
 }
 
-function ReportsPage() {
+export function ReportsPage() {
   const S = RT.S, days = Array.from({ length: 7 }, (_, i) => M.dateKeyOf(S, M.dayOf(S.t) - i));
   const [date, setDate] = useState(days[0]), [shift, setShift] = useState(S.shift && S.shift.name ? S.shift.name : 'all'), [line, setLine] = useState('all'), [busy, setBusy] = useState(null), [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => { const i = setInterval(tick, 2000); return () => clearInterval(i); }, []);

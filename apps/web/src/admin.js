@@ -3,9 +3,14 @@
    scheduled in advance (req 13–15), buzzers (req 18), position correction
    (req 7), users (req 30) and the audit log. Saved on this device.
    ════════════════════════════════════════════════════════════════════════ */
+import { Auth, ROLES, can, hashPw, initials, jget, jset, userName } from './auth.js';
+import { go } from './lib/router.js';
+import { AREAS, M, POS, RT, bump, fmtClock, fmtDur, html, setUI, useReducer, useState } from './lib/runtime.js';
+import { Horn, Icon } from './lib/ui-kit.js';
+
 const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
-function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
-function persistConfig() {
+export function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
+export function persistConfig() {
   const S = RT.S; if (!S) return;
   jset('mg-andon-config', Object.fromEntries(CFG_KEYS.map((k) => [k, S.cfg[k]])));
   const log = jget('mg-andon-audit', []), from = S._auditSaved || 0;
@@ -19,10 +24,10 @@ const ADMIN_TABS = [
   ['takt', 'Takt time', 'clock', 'takt'], ['plan', 'Targets & plan', 'calendar', 'plan'], ['shifts', 'Shifts & breaks', 'hour', 'plan'],
   ['buzzers', 'Buzzers', 'buzz', 'buzzer'], ['correct', 'Position correction', 'swap', 'correct'], ['users', 'Users', 'users', 'users'], ['audit', 'Audit log', 'shield', 'audit'],
 ];
-const adminAllowed = () => ADMIN_TABS.some((t) => can(t[3]));
+export const adminAllowed = () => ADMIN_TABS.some((t) => can(t[3]));
 const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), audit: (p) => AuditAdmin(p) };
 
-function AdminPage() {
+export function AdminPage() {
   const tabs = ADMIN_TABS.filter((t) => can(t[3]));
   if (!tabs.length) return html`<${NoAccess} what="Settings" />`;
   const cur = tabs.find((t) => t[0] === RT.route.sub) || tabs[0];
@@ -33,7 +38,7 @@ function AdminPage() {
     <section class="adm-body"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
   </div>`;
 }
-const PageHead = ({ k, title, sub, children }) => html`<div class="pg-head"><div><div class="micro">${k}</div><h2>${title}</h2>${sub ? html`<p class="pg-sub">${sub}</p>` : null}</div>${children ? html`<div class="actions">${children}</div>` : null}</div>`;
+export const PageHead = ({ k, title, sub, children }) => html`<div class="pg-head"><div><div class="micro">${k}</div><h2>${title}</h2>${sub ? html`<p class="pg-sub">${sub}</p>` : null}</div>${children ? html`<div class="actions">${children}</div>` : null}</div>`;
 function Saved({ msg }) { return msg ? html`<div class=${'result ' + (msg.ok ? 'ok' : 'bad')} role="status" style=${{ marginTop: 10 }}>${msg.text}</div>` : null; }
 const auditFor = (pred) => jget('mg-andon-audit', []).filter(pred).slice(-8).reverse();
 const AuditMini = ({ rows }) => rows.length ? html`<table class="data" style=${{ marginTop: 10 }}><thead><tr><th>When</th><th>Change</th><th>Before → after</th><th>By</th><th>Reason</th></tr></thead><tbody>${rows.map((r, i) => html`<tr key=${i}><td class="mono">${r.date} ${fmtClock(r.t, false)}</td><td style=${{ textAlign: 'left' }}>${r.action} · ${r.target}</td><td class="mono" style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.before} → ${r.after}</td><td style=${{ textAlign: 'left' }}>${(r.by || '').split(' · ')[0]}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason || '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">No changes recorded yet.</p>`;
@@ -225,5 +230,5 @@ function AuditAdmin() {
     </tbody></table>
   </div>`;
 }
-function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
-function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+export function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
+export function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }

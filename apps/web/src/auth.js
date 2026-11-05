@@ -4,7 +4,12 @@
    A deployment signs in against the plant directory (SSO) with server-side
    sessions; the screens and permission rules stay the same.
    ════════════════════════════════════════════════════════════════════════ */
-const ROLES = {
+import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
+import { go } from './lib/router.js';
+import { M, RT, bump, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { Icon, MgMark, tv } from './lib/ui-kit.js';
+
+export const ROLES = {
   admin:       { label: 'Administrator', short: 'Admin', home: 'dash', perms: ['*'], desc: 'Everything, including users and the audit log.' },
   authorised:  { label: 'Authorised person', short: 'Authorised', home: 'floor', perms: ['call', 'offline', 'buzzer', 'takt', 'plan', 'correct', 'reports', 'audit'], desc: 'Sets takt, targets and shifts; corrects positions; switches buzzers.' },
   supervisor:  { label: 'Line supervisor', short: 'Supervisor', home: 'floor', perms: ['call', 'respond.SUP', 'offline', 'reports'], desc: 'Responds to and clears supervisor calls; takes units offline.' },
@@ -21,17 +26,17 @@ const DEMO_USERS = [
 ];
 const IDLE_LOCK_MS = 15 * 60 * 1000, MAX_TRIES = 5, LOCKOUT_MS = 30 * 1000;
 const sstore = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* unavailable */ } }, del(k) { try { sessionStorage.removeItem(k); } catch (e) { /* unavailable */ } } };
-const jget = (k, d) => { try { const v = store.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
-const jset = (k, v) => store.set(k, JSON.stringify(v));
+export const jget = (k, d) => { try { const v = store.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+export const jset = (k, v) => store.set(k, JSON.stringify(v));
 
-async function hashPw(salt, pw) {
+export async function hashPw(salt, pw) {
   const txt = `mg-andon:${salt}:${pw}`;
   try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); return Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, '0')).join(''); }
   catch (e) { let h = 5381; for (let i = 0; i < txt.length; i++) h = ((h << 5) + h + txt.charCodeAt(i)) | 0; return 'f' + (h >>> 0).toString(16); } // no SubtleCrypto (file://): weaker fallback
 }
-const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+export const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
 
-const Auth = {
+export const Auth = {
   user: null, locked: false, lastActive: Date.now(), log: jget('mg-andon-authlog', []),
   async init() {
     let users = jget('mg-andon-users', null);
@@ -72,12 +77,12 @@ const Auth = {
   signOut() { if (this.user) this.record('Signed out', this.user.name); this.user = null; this.locked = false; store.set('mg-andon-session', ''); sstore.del('mg-andon-session'); setUI({ dialog: null, drawer: null, selection: null, menu: false }); location.hash = '#/'; bump(); },
   switchTo(u) { this.record('Demo user switch', u.name, `from ${this.user ? this.user.name : '—'}`); this.start(u, !!store.get('mg-andon-session'), 'Signed in (demo switch)'); setUI({ menu: false, dialog: null }); bump(); },
 };
-function can(perm) { const u = Auth.user; if (!u || Auth.locked) return false; const P = ROLES[u.role].perms; return P.includes('*') || P.includes(perm); }
-function userName() { const u = Auth.user; return u ? `${u.name} · ${ROLES[u.role].short}` : 'System'; }
+export function can(perm) { const u = Auth.user; if (!u || Auth.locked) return false; const P = ROLES[u.role].perms; return P.includes('*') || P.includes(perm); }
+export function userName() { const u = Auth.user; return u ? `${u.name} · ${ROLES[u.role].short}` : 'System'; }
 const isKiosk = () => RT.route && RT.route.page === 'display';
 
 /* ── sign-in screen ── */
-function SignIn({ lock }) {
+export function SignIn({ lock }) {
   const S = RT.S, p = M.pace(S), open = S.calls.filter((c) => c.clearedT == null).length, ls = M.lineStatus(S);
   const [id, setId] = useState(lock && Auth.user ? Auth.user.empId : ''), [pw, setPw] = useState(''), [show, setShow] = useState(false), [keep, setKeep] = useState(true), [caps, setCaps] = useState(false);
   const [busy, setBusy] = useState(false), [err, setErr] = useState(null), [touched, setTouched] = useState(false), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
@@ -151,7 +156,7 @@ function SignInFlow() {
 }
 
 /* ── user menu (top bar) ── */
-function UserMenu() {
+export function UserMenu() {
   const u = Auth.user; if (!u) return null;
   const open = RT.ui.menu;
   return html`<div class="umenu"><button class=${'ubtn r-' + u.role} aria-haspopup="menu" aria-expanded=${!!open} title=${`${u.name} · ${ROLES[u.role].label}`} onClick=${() => setUI({ menu: !open })}>${initials(u.name)}</button>

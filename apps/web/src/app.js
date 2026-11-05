@@ -1,12 +1,27 @@
 /* ════════════════════════════════════════════════════════════════════════
    App shell: signed-in user and permissions, screen router, root and boot.
    ════════════════════════════════════════════════════════════════════════ */
+import { Scene3D } from '@mg/scene';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { AdminPage, adminAllowed, persistConfig } from './admin.js';
+import { Auth, ROLES, SignIn, can } from './auth.js';
+import { AboutDialog, CorrectDialog, OffLineDialog, ReturnDialog, ScanDialog, VinSearchDialog } from './floor/dialogs.js';
+import { AlarmDrawer } from './floor/drawer.js';
+import { Anchors, HoverCard, Inspector, Legend } from './floor/inspector.js';
+import { ActIsland, IdIsland, StateIsland, Strip } from './floor/islands.js';
+import { Plan2D } from './floor/plan2d.js';
+import { DEMO_AFTER, SCENARIOS, freshState, injectDemoDelay, openAlarm, select, topAlarm } from './floor/scenarios.js';
+import { SimConsole } from './floor/sim-console.js';
+import { HowPage } from './how.js';
+import { LineOffCard } from './lib/misc.js';
+import { go, parseHash } from './lib/router.js';
+import { M, RT, bump, effectiveTheme, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { Horn, Icon } from './lib/ui-kit.js';
+import { ReportsPage } from './reports.js';
+import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';
 
-/* ── screens: #/floor, #/dash, #/display/<line>, #/reports, #/admin/<tab>, #/how ── */
-RT.route = { page: 'floor', sub: null };
-function parseHash() { const [page, sub] = (location.hash.replace(/^#\/?/, '') || 'floor').split('/'); return { page: page || 'floor', sub: sub || null }; }
-function go(page, sub) { const h = `#/${page}${sub ? '/' + sub : ''}`; if (location.hash !== h) location.hash = h; else { RT.route = parseHash(); bump(); } }
-window.addEventListener('hashchange', () => { RT.route = parseHash(); setUI({ dialog: null, drawer: null, menu: false }); });
+
 const PAGES = [
   ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
   ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
@@ -88,14 +103,14 @@ function App() {
   </main>`;
 }
 /* Called from src/08-boot.js once every UI module has been defined. */
-function boot() {
+export function boot() {
   const saved = store.get('mg-theme'); if (saved === 'light' || saved === 'dark' || saved === 'auto') RT.ui.theme = saved;
   if (RT.ui.theme !== 'auto') document.documentElement.setAttribute('data-theme', RT.ui.theme);
   RT.route = parseHash();
   if (!location.hash || location.hash === '#/') RT.route = { page: '', sub: null };
   RT.S = freshState(11); SCENARIOS[0].setup(RT.S); RT.speed = 15; RT.demo = { elapsed: 0, fired: false };
   M.logEvent(RT.S, 'sim', 'SIMULATION · scenario 1: Normal production');
-  const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); ReactDOM.createRoot(document.getElementById('app')).render(html`<${App} />`); };
+  const start = () => { if (!RT.route.page && Auth.user) go(ROLES[Auth.user.role].home); createRoot(document.getElementById('app')).render(html`<${App} />`); };
   const fonts = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
   Promise.all([fonts, Auth.init()]).then(start, start);
 }
