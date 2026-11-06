@@ -21,13 +21,6 @@ export const Icons = {
   </${Page}>`,
 };
 
-export const Buttons = {
-  render: () => html`<${Page} title="Buttons" intro="Today's button classes. Step C replaces them with one Button component (primary / secondary / ghost / danger; sm, md, lg, xl).">
-    <div class="cat-row"><button class="btn primary">Primary</button><button class="btn">Secondary</button><button class="btn ghost">Ghost</button><button class="btn danger">Danger</button><button class="btn" disabled>Disabled</button></div>
-    <div class="cat-row"><button class="btn sm primary">Small primary</button><button class="btn sm">Small</button><button class="btn sm ghost icon"><${Icon} n="search" /></button></div>
-  </${Page}>`,
-};
-
 export const Chips = {
   render: () => {
     const st = (code, label, tone) => ({ code, label, tone });

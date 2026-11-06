@@ -3,7 +3,7 @@ import { SCENARIOS, loadScenario } from './scenarios.js';
 import { Act } from '../lib/act.js';
 import { AREAS, M, RT, bump, fmtClock, html, setUI } from '../lib/runtime.js';
 import { Icon } from '../lib/ui-kit.js';
-import { Button, Field, NumberInput, Switch } from '../ui/index.js';
+import { Button, Field, NumberInput, SegmentedControl, Switch } from '../ui/index.js';
 import { powerCut, setLink } from '../screens.js';
 
 export function SimConsole() {
@@ -15,7 +15,7 @@ export function SimConsole() {
       <span class="sim-tag"><${Icon} n="flask" size=${11} />SIM</span>
       <${Button} size="sm" variant="ghost" iconRight=${RT.running ? 'pause' : 'play'} aria-label=${RT.running ? 'Pause simulation' : 'Run simulation'} onClick=${() => Act.setRunning(!RT.running)}><//>
       <span class="micro" style=${{ whiteSpace: 'nowrap' }}>Scenario ${RT.scenario}</span>
-      <div class="speeds" role="group" aria-label="Simulation speed">${[1, 5, 15, 60].map((s) => html`<button key=${s} aria-pressed=${RT.speed === s} onClick=${() => Act.setSpeed(s)}>${s}×</button>`)}</div>
+      <${SegmentedControl} size="sm" class="speeds-ds" label="Simulation speed" value=${RT.speed} onChange=${(v) => Act.setSpeed(v)} options=${[1, 5, 15, 60].map((x) => ({ value: x, label: `${x}×` }))} />
       <${Button} size="sm" variant="ghost" iconRight=${open ? 'down' : 'up'} aria-label=${open ? 'Collapse simulation control' : 'Expand simulation control'} aria-expanded=${open} onClick=${() => setUI({ simOpen: !open })}><//>
     </div>
     ${open ? html`<div class="simcon-body">

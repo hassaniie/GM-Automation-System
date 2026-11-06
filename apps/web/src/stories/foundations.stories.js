@@ -2,6 +2,7 @@
 import React from 'react';
 import { html } from '../lib/runtime.js';
 import { Icon } from '../lib/ui-kit.js';
+import { Button, Panel } from '../ui/index.js';
 
 export default { title: 'Foundations' };
 
@@ -66,9 +67,9 @@ export const CornersAndTicks = {
     <div class="cat-row">
       <div class="cat-box" style=${{ borderRadius: 'var(--ds-radius-md)' }}>--ds-radius-md · 4 px</div>
       <div class="cat-box" style=${{ borderRadius: 'var(--ds-radius-sm)', width: 120, height: 60 }}>--ds-radius-sm · 3 px</div>
-      <div class="cat-box panel ticks" style=${{ borderRadius: 'var(--ds-radius-md)', width: 220 }}>panel with ticks</div>
+      <${Panel} ticks=${true} style=${{ width: 220 }}>panel with ticks<//>
       <span class="sim-tag"><${Icon} n="flask" size=${10} />Chip · 3 px</span>
-      <button class="btn">Button</button><button class="btn primary">Primary</button>
+      <${Button}>Button<//><${Button} variant="primary">Primary<//>
     </div>
   </${Page}>`,
 };
@@ -77,7 +78,7 @@ export const Elevation = {
   render: () => html`<${Page} title="Elevation" intro="Layer 0 is the page; layer 1 panels have a border and no shadow; layer 2 is glass, only for panels floating over the 3D floor; layer 3 is overlays (dialog, drawer, menu).">
     <div class="cat-row">
       <div class="cat-box">Layer 0 · page</div>
-      <div class="cat-box panel">Layer 1 · panel</div>
+      <${Panel} style=${{ width: 160, height: 96, placeItems: 'center' }}>Layer 1 · panel<//>
       <div class="cat-box glass" style=${{ position: 'relative' }}>Layer 2 · glass</div>
       <div class="cat-box glass umenu-pop" style=${{ position: 'relative', top: 0, width: 160 }}>Layer 3 · overlay</div>
     </div>

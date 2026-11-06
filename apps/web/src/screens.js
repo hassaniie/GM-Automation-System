@@ -48,7 +48,7 @@ export function powerCut() {
 export function PowerOverlay() {
   const P = RT.power; if (!P) return null;
   const txt = P.phase === 'off' ? ['Power lost', 'Line controllers are on UPS. Every event up to the cut is already stored locally.'] : P.phase === 'boot' ? ['Restarting', 'Servers and displays come back by themselves. Reading carrier tags at each station…'] : ['Back online', `${P.n} vehicle positions restored and confirmed. No data lost; the line carries on where it stopped.`];
-  return html`<div class=${'power-ov ' + P.phase} role="alert"><div class="glass dialog ticks" style=${{ width: 'min(520px, 100%)' }}><div class="dialog-body" style=${{ gap: 10 }}><div class="micro">Simulation · URD req 32</div><h3 style=${{ margin: 0, display: 'flex', gap: 10, alignItems: 'center' }}><${Icon} n=${P.phase === 'ok' ? 'checkc' : 'power'} />${txt[0]}</h3><p style=${{ margin: 0, color: 'var(--text-2)' }}>${txt[1]}</p>${P.phase !== 'ok' ? html`<div class="pw-bar"><i></i></div>` : null}</div></div></div>`;
+  return html`<div class=${'power-ov ' + P.phase} role="alert"><${Panel} variant="glass" ticks=${true} pad=${5} style=${{ width: 'min(520px, 100%)' }}><div class="micro">Simulation · URD req 32</div><h3 style=${{ margin: 0, display: 'flex', gap: 10, alignItems: 'center' }}><${Icon} n=${P.phase === 'ok' ? 'checkc' : 'power'} />${txt[0]}</h3><p style=${{ margin: 0, color: 'var(--text-2)' }}>${txt[1]}</p>${P.phase !== 'ok' ? html`<div class="pw-bar"><i></i></div>` : null}<//></div>`;
 }
 
 /* everything the dashboard shows, as plain data (so head office can hold a frozen copy) */
@@ -99,7 +99,7 @@ function drillStation(id) { go('floor'); setTimeout(() => select({ kind: 'pos', 
 function LineCard({ l }) {
   const pct = l.target ? Math.min(1, l.done / l.target) : 0, planPct = l.target ? Math.min(1, l.plan / l.target) : 0, mx = Math.max(1, ...l.hours);
   const preview = l.a === 'TRIM';
-  return html`<section class=${'panel ticks lcard s-' + l.state}>
+  return html`<${Panel} ticks=${true} class=${'lcard s-' + l.state}>
     <div class="lc-head"><button class="lc-title" onClick=${() => go('display', l.a.toLowerCase())} title="Open the line display"><span class="micro">${AREAS[l.a].station}</span><span>${AREAS[l.a].name}</span><${Icon} n="tv" /></button>
       <span class=${'andon-state c-' + STATE_TONE[l.state]}>${STATE_LABEL[l.state]}</span></div>
     <div class="lc-kpis">
@@ -114,7 +114,7 @@ function LineCard({ l }) {
     <div class="lc-st" style=${{ gridTemplateColumns: `repeat(${l.st.length}, 1fr)` }}>${l.st.map((s) => html`<button key=${s.id} class=${'lc-cell s-' + s.state} onClick=${() => drillStation(s.id)} title=${`${s.id} · ${STATE_LABEL[s.state]}${s.vin ? ` · ${s.vin}` : ''}${s.state !== 'idle' ? ` · ${fmtDur(s.cycle)} / ${fmtDur(s.takt)}` : ''}`}>
       <span class="id">${s.id}${s.calls.map((t, i) => html`<i key=${i} class=${'lamp ' + t.toLowerCase()}></i>`)}${s.buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : null}</span><span class="cy">${s.state === 'idle' ? '—' : fmtDur(s.cycle)}</span></button>`)}</div>
     <div class="lc-foot"><span class="micro">Completed per hour</span><span class="spark">${l.hours.map((n, i) => html`<i key=${i} style=${{ height: `${(n / mx) * 100}%` }} title=${`Hour ${i + 1}: ${n}`}></i>`)}</span><span class="mono c-muted">${l.lastHour} last hour</span>${preview ? html`<span class="xp">Trim Andon preview</span>` : null}</div>
-  </section>`;
+  <//>`;
 }
 
 /* ── line display (LCD at each line, req 23–24): read from 10 m ── */
