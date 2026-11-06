@@ -39,6 +39,10 @@ function applyTheme() {
   if (Scene3D.ok) Scene3D.setTheme(effectiveTheme());
 }
 export function cycleTheme() { const order = ['auto', 'light', 'dark']; const t = order[(order.indexOf(RT.ui.theme) + 1) % 3]; store.set('mg-theme', t); setUI({ theme: t }); applyTheme(); }
+/* "Large touch targets" (per device, for gloved hands on floor tablets): controls grow to 56 px. */
+export const largeTouch = () => document.documentElement.dataset.touch === 'large';
+export function setLargeTouch(on) { store.set('mg-touch', on ? 'large' : ''); if (on) document.documentElement.dataset.touch = 'large'; else delete document.documentElement.dataset.touch; bump(); }
+if (store.get('mg-touch') === 'large') document.documentElement.dataset.touch = 'large';
 if (mq) mq.addEventListener('change', () => { if (RT.ui.theme === 'auto') applyTheme(); bump(); });
 new MutationObserver(() => { const a = document.documentElement.getAttribute('data-theme'); if (RT.ui.theme === 'auto' && a !== hostTheme) { hostTheme = a; if (Scene3D.ok) Scene3D.setTheme(effectiveTheme()); bump(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
