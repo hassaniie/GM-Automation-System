@@ -154,12 +154,12 @@ button { cursor: pointer; }
 .insp-head { padding: 16px 16px 14px 18px; display: flex; gap: 10px; align-items: flex-start; border-bottom: 1px solid var(--hair); }
 .insp-head .id { font-family: var(--font-mono); font-size: 26px; font-weight: 600; line-height: 1.05; margin-top: 4px; }
 .insp-head .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
-.insp-body { overflow: auto; padding: 16px 18px 20px; display: grid; gap: 20px; align-content: start; }
+.insp-body { overflow: hidden auto; padding: 16px 18px 20px; display: grid; gap: 20px; align-content: start; }
 .sec { display: grid; gap: 10px; }
 .sec > .micro { display: flex; justify-content: space-between; gap: 8px; }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 7px 16px; font-size: 13px; margin: 0; }
 .kv dt { color: var(--muted); } .kv dd { margin: 0; text-align: right; min-width: 0; overflow-wrap: anywhere; }
-.timer { display: grid; grid-template-columns: 88px 1fr; gap: 16px; align-items: center; }
+.timer { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 16px; align-items: center; }
 .timer .num { font-size: 44px; }
 .timer .of { color: var(--muted); font-size: 13px; margin-top: 6px; }
 .timer .delta { font-size: 14px; font-weight: 600; margin-top: 6px; }
@@ -549,7 +549,7 @@ svg.plan text { font-family: var(--font-mono); }
 /* ═════════ Andon (URD draft 2) ═════════ */
 .c-sup { color: var(--call-sup); } .c-mnt { color: var(--call-mnt); }
 @keyframes call-glow { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 45%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--tone) 0%, transparent); } }
-.callpad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.callpad { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .callbtn { display: grid; gap: 4px; justify-items: start; text-align: left; height: auto !important; min-height: 76px; padding: 12px 14px !important; }
 .callbtn .cb-top { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
 .callbtn .cb-top .ico { width: 18px; height: 18px; }
@@ -577,7 +577,7 @@ svg.plan text { font-family: var(--font-mono); }
 .andon-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .andon-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
 .andon-state::before { content: ""; width: 10px; height: 10px; background: currentColor; }
-.callrow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--hair); }
+.callrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--hair); }
 .callrow + .callrow { margin-top: 6px; }
 .callrow .who { font-size: 12px; color: var(--text-2); }
 .callrow .wait { font-family: var(--font-mono); font-size: 18px; }

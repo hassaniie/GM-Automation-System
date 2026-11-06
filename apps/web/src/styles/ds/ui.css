@@ -72,6 +72,11 @@
   .ds-switch-row label { display: grid; gap: 2px; font-size: var(--ds-size-13); color: var(--ds-text-primary); cursor: pointer; }
   .ds-switch-row small { color: var(--ds-text-muted); font-size: var(--ds-size-12); }
 
+  /* Station call buttons (inspector): two equal columns that never widen the panel; the label wraps */
+  .ds-btn.callbtn { display: grid; align-content: center; justify-items: start; gap: var(--ds-space-1); min-width: 0; min-height: 76px; height: auto; padding: var(--ds-space-3); white-space: normal; text-align: start; }
+  .ds-btn.callbtn .cb-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); line-height: 1.2; }
+  .insp-body > * { min-width: 0; }
+
   /* Checkbox */
   .ds-check { display: flex; gap: var(--ds-space-3); align-items: flex-start; min-height: var(--ds-h-sm); padding-block: var(--ds-space-2); font-size: var(--ds-size-13); color: var(--ds-text-secondary); cursor: pointer; --check: var(--ds-text-primary); }
   .ds-check--critical { --check: var(--ds-status-critical); }
