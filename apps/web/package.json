@@ -17,6 +17,7 @@
     "@mg/engine": "workspace:*",
     "@mg/scene": "workspace:*",
     "@mg/sim": "workspace:*",
+    "@mg/reports": "workspace:*",
     "@mg/sync": "workspace:*",
     "htm": "3.1.1",
     "react": "18.3.1",

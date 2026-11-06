@@ -65,6 +65,9 @@ importers:
       '@mg/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@mg/reports':
+        specifier: workspace:*
+        version: link:../../packages/reports
       '@mg/sim':
         specifier: workspace:*
         version: link:../../packages/sim
@@ -111,6 +114,9 @@ importers:
       '@mg/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@mg/reports':
+        specifier: workspace:*
+        version: link:../../packages/reports
       '@mg/scene':
         specifier: workspace:*
         version: link:../../packages/scene
@@ -150,6 +156,16 @@ importers:
       '@mg/core':
         specifier: workspace:*
         version: link:../core
+      '@mg/sim':
+        specifier: workspace:*
+        version: link:../sim
+
+  packages/reports:
+    dependencies:
+      '@mg/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
       '@mg/sim':
         specifier: workspace:*
         version: link:../sim

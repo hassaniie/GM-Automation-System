@@ -82,6 +82,7 @@ button { cursor: pointer; }
 .btn:hover { background: var(--fill-2); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.disabled { opacity: .4; pointer-events: none; } a.btn { text-decoration: none; }
 .btn.primary { background: var(--primary-bg); color: var(--primary-fg); border-color: transparent; }
 .btn.danger { color: var(--crit); border-color: color-mix(in srgb, var(--crit) 45%, transparent); }
 .btn.danger:hover { background: color-mix(in srgb, var(--crit) 10%, transparent); }
@@ -964,7 +965,7 @@ svg.plan text { font-family: var(--font-mono); }
 .reports .pg-head { margin-bottom: 0; }
 .rep-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); }
 .rep-filters .field { min-width: 170px; }
-.rep-filters select { height: 38px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
+.rep-filters select, .rep-filters input { height: 38px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
 .rep-jump { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
 .rep-jump a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--hair-2); } .rep-jump a:hover { color: var(--text); }
 .rep-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }

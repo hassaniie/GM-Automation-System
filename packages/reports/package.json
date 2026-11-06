@@ -1,0 +1,16 @@
+{
+  "name": "@mg/reports",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Report definitions (URD req 28–29): the same tables from live state in the browser or from the line server database",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mg/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@mg/sim": "workspace:*"
+  }
+}

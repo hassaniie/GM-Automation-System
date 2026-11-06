@@ -18,6 +18,7 @@
     "@mg/core": "workspace:*",
     "@mg/engine": "workspace:*",
     "@mg/sim": "workspace:*",
+    "@mg/reports": "workspace:*",
     "@mg/sync": "workspace:*",
     "fastify": "5.12.8",
     "openid-client": "6.8.9",
