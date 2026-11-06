@@ -19,8 +19,12 @@ export type ScanSource = 'MANUAL' | 'SCAN' | 'SIM_AUTO' | 'PHOTO_EYE' | 'SCANNER
 export type PlantEvent =
   /** A carrier (skid, hanger or fixture) stopped at a position; presence confirmed by its sensor. */
   | { type: 'CARRIER_ARRIVED'; pos: PositionId; from: PositionId | 'BUFFER'; carrierId: CarrierId; vehicleId: VehicleId | null }
+  /** From a device: presence on at a position; tracking works out which carrier it is. */
+  | { type: 'CARRIER_ARRIVED'; pos: PositionId; carrierId: null }
+  /** A carrier left a position (presence off). Work there is complete; the carrier moves on or returns. */
+  | { type: 'CARRIER_DEPARTED'; pos: PositionId }
   /** A body moved from one loop's carrier to the next (TL6 → hanger, hanger → FL fixture). */
-  | { type: 'BODY_TRANSFERRED'; vehicleId: VehicleId; from: PositionId; to: PositionId }
+  | { type: 'BODY_TRANSFERRED'; vehicleId: VehicleId | null; from: PositionId; to: PositionId }
   /** Scanner 1 at TL1 read a VIN. */
   | { type: 'ENTRY_SCAN'; raw: string; source: ScanSource }
   /** The registered body is seated on the TL1 skid. */
@@ -32,7 +36,7 @@ export type PlantEvent =
   /** Optional engine/transmission pairing scan at CL2 (off by default). */
   | { type: 'ENGINE_SCAN'; vehicleId: VehicleId }
   /** The end-of-line photo-eye at FL7 saw a unit leave. */
-  | { type: 'LINE_OFF'; vin: string; source: ScanSource }
+  | { type: 'LINE_OFF'; vin: string | null; source: ScanSource }
   /** Station call buttons and responders (also available as commands). */
   | { type: 'CALL_RAISED'; pos: PositionId; callType: CallType; by: string; sim?: boolean }
   | { type: 'CALL_RESPONDED'; callId: string; by: string }
@@ -40,7 +44,7 @@ export type PlantEvent =
 
 export type PlantEventType = PlantEvent['type'];
 export const PLANT_EVENT_TYPES = [
-  'CARRIER_ARRIVED', 'BODY_TRANSFERRED', 'ENTRY_SCAN', 'UNIT_ENTERED', 'UNIT_RETURNED', 'WORK_COMPLETE',
+  'CARRIER_ARRIVED', 'CARRIER_DEPARTED', 'BODY_TRANSFERRED', 'ENTRY_SCAN', 'UNIT_ENTERED', 'UNIT_RETURNED', 'WORK_COMPLETE',
   'ENGINE_SCAN', 'LINE_OFF', 'CALL_RAISED', 'CALL_RESPONDED', 'CALL_CLEARED',
 ] as const satisfies readonly PlantEventType[];
 export const isPlantEvent = (x: unknown): x is PlantEvent =>

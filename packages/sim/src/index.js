@@ -3,3 +3,4 @@ export * from './feed.js';
 export * from './movement.js';
 export * from './tick.js';
 export * from './scenarios.js';
+export * from './signals.js';

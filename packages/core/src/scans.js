@@ -23,12 +23,14 @@ export function entryScan(S, raw, source = 'MANUAL') {
     if (ex.state === 'OFF_LINE') return res(false, `${fmt.vin} was taken off the line at ${fmtClock(ex.offline.t, false)} from ${dispId(ex.offline.pos)}. Use “Return to line” to put it back where it left.`, { vehicleId: ex.id });
     if (ex.state === 'RETURN_QUEUED' || ex.state === 'RETURNING') return res(false, `${fmt.vin} is already returning to ${dispId(ex.returnReq.pos)}.`, { vehicleId: ex.id });
   }
-  const head = bufferHead(S);
-  if (head < 0) return res(false, 'No body is waiting in the paint-shop buffer, so there is nothing to register.');
+  // live: the paint-shop buffer is not reported, so the scanned body is the one arriving
+  const head = S.plantMode === 'live' && bufferHead(S) < 0 ? -1 : bufferHead(S);
+  if (head < 0 && S.plantMode !== 'live') return res(false, 'No body is waiting in the paint-shop buffer, so there is nothing to register.');
   const E = S.pos['TL1'];
   if (!E.carrierId || E.occ.vehicleId || E.occ.pendingBody) return res(false, E.carrierId ? 'TL1 is occupied. Wait for the body ahead to move on to TL2.' : 'No empty skid at TL1 yet. Wait for the returning skid.');
   if (S.carriers[E.carrierId].fault) return res(false, `Skid ${E.carrierId} is in fault.`);
-  const body = S.bodyBuffer[head]; S.bodyBuffer[head] = null;
+  const body = head >= 0 ? S.bodyBuffer[head] : { paint: { name: 'Not reported', hex: '#9aa0a6' } };
+  if (head >= 0) S.bodyBuffer[head] = null;
   const variant = variantFromVin(fmt.vin);
   const v = {
     id: uid(S, 'v'), vin: fmt.vin, variant, paint: body.paint, carrierId: null, state: 'IN_PROCESS', posId: 'TL1',
@@ -37,7 +39,7 @@ export function entryScan(S, raw, source = 'MANUAL') {
   };
   S.vehicles[v.id] = v; S.vehOrder.push(v.id); S.lastEntryT = S.t;
   E.occ.pendingBody = v.id;
-  S.anims.push({ id: uid(S, 'an'), vehicleId: v.id, kind: 'entry', t0: S.t, t1: S.t + 30, path: bufferToEntryPath(head), y0: H_BUFFER, y1: H_TRIM });
+  S.anims.push({ id: uid(S, 'an'), vehicleId: v.id, kind: 'entry', t0: S.t, t1: S.t + 30, path: bufferToEntryPath(Math.max(0, head)), y0: H_BUFFER, y1: H_TRIM });
   logEvent(S, 'scan', `Scanner 1 accepted ${v.vin} · ${variant.name} · ${body.paint.name}. Line-in recorded; assembly timer started.`, { vehicleId: v.id, pos: 'TL1' });
   return res(true, `Registered ${variant.name}. Assembly timer started at ${fmtClock(S.t)}.`, { vehicleId: v.id });
 }

@@ -10,6 +10,8 @@ export * from './corrections.js';
 export * from './events.js';
 export * from './faults.js';
 export * from './interlocks.js';
+export * from './live.js';
+export * from './movement.js';
 export * from './occupancy.js';
 export * from './offline.js';
 export * from './plant.js';

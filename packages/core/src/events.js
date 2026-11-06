@@ -2,6 +2,7 @@
 /* ── plant events (URD §6 integration boundary) ──
    Everything the shop floor reports goes through apply(): the simulator today, PLC / scanner / photo-eye
    adapters in deployment. Each event maps to one rule in the core. */
+import { arrivalOf, departCarrier, lineOffAt, transferOf } from './live.js';
 import { resolveAlarmsFor } from './alarms.js';
 import { clearCall, raiseCall, respondCall } from './calls.js';
 import { closeSegment, completeWork, startOcc } from './occupancy.js';
@@ -40,14 +41,19 @@ export function apply(S, e) {
   // Opt-in journal of every plant event (the edge server stores these from phase 3).
   if (Array.isArray(S.journal)) S.journal.push({ t: S.t, ...e });
   switch (e.type) {
-    case 'CARRIER_ARRIVED': return arrive(S, e.pos, e.from, e.carrierId, e.vehicleId);
-    case 'BODY_TRANSFERRED': return transferBody(S, e.vehicleId, e.from, e.to);
+    // from a device, a carrier arriving is not identified: tracking works out which one it is
+    case 'CARRIER_ARRIVED': {
+      if (e.carrierId === null) { const a = arrivalOf(S, e.pos); return a ? arrive(S, e.pos, a.from, a.carrierId, a.vehicleId) : null; }
+      return arrive(S, e.pos, e.from, e.carrierId, e.vehicleId);
+    }
+    case 'CARRIER_DEPARTED': return departCarrier(S, e.pos);
+    case 'BODY_TRANSFERRED': { const vid = e.vehicleId ?? transferOf(S, e.from); return vid ? transferBody(S, vid, e.from, e.to) : null; }
     case 'ENTRY_SCAN': return entryScan(S, e.raw, e.source);
     case 'UNIT_ENTERED': return finishEntry(S, S.vehicles[e.vehicleId]);
     case 'UNIT_RETURNED': return finishReturn(S, S.vehicles[e.vehicleId]);
     case 'WORK_COMPLETE': return completeWork(S, e.pos, e.by);
     case 'ENGINE_SCAN': return engineScan(S, S.vehicles[e.vehicleId]);
-    case 'LINE_OFF': return exitScan(S, e.vin, e.source);
+    case 'LINE_OFF': return e.vin === null ? lineOffAt(S, 'FL7', e.source) : exitScan(S, e.vin, e.source);
     case 'CALL_RAISED': return raiseCall(S, e.pos, e.callType, e.by, e.sim);
     case 'CALL_RESPONDED': return respondCall(S, e.callId, e.by);
     case 'CALL_CLEARED': return clearCall(S, e.callId, e.by, e.note);
