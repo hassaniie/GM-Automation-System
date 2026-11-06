@@ -11,3 +11,6 @@ dist-edge/
 # device maps for a site or the local emulator (examples are committed)
 config/devices.json
 config/devices.emulator.json
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/storybook-static/
