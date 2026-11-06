@@ -71,9 +71,11 @@ test('station panel and alarm drawer never clip their content', async ({ page })
   for (const w of [1024, 1512, 2000]) {
     await page.setViewportSize({ width: w, height: Math.round(w * 0.65) });
     await page.evaluate(() => { const m = (window as unknown as { __mg: { Act: { raiseCall: (p: string, t: string, b: string) => void }; setUI: (u: object) => void } }).__mg; location.hash = '#/floor'; m.Act.raiseCall('FL7', 'SUP', 'test'); m.setUI({ selection: { kind: 'pos', id: 'FL7' }, drawer: null }); });
-    await page.waitForTimeout(500);
+    await page.locator('.inspector').waitFor();
+    await page.waitForTimeout(300);
     for (const x of await sideways(page, '.inspector')) found.push(`${w}px station panel: ${x}`);
     await page.evaluate(() => (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ selection: null, drawer: 'active' }));
+    await page.locator('.drawer .ds-tabs').waitFor();
     await page.waitForTimeout(300);
     for (const x of await sideways(page, '.drawer .ds-tabs')) found.push(`${w}px drawer tabs: ${x}`);
     await page.evaluate(() => (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ drawer: null }));

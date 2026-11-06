@@ -4,7 +4,7 @@
    Widths are remembered while an item is visible, so a dropped item comes back as soon as there is room. */
 import React from 'react';
 
-export function useFit(ref, reserve = 56) {
+export function useFit(ref, reserve = 120) { // reserve: room kept for the labelled "More n ▾" button
   const [hidden, setHidden] = React.useState(() => new Set());
   const widths = React.useRef(new Map());
   const decide = React.useCallback(() => {

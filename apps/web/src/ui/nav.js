@@ -1,5 +1,5 @@
-/* Andon DS · navigation: Rail, the app's page navigation. A slim column on the left with an icon and a
-   visible label per page; the current page is marked. Page status and alerts stay in the top bar. */
+/* Andon DS · navigation: Rail, the app's page navigation. A small panel under the top bar on the left with an
+   icon and a visible label per page; the current page is marked. Page status and alerts stay in the top bar. */
 import { html } from '../lib/runtime.js';
 import { Icon } from '../lib/ui-kit.js';
 import { cx } from './layout.js';
@@ -7,7 +7,7 @@ import { cx } from './layout.js';
 /**
  * @param {{ items: { value: string, label: string, icon: string, end?: boolean }[], value: string,
  *   onChange: (v: string) => void, label?: string }} p
- * end: the item sits at the bottom of the rail (help, guide).
+ * end: the item comes last, after a divider (help, guide).
  */
 export function Rail({ items, value, onChange, label = 'Pages' }) {
   const onKey = (e) => {
@@ -18,5 +18,5 @@ export function Rail({ items, value, onChange, label = 'Pages' }) {
   };
   const item = (it) => html`<button key=${it.value} type="button" class=${cx('ds-rail__item', it.end && 'ds-rail__item--end')}
     aria-current=${value === it.value ? 'page' : null} onClick=${() => onChange(it.value)}><${Icon} n=${it.icon} size=${20} /><span>${it.label}</span></button>`;
-  return html`<nav class="ds-rail" aria-label=${label} onKeyDown=${onKey}>${items.map(item)}</nav>`;
+  return html`<nav class="ds-rail glass" aria-label=${label} onKeyDown=${onKey}>${items.map(item)}</nav>`;
 }

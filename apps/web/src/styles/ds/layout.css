@@ -25,7 +25,7 @@
   /* page status: figures keep their natural width; the row decides what fits */
   .hud .state-island > .metric { flex: none; }
   .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-20); }
-  .fit-more { flex: none; position: relative; display: flex; align-items: stretch; }
+  .fit-more { flex: none; position: relative; display: flex; align-items: stretch; margin-left: auto; }
   /* labelled fold buttons: "More 4 ▾" for figures, "Tools ▾" for the tool icons */
   .fit-more .ibtn, .tools-menu > .ibtn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
   .fit-more .ibtn:hover, .tools-menu > .ibtn:hover, .fit-more .ibtn[aria-expanded="true"], .tools-menu > .ibtn[aria-expanded="true"] { color: var(--ds-text-primary); }
@@ -112,32 +112,31 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Page rail: page navigation on the left, the full height between the top
-   and bottom gutters. Every floor region starts after it (--gl).
+   Page rail: compact page navigation, a small panel just under the top bar
+   on the left, sized to its items. On the floor it floats over the 3D (glass)
+   and the bar and strip keep the full width; on page screens the content
+   starts to its right.
    ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
-  :root { --rail-w: 72px; }
-  .stage.has-rail { --gl: calc(max(var(--g), env(safe-area-inset-left, 0px)) + var(--rail-w) + var(--g)); }
-  .stage.has-rail > .page-shell { left: calc(max(var(--g), env(safe-area-inset-left, 0px)) + var(--rail-w)); --gl: var(--g); }
+  :root { --rail-w: 68px; --ds-rail-space: calc(var(--rail-w) + var(--g)); }
   .ds-rail {
-    position: absolute; z-index: var(--ds-z-chrome);
-    top: var(--gt); bottom: var(--gb); left: max(var(--g), env(safe-area-inset-left, 0px)); width: var(--rail-w);
-    display: flex; flex-direction: column; gap: var(--ds-space-1); padding: var(--ds-space-2) var(--ds-space-1);
-    background: var(--ds-layer-solid); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-md);
+    position: absolute; z-index: var(--ds-z-panel);
+    top: calc(var(--gt) + var(--hud-h) + var(--g)); left: var(--gl); width: var(--rail-w);
+    display: flex; flex-direction: column; gap: 2px; padding: var(--ds-space-1);
+    border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-md);
   }
   .ds-rail__item {
     position: relative; display: grid; justify-items: center; align-content: center; gap: var(--ds-space-1);
-    min-height: 60px; padding: var(--ds-space-2) 2px; border: 0; border-radius: var(--ds-radius-sm); background: transparent;
+    min-height: 56px; padding: var(--ds-space-2) 2px; border: 0; border-radius: var(--ds-radius-sm); background: transparent;
     color: var(--ds-text-secondary); font: 500 var(--ds-size-11) / 1.2 var(--ds-font-ui); text-align: center; cursor: pointer;
     transition: background-color var(--ds-dur-fast), color var(--ds-dur-fast);
   }
   .ds-rail__item:hover { background: var(--ds-layer-2); color: var(--ds-text-primary); }
   .ds-rail__item:focus-visible { outline: 2px solid var(--ds-text-primary); outline-offset: -2px; }
   .ds-rail__item[aria-current="page"] { background: var(--ds-layer-2); color: var(--ds-text-primary); font-weight: 600; }
-  .ds-rail__item[aria-current="page"]::before { content: ""; position: absolute; left: -4px; top: var(--ds-space-3); bottom: var(--ds-space-3); width: 3px; border-radius: var(--ds-radius-sm); background: var(--ds-text-primary); }
-  .ds-rail__item--end { margin-top: auto; }
-  @media (max-width: 767px) {
-    :root { --rail-w: 56px; }
-    .ds-rail__item span { letter-spacing: -.01em; }
-  }
+  .ds-rail__item[aria-current="page"]::before { content: ""; position: absolute; left: -4px; top: var(--ds-space-3); bottom: var(--ds-space-3); width: 2px; border-radius: var(--ds-radius-sm); background: var(--ds-text-primary); }
+  .ds-rail__item--end { margin-top: var(--ds-space-1); }
+  .ds-rail__item--end::after { content: ""; position: absolute; top: calc(-1 * var(--ds-space-1)); left: var(--ds-space-2); right: var(--ds-space-2); height: 1px; background: var(--ds-border-subtle); }
+  /* page screens: the content starts right of the rail */
+  .stage.has-rail > .page-shell > .page-scroll { padding-left: var(--ds-rail-space); }
 }
