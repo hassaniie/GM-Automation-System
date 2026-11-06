@@ -3,7 +3,7 @@ import React from 'react';
 import { html } from '../lib/runtime.js';
 import {
   Button, Checkbox, Cluster, DataTable, DateInput, Dialog, Drawer, EmptyState, Field, Grid, IconButton, Menu, Meter, Notice, NumberInput,
-  PageHeader, Panel, SegmentedControl, Select, Skeleton, Stack, Stat, Switch, Tabs, Tag, TextInput, Textarea, TimeInput,
+  PageHeader, Panel, Rail, SegmentedControl, Select, Skeleton, Stack, Stat, Switch, Tabs, Tag, TextInput, Textarea, TimeInput,
 } from '../ui/index.js';
 
 export default { title: 'Components/Core' };
@@ -138,4 +138,16 @@ export const Usage = {
       { key: 'dont', label: 'Avoid', render: (r) => r[2], wrap: true },
     ]} />
   </${Page}>`,
+};
+
+export const PageRail = {
+  name: 'Page rail',
+  render: function Story() {
+    const [p, setP] = React.useState('floor');
+    return html`<${Page} title="Page rail" intro="Page navigation lives on the left: an icon and a visible label for each page, the current page marked, the guide at the bottom. Arrow keys move between pages. The top bar is kept for the line's status and alerts.">
+      <div style=${{ position: 'relative', height: 520, width: 72 }}><div class="stage" style=${{ position: 'absolute', inset: 0, '--g': '0px' }}>
+        <${Rail} value=${p} onChange=${setP} items=${[['floor', 'Floor', 'layers'], ['dash', 'Dashboard', 'grid'], ['display', 'Displays', 'tv'], ['reports', 'Reports', 'chart'], ['admin', 'Settings', 'cog'], ['how', 'Guide', 'book']].map(([v, l, i]) => ({ value: v, label: l, icon: i, end: v === 'how' }))} />
+      </div></div>
+    </${Page}>`;
+  },
 };

@@ -4,3 +4,4 @@ export { Button, IconButton, SegmentedControl, Switch, Checkbox } from './contro
 export { Field, TextInput, NumberInput, DateInput, TimeInput, Textarea, Select } from './form.js';
 export { Panel, Stat, Meter, DataTable, Tag, Notice, PageHeader, EmptyState, Skeleton, TONE } from './data.js';
 export { Tabs, Menu, Dialog, Drawer } from './overlay.js';
+export { Rail } from './nav.js';

@@ -43,7 +43,7 @@ export function SegmentedControl({ value, options, onChange, label, size = 'md',
 /** On/off setting. The label is required (visible, or given as `label` for an icon row). */
 export function Switch({ checked, onChange, label, id, disabled, hint }) {
   const auto = React.useId(), sid = id || auto;
-  return html`<span class="ds-switch-row"><button id=${sid} type="button" class="ds-switch" role="switch" aria-checked=${!!checked} disabled=${disabled} onClick=${() => onChange(!checked)}></button>${label ? html`<label for=${sid}>${label}${hint ? html`<small>${hint}</small>` : null}</label>` : null}</span>`;
+  return html`<span class="ds-switch-row"><button id=${sid} type="button" class="ds-switch" role="switch" aria-checked=${!!checked} disabled=${disabled} onClick=${() => onChange(!checked)}></button><span class="ds-switch__state" aria-hidden="true">${checked ? 'On' : 'Off'}</span>${label ? html`<label for=${sid}>${label}${hint ? html`<small>${hint}</small>` : null}</label>` : null}</span>`;
 }
 
 /**

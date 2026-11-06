@@ -11,7 +11,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:6007',
     trace: 'off',
     deviceScaleFactor: 1,
-    launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
+    // the same font hinting on every machine (GitHub runners and dev containers default differently), so text
+    // wraps identically and screenshots compare
+    launchOptions: { args: ['--font-render-hinting=full'], ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) },
   },
   // the built Storybook (pnpm build-storybook), served for the story screenshots and axe scans
   webServer: { command: 'python3 -m http.server 6007 --bind 127.0.0.1 -d storybook-static', url: 'http://127.0.0.1:6007/index.json', reuseExistingServer: !process.env.CI, stdout: 'ignore', stderr: 'ignore' },

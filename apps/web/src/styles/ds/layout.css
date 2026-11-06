@@ -1,23 +1,24 @@
 /* ════════════════════════════════════════════════════════════════════════
    Andon DS · app shell layout
-   Top bar: fixed regions in one grid. Identity, page navigation, alerts and
-   the user menu never move or shrink; the page status row takes what is
-   left and folds its lower-priority figures into "More" (lib/fit.js); the
-   tools fold into one menu below the wide breakpoint (1440).
+   Page navigation is the rail on the left (ui/nav.js); the top bar carries
+   identity, the line's status and the alerts, in that order of importance.
+   Identity, alerts, the user menu and the Bolt & Volt mark never move,
+   shrink or hide; the status row takes what is left and folds its
+   lower-priority figures into "More" (lib/fit.js); the tools fold into one
+   menu below 1920 px.
    Breakpoints: compact < 1024 · regular 1024–1439 · wide 1440–1919 · ultra ≥ 1920
    ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
   .hud {
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-    grid-template-areas: "id nav status act";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "id status act";
     align-items: stretch;
     z-index: var(--ds-z-chrome);
   }
   /* on page screens the bar sits in the flow: inset with margins (a relative offset would push it past the edge) */
   .page-shell > .hud { inset: auto; margin: var(--gt) var(--gr) 0 var(--gl); }
   .hud > .id-island { grid-area: id; min-width: 0; }
-  .hud > .nav-island { grid-area: nav; }
   .hud > .state-island { grid-area: status; min-width: 0; width: 100%; overflow: hidden; justify-content: flex-start; border-right: 0; }
   .hud > .act-island { grid-area: act; display: flex; align-items: stretch; }
 
@@ -25,9 +26,11 @@
   .hud .state-island > .metric { flex: none; }
   .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-20); }
   .fit-more { flex: none; position: relative; display: flex; align-items: stretch; }
-  .fit-more .ibtn { width: auto; padding: 0 var(--ds-space-3); gap: var(--ds-space-1); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
-  .fit-more .ibtn .ico { transform: rotate(90deg); }
-  .fit-n { font: 600 var(--ds-size-12) / 1 var(--ds-font-mono); }
+  /* labelled fold buttons: "More 4 ▾" for figures, "Tools ▾" for the tool icons */
+  .fit-more .ibtn, .tools-menu > .ibtn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
+  .fit-more .ibtn:hover, .tools-menu > .ibtn:hover, .fit-more .ibtn[aria-expanded="true"], .tools-menu > .ibtn[aria-expanded="true"] { color: var(--ds-text-primary); }
+  .hud-btn-l { font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: var(--ds-tracking-label); text-transform: uppercase; }
+  .fit-n { display: inline-grid; place-items: center; min-width: 20px; height: 18px; padding: 0 var(--ds-space-1); border-radius: var(--ds-radius-sm); background: var(--ds-layer-2); color: var(--ds-text-primary); font: 600 var(--ds-size-11) / 1 var(--ds-font-mono); }
   .fit-pop { position: absolute; top: calc(100% + var(--ds-space-2)); right: 0; z-index: var(--ds-z-overlay); display: grid; gap: var(--ds-space-3); padding: var(--ds-space-4); min-width: 220px; }
   .fit-pop .metric { border: 0; padding: 0; }
 
@@ -41,13 +44,12 @@
     .tools-menu { display: flex; }
   }
   @media (max-width: 1919px) {
-    .hud .bv-mark { display: none; }
     /* the floor's bar also carries the page status: tools fold first to give it room */
     .hud:has(> .state-island) .hud-tools { display: none; }
     .hud:has(> .state-island) .tools-menu { display: flex; }
   }
   @media (max-width: 2399px) {
-    .hud:has(> .state-island) .nav-b span, .hud:has(> .state-island) .brand > div { display: none; }
+    .hud:has(> .state-island) .brand > div { display: none; }
   }
 }
 
@@ -107,4 +109,35 @@
   .strip .cell.near .mk { color: var(--ds-status-warning); }
   .strip .cell.held .mk { color: var(--ds-status-held); }
   .strip .cell[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--ds-text-secondary); }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Page rail: page navigation on the left, the full height between the top
+   and bottom gutters. Every floor region starts after it (--gl).
+   ════════════════════════════════════════════════════════════════════════ */
+@layer layout {
+  :root { --rail-w: 72px; }
+  .stage.has-rail { --gl: calc(max(var(--g), env(safe-area-inset-left, 0px)) + var(--rail-w) + var(--g)); }
+  .stage.has-rail > .page-shell { left: calc(max(var(--g), env(safe-area-inset-left, 0px)) + var(--rail-w)); --gl: var(--g); }
+  .ds-rail {
+    position: absolute; z-index: var(--ds-z-chrome);
+    top: var(--gt); bottom: var(--gb); left: max(var(--g), env(safe-area-inset-left, 0px)); width: var(--rail-w);
+    display: flex; flex-direction: column; gap: var(--ds-space-1); padding: var(--ds-space-2) var(--ds-space-1);
+    background: var(--ds-layer-solid); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-md);
+  }
+  .ds-rail__item {
+    position: relative; display: grid; justify-items: center; align-content: center; gap: var(--ds-space-1);
+    min-height: 60px; padding: var(--ds-space-2) 2px; border: 0; border-radius: var(--ds-radius-sm); background: transparent;
+    color: var(--ds-text-secondary); font: 500 var(--ds-size-11) / 1.2 var(--ds-font-ui); text-align: center; cursor: pointer;
+    transition: background-color var(--ds-dur-fast), color var(--ds-dur-fast);
+  }
+  .ds-rail__item:hover { background: var(--ds-layer-2); color: var(--ds-text-primary); }
+  .ds-rail__item:focus-visible { outline: 2px solid var(--ds-text-primary); outline-offset: -2px; }
+  .ds-rail__item[aria-current="page"] { background: var(--ds-layer-2); color: var(--ds-text-primary); font-weight: 600; }
+  .ds-rail__item[aria-current="page"]::before { content: ""; position: absolute; left: -4px; top: var(--ds-space-3); bottom: var(--ds-space-3); width: 3px; border-radius: var(--ds-radius-sm); background: var(--ds-text-primary); }
+  .ds-rail__item--end { margin-top: auto; }
+  @media (max-width: 767px) {
+    :root { --rail-w: 56px; }
+    .ds-rail__item span { letter-spacing: -.01em; }
+  }
 }

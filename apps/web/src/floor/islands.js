@@ -44,7 +44,7 @@ export function StateIsland() {
   const folded = metrics.filter((m) => hidden.has(m.key));
   return html`<section class="state-island" role="status" aria-live="polite" ref=${row}>
     ${metrics.map((m) => html`<div key=${m.key} class=${'metric' + (m.key === 'line' ? ' lead' : '')} data-fit=${m.key} data-priority=${m.p} title=${m.title} hidden=${hidden.has(m.key)}>${m.body}</div>`)}
-    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} aria-label=${`${folded.length} more figures`} title="More figures" onClick=${() => setMore(!more)}><${Icon} n="chev" /><span class="fit-n">+${folded.length}</span></button>
+    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} title="More line figures" onClick=${() => setMore(!more)}><span class="hud-btn-l">More</span><span class="fit-n">${folded.length}</span><${Icon} n="down" size=${14} /></button>
       ${more ? html`<div class="glass fit-pop" ref=${pop} role="dialog" aria-label="More figures">${folded.map((m) => html`<div key=${m.key} class="metric" title=${m.title}>${m.body}</div>`)}</div>` : null}</div>` : null}
   </section>`;
 }
@@ -65,7 +65,7 @@ function ToolsMenu({ themeIcon }) {
     [themeIcon, `Theme: ${RT.ui.theme}`, cycleTheme],
     [RT.ui.muted ? 'mute' : 'vol', RT.ui.muted ? 'Alarm sound: muted' : 'Alarm sound: on', () => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }],
   ];
-  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} aria-label="Tools" title="Tools" onClick=${() => setOpen(!open)}><${Icon} n="more" /></button>
+  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} title="Search, scan, X-ray, theme and sound" onClick=${() => setOpen(!open)}><span class="hud-btn-l">Tools</span><${Icon} n="down" size=${14} /></button>
     ${open ? html`<div class="glass umenu-pop tools-pop" role="menu" ref=${pop}>${items.map(([ic, label, f]) => html`<button key=${label} class="um-item" role="menuitem" onClick=${run(f)}><${Icon} n=${ic} />${label}</button>`)}</div>` : null}</div>`;
 }
 

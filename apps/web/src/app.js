@@ -21,19 +21,23 @@ import { M, RT, bump, effectiveTheme, fmtClock, html, setUI, store, useEffect, u
 import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
 import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';
+import { Rail } from './ui/nav.js';
 
 
 const PAGES = [
   ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
   ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
 ];
-function NavIsland() {
-  const cur = RT.route.page;
-  return html`<nav class="seg nav-island" aria-label="Screens">${PAGES.filter((p) => p[3]()).map(([k, l, ic]) => html`<button key=${k} class="nav-b" aria-current=${cur === k ? 'page' : null} title=${l} onClick=${() => go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null)}><${Icon} n=${ic} /><span>${l}</span></button>`)}</nav>`;
+/* Page navigation: the rail on the left (floor first, the guide at the bottom). */
+const RAIL = [['floor', 'Floor', 'layers'], ['dash', 'Dashboard', 'grid'], ['display', 'Displays', 'tv'], ['reports', 'Reports', 'chart'], ['admin', 'Settings', 'cog'], ['how', 'Guide', 'book']];
+function PageRail() {
+  const cur = RT.route.page, ok = Object.fromEntries(PAGES.map((p) => [p[0], p[3]()]));
+  return html`<${Rail} value=${cur} items=${RAIL.filter(([k]) => ok[k]).map(([k, l, ic]) => ({ value: k, label: l, icon: ic, end: k === 'how' }))}
+    onChange=${(k) => go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null)} />`;
 }
 /* Non-floor screens share the header and scroll their own body. */
 function PageShell({ children }) {
-  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
+  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
 }
 function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 
@@ -60,8 +64,8 @@ function App() {
         // the camera frames the line inside the space the top bar and strip leave free (checked twice a second)
         if (now - (RT._safeAt || 0) > 500) {
           RT._safeAt = now;
-          const hud = document.querySelector('.stage header.hud'), strip = document.querySelector('.strip');
-          Scene3D.setSafeArea({ top: hud ? hud.getBoundingClientRect().bottom : 0, bottom: strip ? window.innerHeight - strip.getBoundingClientRect().top : 0 });
+          const hud = document.querySelector('.stage header.hud'), strip = document.querySelector('.strip'), rail = document.querySelector('.ds-rail');
+          Scene3D.setSafeArea({ top: hud ? hud.getBoundingClientRect().bottom : 0, bottom: strip ? window.innerHeight - strip.getBoundingClientRect().top : 0, left: rail ? rail.getBoundingClientRect().right : 0 });
         }
         Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
       }
@@ -92,13 +96,15 @@ function App() {
   }, []);
   const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
   const gate = page !== 'display' && (!Auth.user || Auth.locked);
-  return html`<main class="stage">
+  const rail = !gate && page !== 'display';
+  return html`<main class=${'stage' + (rail ? ' has-rail' : '')}>
+    ${rail ? html`<${PageRail} />` : null}
     ${RT.conn.state === 'down' ? html`<div class="conn-banner" role="alert"><${Icon} n="wifioff" size=${14} /><b>Line server not reachable</b><span>Showing the last data received at ${fmtClock(RT.S.t)} · reconnecting…</span></div>` : null}
     <div id="scene" ref=${sceneRef} style=${{ visibility: floor && !RT.ui.view2D && !gate ? 'visible' : 'hidden' }}></div>
     ${gate ? html`<${SignIn} key=${Auth.locked ? 'lock' : 'in'} lock=${!!(Auth.user && Auth.locked)} />` : floor ? html`<${React.Fragment}>
     ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
     ${!RT.ui.view2D ? html`<${HoverCard} />` : null}
-    <header class="glass hud ticks in"><${IdIsland} /><${NavIsland} /><${StateIsland} /><${ActIsland} /></header>
+    <header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header>
     <${Strip} /><${SimConsole} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}</${React.Fragment}>`
