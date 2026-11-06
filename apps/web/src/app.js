@@ -22,18 +22,12 @@ import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
 import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';
 import { Rail } from './ui/nav.js';
+import { goPage, navPages } from './lib/pages.js';
 
 
-const PAGES = [
-  ['dash', 'Dashboard', 'grid', () => true], ['floor', 'Floor', 'layers', () => true], ['display', 'Line displays', 'tv', () => true],
-  ['reports', 'Reports', 'chart', () => can('reports')], ['admin', 'Settings', 'cog', () => adminAllowed()], ['how', 'How it works', 'book', () => true],
-];
-/* Page navigation: the rail on the left (floor first, the guide at the bottom). */
-const RAIL = [['floor', 'Floor', 'layers'], ['dash', 'Dashboard', 'grid'], ['display', 'Displays', 'tv'], ['reports', 'Reports', 'chart'], ['admin', 'Settings', 'cog'], ['how', 'Guide', 'book']];
+/* Page navigation: the rail under the top bar (tablet and desktop); on phones the pages are in the top bar's menu. */
 function PageRail() {
-  const cur = RT.route.page, ok = Object.fromEntries(PAGES.map((p) => [p[0], p[3]()]));
-  return html`<${Rail} value=${cur} items=${RAIL.filter(([k]) => ok[k]).map(([k, l, ic]) => ({ value: k, label: l, icon: ic, end: k === 'how' }))}
-    onChange=${(k) => go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null)} />`;
+  return html`<${Rail} value=${RT.route.page} items=${navPages().map((p) => ({ ...p, end: p.value === 'how' }))} onChange=${goPage} />`;
 }
 /* Non-floor screens share the header and scroll their own body. */
 function PageShell({ children }) {

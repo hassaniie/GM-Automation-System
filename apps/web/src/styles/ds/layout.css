@@ -140,3 +140,70 @@
   /* page screens: the content starts right of the rail */
   .stage.has-rail > .page-shell > .page-scroll { padding-left: var(--ds-rail-space); }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Phones (< 768 px). The top bar is two rows: identity left, user and the
+   Bolt & Volt mark right; then the menu (pages and tools) left, Calls and
+   Alarms right. The line's figures live in the strip's lane headers, the
+   page rail is folded into the menu, and panels take the full width.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer layout {
+  .tl-menu, .tools-pages { display: none; }
+  .um-h { padding: var(--ds-space-2) var(--ds-space-3) var(--ds-space-1); color: var(--ds-text-muted); font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: var(--ds-tracking-label); text-transform: uppercase; }
+  .tools-pages .um-item[aria-current="page"] { background: var(--ds-layer-2); color: var(--ds-text-primary); font-weight: 600; }
+
+  @media (max-width: 767px) {
+    :root { --hud-h: 96px; --strip-h: 172px; }
+
+    /* top bar */
+    .hud {
+      height: auto;
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      grid-template-rows: 52px 44px;
+      grid-template-areas: "id id user brand" "menu alerts alerts alerts";
+    }
+    .hud > .state-island, .hud .act-island > .sep, .hud .hud-tools { display: none; }
+    .hud > .act-island { display: contents; }
+    .hud > .id-island { padding: 0 var(--ds-space-3); }
+    .hud .umenu { grid-area: user; display: flex; align-items: center; }
+    .hud .bv-mark { grid-area: brand; padding: 0 var(--ds-space-3) 0 var(--ds-space-2); }
+    .hud .tools-menu { grid-area: menu; display: flex; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
+    .hud .hud-alerts { grid-area: alerts; justify-content: flex-end; align-items: center; gap: var(--ds-space-2); padding-right: var(--ds-space-2); border-left: 0; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
+    .hud .tools-menu > .ibtn { height: 43px; padding: 0 var(--ds-space-3); }
+    .hud .alarm-pill { height: 34px; padding: 0 var(--ds-space-3); border-left: 0; }
+    .tl-tools { display: none; }
+    .tl-menu { display: inline-flex; align-items: center; gap: var(--ds-space-2); }
+    .tools-pages { display: block; }
+    /* menus open from the bar's own edges (the buttons sit mid-row): Menu from the left, the user menu from the right */
+    .hud .tools-menu, .hud .umenu { position: static; }
+    .hud .tools-pop { left: 0; right: auto; width: min(280px, calc(100vw - 2 * var(--g))); max-height: calc(100dvh - 140px); overflow-y: auto; }
+    .hud .umenu-pop:not(.tools-pop) { right: 0; width: min(320px, calc(100vw - 2 * var(--g))); max-height: calc(100dvh - 140px); overflow-y: auto; }
+    /* tab rows that scroll sideways fade out at the right edge, so the hidden tabs are noticed */
+    .drawer-tabs { -webkit-mask-image: linear-gradient(90deg, black 85%, transparent); mask-image: linear-gradient(90deg, black 85%, transparent); }
+    .drawer-tabs button { flex: none; }
+
+    /* page navigation is in the menu */
+    .ds-rail { display: none; }
+    .stage.has-rail > .page-shell > .page-scroll { padding-left: 0; }
+
+    /* strip: views, then line tabs, then the chosen line's stations */
+    .strip { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); padding: var(--ds-space-2) var(--ds-space-3); }
+    .strip .views { grid-column: 1; grid-row: 1; display: flex; flex-wrap: nowrap; gap: var(--ds-space-1); border-right: 0; padding-right: 0; }
+    .strip .lane-tabs { grid-column: 1; grid-row: 2; }
+    .strip .lane-tabs button { flex: 1 1 0; }
+    .strip .lanes { grid-column: 1; grid-row: 3; }
+
+    /* floating panels: full width */
+    .simcon { left: var(--gl); right: var(--gr); width: auto; }
+    .simcon-bar .micro { display: none; }
+    .drawer { top: calc(var(--gt) + var(--hud-h) + var(--g)); left: var(--gl); right: var(--gr); bottom: var(--gb); width: auto; }
+    .inspector { top: auto; left: var(--gl); right: var(--gr); bottom: var(--gb); width: auto; max-height: 70dvh; }
+  }
+
+  /* tablets: a little less padding around the alerts and the Bolt & Volt mark, so the bar keeps every item */
+  @media (max-width: 1023px) {
+    .hud .bv-mark { padding: 0 var(--ds-space-3) 0 var(--ds-space-2); }
+    .hud .bv-mark img { height: 22px; }
+    .hud .alarm-pill { padding: 0 var(--ds-space-3); }
+  }
+}

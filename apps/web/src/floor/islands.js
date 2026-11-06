@@ -6,6 +6,7 @@ import { UserMenu } from '../auth.js';
 import { openAlarm, select, topAlarm } from './scenarios.js';
 import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI, useRef, useState } from '../lib/runtime.js';
 import { useFit, usePopover } from '../lib/fit.js';
+import { goPage, navPages } from '../lib/pages.js';
 import { ANDON_LABEL, ANDON_TONE, Horn, Icon, MgMark, STATUS_ICON, tv } from '../lib/ui-kit.js';
 
 export function IdIsland() {
@@ -65,8 +66,11 @@ function ToolsMenu({ themeIcon }) {
     [themeIcon, `Theme: ${RT.ui.theme}`, cycleTheme],
     [RT.ui.muted ? 'mute' : 'vol', RT.ui.muted ? 'Alarm sound: muted' : 'Alarm sound: on', () => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }],
   ];
-  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} title="Search, scan, X-ray, theme and sound" onClick=${() => setOpen(!open)}><span class="hud-btn-l">Tools</span><${Icon} n="down" size=${14} /></button>
-    ${open ? html`<div class="glass umenu-pop tools-pop" role="menu" ref=${pop}>${items.map(([ic, label, f]) => html`<button key=${label} class="um-item" role="menuitem" onClick=${run(f)}><${Icon} n=${ic} />${label}</button>`)}</div>` : null}</div>`;
+  // on phones the same menu also lists the pages (the rail is hidden there) and is labelled "Menu"
+  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} title="Search, scan, X-ray, theme and sound" onClick=${() => setOpen(!open)}><span class="hud-btn-l tl-tools">Tools</span><span class="tl-menu"><${Icon} n="menu" size=${18} /><span class="hud-btn-l">Menu</span></span><${Icon} n="down" size=${14} /></button>
+    ${open ? html`<div class="glass umenu-pop tools-pop" role="menu" ref=${pop}>
+      <div class="tools-pages"><div class="um-h">Pages</div>${navPages().map((p) => html`<button key=${p.value} class="um-item" role="menuitem" aria-current=${RT.route.page === p.value ? 'page' : null} onClick=${run(() => goPage(p.value))}><${Icon} n=${p.icon} />${p.label}</button>`)}<div class="um-h">Tools</div></div>
+      ${items.map(([ic, label, f]) => html`<button key=${label} class="um-item" role="menuitem" onClick=${run(f)}><${Icon} n=${ic} />${label}</button>`)}</div>` : null}</div>`;
 }
 
 export function ActIsland() {

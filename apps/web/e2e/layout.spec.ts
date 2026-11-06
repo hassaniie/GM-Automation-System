@@ -1,4 +1,4 @@
-/* Layout guardrail (design system release 1): at every supported width, in both themes, the top bar
+/* Layout guardrail (design system release 1): at every supported width (phone 390 px to 2560 px), in both themes, the top bar
    never overflows or overlaps and keeps Calls, Alarms, the user menu and the Bolt & Volt logo on screen, and the station strip
    never scrolls. Runs against the single-file demo build (dist-demo/index.html). */
 import { expect, test, type Page } from '@playwright/test';
@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 
 const FILE = pathToFileURL(resolve(process.cwd(), 'dist-demo/index.html')).href;
-const WIDTHS = [1024, 1280, 1440, 1920, 2560];
+const WIDTHS = [390, 768, 1024, 1280, 1440, 1920, 2560];
 const PAGES = ['floor', 'dash', 'reports', 'admin/takt'];
 
 async function signIn(page: Page, theme: 'light' | 'dark') {

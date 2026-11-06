@@ -257,4 +257,14 @@
   .ds-seg button::after { --bk-in: 2px; }
   .ds-seg button:focus-visible { --bk-o: 1; }
   @media (prefers-reduced-motion: reduce) { .ds-btn, .ds-switch::after, .ds-input { transition: none; } .ds-skeleton, .ds-btn[aria-busy="true"] { animation: none; } }
+
+  /* Settings below 900 px: section tabs become one row that scrolls sideways, the note sits under it */
+  @media (max-width: 900px) {
+    .adm-nav { grid-auto-flow: row; gap: var(--ds-space-2); }
+    .adm-nav > .ds-label { display: none; }
+    .adm-nav .ds-tabs--vertical { flex-direction: row; overflow-x: auto; scrollbar-width: none; border-bottom: var(--ds-border-1) solid var(--ds-border-subtle); -webkit-mask-image: linear-gradient(90deg, black 88%, transparent); mask-image: linear-gradient(90deg, black 88%, transparent); }
+    .adm-nav .ds-tabs--vertical button { width: auto; flex: none; height: var(--ds-h-sm); border-radius: var(--ds-radius-md) var(--ds-radius-md) 0 0; font-size: var(--ds-size-13); }
+    .adm-nav .ds-tabs--vertical button[aria-selected="true"] { background: transparent; box-shadow: inset 0 -2px 0 var(--ds-text-primary); }
+    .adm-nav > .note { padding: 0 var(--ds-space-1) !important; margin: 0; }
+  }
 }
