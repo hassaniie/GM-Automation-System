@@ -6,10 +6,10 @@ import { raiseOrUpdate, resolveAlarmsFor } from './alarms.js';
 import { apply } from './events.js';
 import { areaPaused } from './interlocks.js';
 import { processReturns, startReturn, startTransit } from './movement.js';
-import { completeWork } from './occupancy.js';
+import { completeWork, startOcc } from './occupancy.js';
 import { LOOPS, NEXT, POS, ROUTE, isLoopFirst } from './plant.js';
 import { dispId, exitScan } from './scans.js';
-import { logEvent } from './state.js';
+import { createState, logEvent } from './state.js';
 import { accountTime, beginTick, endTick } from './tick.js';
 
 /** Tracking could not follow what a device reported: logged and raised, so people correct the position. */
@@ -106,4 +106,30 @@ export function liveStep(S, dt = 1, events = []) {
 function applyDevice(S, e) {
   try { return apply(S, e); }
   catch (err) { return trackingMismatch(S, e.pos || e.from || 'TL1', `${e.type} could not be applied: ${err.message}`); }
+}
+
+/** A fresh plant for live running: today's date and time on the plant clock, carriers in their loops, no units. */
+export function createLiveState(seed, date, t, cfg = {}) {
+  const S = createState(seed, { ...cfg, baseDate: date });
+  S.t = t; S.plantMode = 'live';
+  logEvent(S, 'sim', 'Live running started · the line is tracked from device signals; enter units already on the line with Correct position');
+  return S;
+}
+
+/** First connection of the plant (go-live): a carrier the PLC reports at a position tracking has empty is
+    seated there from its loop, without a unit. Returns true if one was seated. */
+export function seatCarrier(S, pos) {
+  const p = S.pos[pos]; if (!p || p.carrierId || p.reservedBy) return false;
+  const loop = POS[pos].loop, cid = S.loopBuf[loop].shift(); if (!cid) return false;
+  const c = S.carriers[cid]; c.mode = 'POS'; c.posId = pos; c.transit = null;
+  startOcc(S, pos, cid, null);
+  logEvent(S, 'move', `Go-live · ${c.kind.toLowerCase()} ${cid} reported at ${dispId(pos)} by the PLC`, { pos });
+  return true;
+}
+
+/** A device (PLC, scanner) stopped reporting, or came back. Raised as an alarm so the floor knows tracking is blind. */
+export function deviceAlarm(S, device, down, msg) {
+  const key = `DEVICE:${device}`;
+  if (down) raiseOrUpdate(S, key, { type: 'DEVICE', level: 'FAULT', pos: device, msg });
+  else resolveAlarmsFor(S, (a) => a.key === key, msg);
 }
