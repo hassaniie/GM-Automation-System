@@ -33,6 +33,8 @@ export class Persistence {
   private timers: NodeJS.Timeout[] = [];
   private flushing: Promise<void> | null = null;
   private readonly log: Log;
+  /** Called once a shift has ended and its records are saved (the end-of-shift report). */
+  onShiftEnd: ((key: string) => Promise<void>) | null = null;
 
   constructor(readonly db: Db, readonly host: EngineHost, readonly opts: PersistOptions = {}) {
     this.log = opts.log ?? { info() {}, warn() {}, error() {} };
@@ -63,7 +65,15 @@ export class Persistence {
   private onAdvance(S: EngineState) {
     this.attach();
     const key = S.shift ? S.shift.key : null;
-    if (key !== this.shiftKey) { if (this.shiftKey !== null) void this.flush().then(() => this.checkpoint()).catch(() => {}); this.shiftKey = key; }
+    if (key !== this.shiftKey) {
+      const ended = this.shiftKey;
+      if (ended !== null) {
+        const saved = this.flush();
+        void saved.then(() => this.checkpoint()).catch(() => {});
+        if (!ended.endsWith(' · off') && this.onShiftEnd) void saved.then(() => this.onShiftEnd?.(ended)).catch(() => {});
+      }
+      this.shiftKey = key;
+    }
     const d = dayOf(S.t);
     if (this.day !== null && d !== this.day) void this.trim(S, (d - 1) * 86400);
     this.day = d;
@@ -149,9 +159,11 @@ export class Persistence {
 
   private async writeShifts(q: Queryable, S: EngineState) {
     const rows: unknown[][] = [];
-    for (const h of S.history as { key?: string }[]) if (h.key) rows.push([h.key, JSON.stringify(h), JSON.stringify(S.down[h.key] || null)]);
-    if (S.shift && !rows.some((r) => r[0] === S.shift!.key)) rows.push([S.shift.key, null, JSON.stringify(S.down[S.shift.key] || null)]);
-    if (rows.length) await upsert(q, 'shifts', ['key', 'summary', 'downtime'], rows, ['key'], true, 'updated_at = now()', 'summary = COALESCE(EXCLUDED.summary, shifts.summary)');
+    // downtime leaves memory with old history (trim): never overwrite what is stored with nothing
+    const down = (key: string) => (S.down[key] ? JSON.stringify(S.down[key]) : null);
+    for (const h of S.history as { key?: string }[]) if (h.key) rows.push([h.key, JSON.stringify(h), down(h.key)]);
+    if (S.shift && !rows.some((r) => r[0] === S.shift!.key)) rows.push([S.shift.key, null, down(S.shift.key)]);
+    if (rows.length) await upsert(q, 'shifts', ['key', 'summary', 'downtime'], rows, ['key'], true, 'updated_at = now()', 'summary = COALESCE(EXCLUDED.summary, shifts.summary)', 'downtime = COALESCE(EXCLUDED.downtime, shifts.downtime)');
   }
 
   private async writeConfig(q: Queryable, S: EngineState) {
@@ -192,6 +204,7 @@ export class Persistence {
     const cut = `now() - interval '${Math.max(1, Math.floor(days))} days'`;
     await this.db.tx(async (q) => {
       for (const t of ['events', 'auth_log', 'audit']) await q.query(`DELETE FROM ${t} WHERE at < ${cut}`);
+      await q.query(`DELETE FROM saved_reports WHERE created_at < ${cut}`);
       await q.query(`DELETE FROM vehicles WHERE updated_at < ${cut} AND state = 'LINED_OFF'`);
       await q.query(`DELETE FROM sessions WHERE expires_at < now() - interval '30 days'`);
     });

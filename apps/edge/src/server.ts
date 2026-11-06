@@ -3,6 +3,7 @@
      GET  /api/snapshot   full state (JSON)
      POST /api/commands   one command → its result (for integrations)
      WS   /api/live       hello + snapshot, then patches; commands in, results out
+     GET  /api/reports…   reports from the database, Excel and PDF (reports/routes.ts)
    It also serves the web app (apps/web/dist-edge) so one process runs the plant PC. */
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -20,6 +21,7 @@ import { registerOidc, type OidcSettings } from './auth/oidc.ts';
 import { COOKIE, Sessions, type Session } from './auth/sessions.ts';
 import { createDb, migrate, type Db } from './db/index.ts';
 import { Persistence, type PersistOptions } from './persist.ts';
+import { registerReports, saveShiftReport } from './reports/routes.ts';
 
 export const VERSION = '0.3.0';
 const MAX_BUFFERED = 8 * 1024 * 1024; // a client this far behind is dropped; it reconnects and resyncs
@@ -70,6 +72,9 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
       onRevoke: (match) => { for (const [sock, c] of live) if (c.session && match(c.session)) sock.close(4401, 'Signed out'); },
     });
     if (opts.sso) await registerOidc(app, db, sessions, opts.sso);
+    registerReports(app, db, host, persistence);
+    const p = persistence!, d = db;
+    p.onShiftEnd = (key) => saveShiftReport(d, host, p, key, app.log);
     // sessions can expire or be revoked while a screen is connected
     const sweep = setInterval(async () => {
       for (const [sock, c] of live) if (c.token && !(await sessions.resolve(c.token))) sock.close(4401, 'Session ended');

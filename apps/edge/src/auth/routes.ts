@@ -47,6 +47,12 @@ export async function logAuth(db: Db, who: string, action: string, detail = '', 
   await db.query('INSERT INTO auth_log (who, action, detail, ip) VALUES ($1, $2, $3, $4)', [who, action, detail, ip ?? null]).catch(() => {});
 }
 
+/** preHandler: a signed-in person whose role has `perm` (display links never do). */
+export const need = (perm: Permission) => async (req: FastifyRequest, reply: FastifyReply) => {
+  const s = req.session;
+  if (!s || s.kind !== 'user' || !roleCan(s.user!.role, perm)) return reply.code(403).send({ ok: false, error: 'Not allowed for your role' });
+};
+
 export function registerAuth(app: FastifyInstance, db: Db, sessions: Sessions, opts: AuthOptions, hooks: AuthHooks = {}) {
   const lockout = new Lockout();
   const PUBLIC = /^\/api\/(health$|auth\/(sign-in|sign-out|me|config|display|oidc\/))/;
@@ -61,10 +67,6 @@ export function registerAuth(app: FastifyInstance, db: Db, sessions: Sessions, o
     if (PUBLIC.test(req.url.split('?')[0])) return;
     if (!req.session) return reply.code(401).send({ ok: false, error: 'Sign in required' });
   });
-  const need = (perm: Permission) => async (req: FastifyRequest, reply: FastifyReply) => {
-    const s = req.session;
-    if (!s || s.kind !== 'user' || !roleCan(s.user!.role, perm)) return reply.code(403).send({ ok: false, error: 'Not allowed for your role' });
-  };
   const me = (s: Session | null) => s && s.kind === 'user'
     ? { kind: 'user', user: publicUser(s.user!), perms: ROLES[s.user!.role].perms, demo: opts.demo }
     : s ? { kind: 'display', display: { id: s.display!.id, name: s.display!.name, line: s.display!.line }, demo: opts.demo } : null;
