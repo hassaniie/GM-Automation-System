@@ -4,7 +4,8 @@ import { Scene3D } from '@mg/scene';
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { UserMenu } from '../auth.js';
 import { openAlarm, select, topAlarm } from './scenarios.js';
-import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI } from '../lib/runtime.js';
+import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI, useRef, useState } from '../lib/runtime.js';
+import { useFit, usePopover } from '../lib/fit.js';
 import { ANDON_LABEL, ANDON_TONE, Horn, Icon, MgMark, STATUS_ICON, tv } from '../lib/ui-kit.js';
 
 export function IdIsland() {
@@ -28,14 +29,23 @@ export function StateIsland() {
   const S = RT.S, p = M.pace(S), ls = M.lineStatus(S);
   const wip = S.vehOrder.filter((id) => M.isActive(S.vehicles[id])).length;
   const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
-  return html`<section class="state-island" role="status" aria-live="polite">
-    <div class="metric"><span class="micro">Line</span>
-      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button></div>
-    <div class="metric" title="Final line: vehicles completed this shift against the shift target"><span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
-    <div class="metric opt"><span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span></div>
-    <div class="metric opt" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span></div>
-    <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span></div>
-    <div class="metric opt"><span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span></div>
+  const row = useRef(null), hidden = useFit(row), [more, setMore] = useState(false), moreBtn = useRef(null), pop = useRef(null);
+  usePopover(more, setMore, moreBtn, pop);
+  // priority 1 never folds; the rest fold into More from the highest number when the top bar is short of room
+  const metrics = [
+    { key: 'line', p: 1, body: html`<span class="micro">Line</span>
+      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button>` },
+    { key: 'done', p: 1, title: 'Final line: vehicles completed this shift against the shift target', body: html`<span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span>` },
+    { key: 'remaining', p: 3, body: html`<span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span>` },
+    { key: 'down', p: 2, title: 'Final line downtime this shift: time with at least one station over takt, breaks excluded', body: html`<span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span>` },
+    { key: 'lasthour', p: 4, body: html`<span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span>` },
+    { key: 'wip', p: 5, body: html`<span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span>` },
+  ];
+  const folded = metrics.filter((m) => hidden.has(m.key));
+  return html`<section class="state-island" role="status" aria-live="polite" ref=${row}>
+    ${metrics.map((m) => html`<div key=${m.key} class=${'metric' + (m.key === 'line' ? ' lead' : '')} data-fit=${m.key} data-priority=${m.p} title=${m.title} hidden=${hidden.has(m.key)}>${m.body}</div>`)}
+    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} aria-label=${`${folded.length} more figures`} title="More figures" onClick=${() => setMore(!more)}><${Icon} n="chev" /><span class="fit-n">+${folded.length}</span></button>
+      ${more ? html`<div class="glass fit-pop" ref=${pop} role="dialog" aria-label="More figures">${folded.map((m) => html`<div key=${m.key} class="metric" title=${m.title}>${m.body}</div>`)}</div>` : null}</div>` : null}
   </section>`;
 }
 function CallsPill() {
@@ -43,19 +53,38 @@ function CallsPill() {
   return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
     <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
 }
+/* The tools (search, scan, x-ray, theme, sound) as one menu when the top bar is narrow. */
+function ToolsMenu({ themeIcon }) {
+  const [open, setOpen] = useState(false), btn = useRef(null), pop = useRef(null);
+  usePopover(open, setOpen, btn, pop);
+  const run = (f) => () => { setOpen(false); f(); };
+  const items = [
+    ['search', 'Find a vehicle by VIN', () => setUI({ dialog: { type: 'vin' } })],
+    ['scanin', 'Line-in scan at TL1', () => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })],
+    ['xray', RT.ui.xray ? 'X-ray view: on' : 'X-ray view: off', () => setUI({ xray: !RT.ui.xray })],
+    [themeIcon, `Theme: ${RT.ui.theme}`, cycleTheme],
+    [RT.ui.muted ? 'mute' : 'vol', RT.ui.muted ? 'Alarm sound: muted' : 'Alarm sound: on', () => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }],
+  ];
+  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} aria-label="Tools" title="Tools" onClick=${() => setOpen(!open)}><${Icon} n="more" /></button>
+    ${open ? html`<div class="glass umenu-pop tools-pop" role="menu" ref=${pop}>${items.map(([ic, label, f]) => html`<button key=${label} class="um-item" role="menuitem" onClick=${run(f)}><${Icon} n=${ic} />${label}</button>`)}</div>` : null}</div>`;
+}
+
 export function ActIsland() {
   const S = RT.S;
   const active = S.alarms.filter((a) => M.alarmActive(a) && M.SEV[a.level] >= 3), unacked = active.filter(M.alarmUnacked);
   const themeIcon = RT.ui.theme === 'light' ? 'sun' : RT.ui.theme === 'dark' ? 'moon' : 'auto';
   return html`<nav class="seg act-island" aria-label="Actions">
+    <div class="hud-tools">
     <button class="ibtn" title="Find a vehicle by VIN (/)" aria-label="Find a vehicle by VIN" onClick=${() => setUI({ dialog: { type: 'vin' } })}><${Icon} n="search" /></button>
     <button class="ibtn" title="Scanner 1 · line-in scan at TL1" aria-label="Line-in scan" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" /></button>
     <button class="ibtn" title="X-ray build view (X)" aria-label="X-ray build view" aria-pressed=${RT.ui.xray} onClick=${() => setUI({ xray: !RT.ui.xray })}><${Icon} n="xray" /></button>
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
-    <button class="ibtn opt" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
+    <button class="ibtn" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
+    </div>
+    <${ToolsMenu} themeIcon=${themeIcon} />
     <span class="sep"></span>
-    <${CallsPill} />
-    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button>
+    <div class="hud-alerts"><${CallsPill} />
+    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button></div>
     <span class="sep"></span>
     <${UserMenu} />
     <span class="sep"></span>

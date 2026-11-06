@@ -15,58 +15,27 @@
 Error: expect(received).toEqual(expected) // deep equality
 
 - Expected  -  1
-+ Received  + 50
++ Received  + 19
 
 - Array []
 + Array [
-+   "1024px floor: no top bar",
-+   "1024px dash: top bar content is 135px wider than the bar",
-+   "1024px dash: seg.act-island is outside the window (442–1166 of 1024)",
-+   "1024px reports: top bar content is 119px wider than the bar",
-+   "1024px reports: seg.act-island is outside the window (426–1150 of 1024)",
-+   "1024px admin/takt: top bar content is 119px wider than the bar",
-+   "1024px admin/takt: seg.act-island is outside the window (426–1150 of 1024)",
-+   "1280px floor: top bar content is 308px wider than the bar",
-+   "1280px floor: seg.act-island is outside the window (856–1579 of 1280)",
-+   "1280px floor: Alarms is not fully visible",
-+   "1280px floor: user menu is not fully visible",
++   "1024px floor: .lanes scrolls vertically (84 > 82)",
++   "1024px floor: .lanes scrolls horizontally (890 > 787)",
++   "1024px floor: .lane scrolls horizontally (321 > 232)",
++   "1024px floor: .lane scrolls vertically (83 > 81)",
++   "1024px floor: .lane scrolls horizontally (415 > 255)",
++   "1024px floor: .lane scrolls horizontally (374 > 270)",
 +   "1280px floor: .lanes scrolls vertically (84 > 82)",
 +   "1280px floor: .lanes scrolls horizontally (1054 > 1043)",
 +   "1280px floor: .lane scrolls horizontally (321 > 310)",
 +   "1280px floor: .lane scrolls vertically (83 > 81)",
-+   "1280px floor: .lane scrolls horizontally (415 > 341)",
++   "1280px floor: .lane scrolls horizontally (427 > 341)",
 +   "1280px floor: .lane scrolls horizontally (374 > 362)",
-+   "1280px dash: seg.act-island is outside the window (563–1287 of 1280)",
-+   "1280px reports: seg.act-island is outside the window (563–1287 of 1280)",
-+   "1280px admin/takt: seg.act-island is outside the window (563–1287 of 1280)",
-+   "1440px floor: top bar content is 207px wider than the bar",
-+   "1440px floor: seg.act-island is outside the window (915–1638 of 1440)",
-+   "1440px floor: user menu is not fully visible",
 +   "1440px floor: .lanes scrolls vertically (84 > 82)",
 +   "1440px floor: .lane scrolls vertically (83 > 81)",
 +   "1440px floor: .lane scrolls horizontally (427 > 395)",
-+   "1440px dash: seg.act-island is outside the window (723–1447 of 1440)",
-+   "1440px reports: seg.act-island is outside the window (723–1447 of 1440)",
-+   "1440px admin/takt: seg.act-island is outside the window (723–1447 of 1440)",
-+   "1920px floor: top bar content is 802px wider than the bar",
-+   "1920px floor: state-island is outside the window (1178–1989 of 1920)",
-+   "1920px floor: seg.act-island is outside the window (1989–2713 of 1920)",
-+   "1920px floor: Calls is not fully visible",
-+   "1920px floor: Alarms is not fully visible",
-+   "1920px floor: user menu is not fully visible",
 +   "1920px floor: .lanes scrolls vertically (84 > 82)",
 +   "1920px floor: .lane scrolls vertically (83 > 81)",
-+   "1920px dash: seg.act-island is outside the window (1203–1927 of 1920)",
-+   "1920px reports: seg.act-island is outside the window (1203–1927 of 1920)",
-+   "1920px admin/takt: seg.act-island is outside the window (1203–1927 of 1920)",
-+   "2560px floor: top bar content is 585px wider than the bar",
-+   "2560px floor: seg.act-island is outside the window (2384–3252 of 2560)",
-+   "2560px floor: Calls is not fully visible",
-+   "2560px floor: Alarms is not fully visible",
-+   "2560px floor: user menu is not fully visible",
-+   "2560px dash: seg.act-island is outside the window (1701–2569 of 2560)",
-+   "2560px reports: seg.act-island is outside the window (1701–2569 of 2560)",
-+   "2560px admin/takt: seg.act-island is outside the window (1701–2569 of 2560)",
 + ]
 ```
 
@@ -83,7 +52,7 @@ Error: expect(received).toEqual(expected) // deep equality
             - generic [ref=e10]: GA Operations
             - generic [ref=e11]: MG JW Automobile
         - generic [ref=e12]:
-          - generic [ref=e13]: 09:40:11
+          - generic [ref=e13]: 09:40:22
           - generic [ref=e14]: Shift A
         - generic "All data is simulated in this browser. No PLC, scanner or sensor is connected." [ref=e15]: SIMULATION
         - generic "Shift A 06:00–14:30 · 45% of productive time elapsed" [ref=e18]
@@ -95,91 +64,93 @@ Error: expect(received).toEqual(expected) // deep equality
         - button "Settings" [ref=e42] [cursor=pointer]
         - button "How it works" [ref=e47] [cursor=pointer]
       - navigation "Actions" [ref=e51]:
-        - button "Find a vehicle by VIN" [ref=e52] [cursor=pointer]
-        - button "Line-in scan" [ref=e56] [cursor=pointer]
-        - button "X-ray build view" [ref=e63] [cursor=pointer]
-        - button "Theme auto. Switch theme" [ref=e71] [cursor=pointer]
-        - button "Mute alarm sound" [ref=e75] [cursor=pointer]
-        - button "0 supervisor and 0 maintenance calls open" [ref=e80] [cursor=pointer]:
-          - text: CALLS
-          - generic [ref=e83]: "0"
-        - button "0 critical alarms, 0 unacknowledged" [ref=e84] [cursor=pointer]:
-          - text: ALARMS
-          - generic [ref=e88]: "0"
-        - button "HS" [ref=e90] [cursor=pointer]
-        - button [ref=e91] [cursor=pointer]:
-          - img "Bolt & Volt" [ref=e92]
-    - generic [ref=e94]:
-      - complementary "Settings sections" [ref=e95]:
-        - generic [ref=e96]: Settings
-        - button "Takt time" [ref=e97] [cursor=pointer]
-        - button "Targets & plan" [ref=e101] [cursor=pointer]
-        - button "Shifts & breaks" [ref=e104] [cursor=pointer]
-        - button "Buzzers" [ref=e108] [cursor=pointer]
-        - button "Position correction" [ref=e114] [cursor=pointer]
-        - button "Users" [ref=e118] [cursor=pointer]
-        - button "Audit log" [ref=e124] [cursor=pointer]
-        - paragraph [ref=e127]: Changes apply at once, are saved on this device and are written to the audit log with your name.
-      - generic [ref=e129]:
-        - generic [ref=e131]:
-          - generic [ref=e132]: Takt time · URD req 10
-          - heading "Takt time per line" [level=2] [ref=e133]
-          - paragraph [ref=e134]: The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime.
-        - generic [ref=e135]:
-          - generic [ref=e136]:
-            - generic [ref=e137]: Station 1 · Trim Line · preview
-            - generic [ref=e138]:
-              - spinbutton "Trim Line takt minutes" [ref=e139]: "10"
-              - generic [ref=e140]: ":"
-              - spinbutton "Trim Line takt seconds" [ref=e141]: "00"
-              - generic [ref=e142]: "min : s"
-            - generic [ref=e143]: Now 10:00 · close to limit at 09:30
-            - generic [ref=e144]:
-              - button "−1:00" [ref=e145] [cursor=pointer]
-              - button "−0:30" [ref=e146] [cursor=pointer]
-              - button "+0:30" [ref=e147] [cursor=pointer]
-              - button "+1:00" [ref=e148] [cursor=pointer]
-          - generic [ref=e149]:
-            - generic [ref=e150]: Station 2 · Chassis Line
-            - generic [ref=e151]:
-              - spinbutton "Chassis Line takt minutes" [ref=e152]: "10"
-              - generic [ref=e153]: ":"
-              - spinbutton "Chassis Line takt seconds" [ref=e154]: "00"
-              - generic [ref=e155]: "min : s"
-            - generic [ref=e156]: Now 10:00 · close to limit at 09:30
-            - generic [ref=e157]:
-              - button "−1:00" [ref=e158] [cursor=pointer]
-              - button "−0:30" [ref=e159] [cursor=pointer]
-              - button "+0:30" [ref=e160] [cursor=pointer]
-              - button "+1:00" [ref=e161] [cursor=pointer]
-          - generic [ref=e162]:
-            - generic [ref=e163]: Station 3 · Final Line
-            - generic [ref=e164]:
-              - spinbutton "Final Line takt minutes" [ref=e165]: "10"
-              - generic [ref=e166]: ":"
-              - spinbutton "Final Line takt seconds" [ref=e167]: "00"
-              - generic [ref=e168]: "min : s"
-            - generic [ref=e169]: Now 10:00 · close to limit at 09:30
-            - generic [ref=e170]:
-              - button "−1:00" [ref=e171] [cursor=pointer]
-              - button "−0:30" [ref=e172] [cursor=pointer]
-              - button "+0:30" [ref=e173] [cursor=pointer]
-              - button "+1:00" [ref=e174] [cursor=pointer]
-        - generic [ref=e175]:
-          - generic [ref=e176]:
-            - generic [ref=e177]: Close to limit at (% of takt)
-            - spinbutton "Close to limit at (% of takt)" [ref=e178]: "95"
-          - generic [ref=e179]:
-            - generic [ref=e180]: Reason for the change (kept in the audit log)
-            - textbox "Reason for the change (kept in the audit log)" [ref=e181]:
+        - generic [ref=e52]:
+          - button "Find a vehicle by VIN" [ref=e53] [cursor=pointer]
+          - button "Line-in scan" [ref=e57] [cursor=pointer]
+          - button "X-ray build view" [ref=e64] [cursor=pointer]
+          - button "Theme auto. Switch theme" [ref=e72] [cursor=pointer]
+          - button "Mute alarm sound" [ref=e76] [cursor=pointer]
+        - generic [ref=e81]:
+          - button "0 supervisor and 0 maintenance calls open" [ref=e82] [cursor=pointer]:
+            - text: CALLS
+            - generic [ref=e85]: "0"
+          - button "0 critical alarms, 0 unacknowledged" [ref=e86] [cursor=pointer]:
+            - text: ALARMS
+            - generic [ref=e90]: "0"
+        - button "HS" [ref=e92] [cursor=pointer]
+        - button [ref=e93] [cursor=pointer]:
+          - img "Bolt & Volt" [ref=e94]
+    - generic [ref=e96]:
+      - complementary "Settings sections" [ref=e97]:
+        - generic [ref=e98]: Settings
+        - button "Takt time" [ref=e99] [cursor=pointer]
+        - button "Targets & plan" [ref=e103] [cursor=pointer]
+        - button "Shifts & breaks" [ref=e106] [cursor=pointer]
+        - button "Buzzers" [ref=e110] [cursor=pointer]
+        - button "Position correction" [ref=e116] [cursor=pointer]
+        - button "Users" [ref=e120] [cursor=pointer]
+        - button "Audit log" [ref=e126] [cursor=pointer]
+        - paragraph [ref=e129]: Changes apply at once, are saved on this device and are written to the audit log with your name.
+      - generic [ref=e131]:
+        - generic [ref=e133]:
+          - generic [ref=e134]: Takt time · URD req 10
+          - heading "Takt time per line" [level=2] [ref=e135]
+          - paragraph [ref=e136]: The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime.
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - generic [ref=e139]: Station 1 · Trim Line · preview
+            - generic [ref=e140]:
+              - spinbutton "Trim Line takt minutes" [ref=e141]: "10"
+              - generic [ref=e142]: ":"
+              - spinbutton "Trim Line takt seconds" [ref=e143]: "00"
+              - generic [ref=e144]: "min : s"
+            - generic [ref=e145]: Now 10:00 · close to limit at 09:30
+            - generic [ref=e146]:
+              - button "−1:00" [ref=e147] [cursor=pointer]
+              - button "−0:30" [ref=e148] [cursor=pointer]
+              - button "+0:30" [ref=e149] [cursor=pointer]
+              - button "+1:00" [ref=e150] [cursor=pointer]
+          - generic [ref=e151]:
+            - generic [ref=e152]: Station 2 · Chassis Line
+            - generic [ref=e153]:
+              - spinbutton "Chassis Line takt minutes" [ref=e154]: "10"
+              - generic [ref=e155]: ":"
+              - spinbutton "Chassis Line takt seconds" [ref=e156]: "00"
+              - generic [ref=e157]: "min : s"
+            - generic [ref=e158]: Now 10:00 · close to limit at 09:30
+            - generic [ref=e159]:
+              - button "−1:00" [ref=e160] [cursor=pointer]
+              - button "−0:30" [ref=e161] [cursor=pointer]
+              - button "+0:30" [ref=e162] [cursor=pointer]
+              - button "+1:00" [ref=e163] [cursor=pointer]
+          - generic [ref=e164]:
+            - generic [ref=e165]: Station 3 · Final Line
+            - generic [ref=e166]:
+              - spinbutton "Final Line takt minutes" [ref=e167]: "10"
+              - generic [ref=e168]: ":"
+              - spinbutton "Final Line takt seconds" [ref=e169]: "00"
+              - generic [ref=e170]: "min : s"
+            - generic [ref=e171]: Now 10:00 · close to limit at 09:30
+            - generic [ref=e172]:
+              - button "−1:00" [ref=e173] [cursor=pointer]
+              - button "−0:30" [ref=e174] [cursor=pointer]
+              - button "+0:30" [ref=e175] [cursor=pointer]
+              - button "+1:00" [ref=e176] [cursor=pointer]
+        - generic [ref=e177]:
+          - generic [ref=e178]:
+            - generic [ref=e179]: Close to limit at (% of takt)
+            - spinbutton "Close to limit at (% of takt)" [ref=e180]: "95"
+          - generic [ref=e181]:
+            - generic [ref=e182]: Reason for the change (kept in the audit log)
+            - textbox "Reason for the change (kept in the audit log)" [ref=e183]:
               - /placeholder: e.g. New line balance after adding CL3
-          - button "Save takt" [ref=e182] [cursor=pointer]
-        - paragraph [ref=e185]:
+          - button "Save takt" [ref=e184] [cursor=pointer]
+        - paragraph [ref=e187]:
           - text: To change takt from a future date, schedule it under
-          - button "Targets & plan" [ref=e186] [cursor=pointer]
+          - button "Targets & plan" [ref=e188] [cursor=pointer]
           - text: .
-        - generic [ref=e187]: Recent takt changes
-        - paragraph [ref=e188]: No changes recorded yet.
+        - generic [ref=e189]: Recent takt changes
+        - paragraph [ref=e190]: No changes recorded yet.
 ```
 
 # Test source

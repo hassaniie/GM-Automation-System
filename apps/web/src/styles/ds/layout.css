@@ -1,3 +1,52 @@
-/* Andon DS · app shell layout (top bar regions, floor safe area, strip). */
+/* ════════════════════════════════════════════════════════════════════════
+   Andon DS · app shell layout
+   Top bar: fixed regions in one grid. Identity, page navigation, alerts and
+   the user menu never move or shrink; the page status row takes what is
+   left and folds its lower-priority figures into "More" (lib/fit.js); the
+   tools fold into one menu below the wide breakpoint (1440).
+   Breakpoints: compact < 1024 · regular 1024–1439 · wide 1440–1919 · ultra ≥ 1920
+   ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "id nav status act";
+    align-items: stretch;
+    z-index: var(--ds-z-chrome);
+  }
+  /* on page screens the bar sits in the flow: inset with margins (a relative offset would push it past the edge) */
+  .page-shell > .hud { inset: auto; margin: var(--gt) var(--gr) 0 var(--gl); }
+  .hud > .id-island { grid-area: id; min-width: 0; }
+  .hud > .nav-island { grid-area: nav; }
+  .hud > .state-island { grid-area: status; min-width: 0; width: 100%; overflow: hidden; justify-content: flex-start; border-right: 0; }
+  .hud > .act-island { grid-area: act; display: flex; align-items: stretch; }
+
+  /* page status: figures keep their natural width; the row decides what fits */
+  .hud .state-island > .metric { flex: none; }
+  .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-20); }
+  .fit-more { flex: none; position: relative; display: flex; align-items: stretch; }
+  .fit-more .ibtn { width: auto; padding: 0 var(--ds-space-3); gap: var(--ds-space-1); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
+  .fit-more .ibtn .ico { transform: rotate(90deg); }
+  .fit-n { font: 600 var(--ds-size-12) / 1 var(--ds-font-mono); }
+  .fit-pop { position: absolute; top: calc(100% + var(--ds-space-2)); right: 0; z-index: var(--ds-z-overlay); display: grid; gap: var(--ds-space-3); padding: var(--ds-space-4); min-width: 220px; }
+  .fit-pop .metric { border: 0; padding: 0; }
+
+  /* actions: tools | alerts | user | partner mark */
+  .hud-tools, .hud-alerts { display: flex; align-items: stretch; }
+  .hud-alerts { border-left: var(--ds-border-1) solid var(--ds-border-subtle); }
+  .tools-menu { display: none; position: relative; align-items: stretch; }
+  .tools-pop { width: 260px; }
+  @media (max-width: 1439px) {
+    .hud-tools { display: none; }
+    .tools-menu { display: flex; }
+  }
+  @media (max-width: 1919px) {
+    .hud .bv-mark { display: none; }
+    /* the floor's bar also carries the page status: tools fold first to give it room */
+    .hud:has(> .state-island) .hud-tools { display: none; }
+    .hud:has(> .state-island) .tools-menu { display: flex; }
+  }
+  @media (max-width: 2399px) {
+    .hud:has(> .state-island) .nav-b span, .hud:has(> .state-island) .brand > div { display: none; }
+  }
 }
