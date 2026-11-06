@@ -1,0 +1,9 @@
+/* Andon DS — stylesheet order. Later layers win over earlier ones regardless of selector weight, so new
+   design-system rules (layout, components) override the legacy stylesheet without !important.
+   reset (page shell in index.html) → tokens → legacy (app.css, being migrated) → layout (app shell) → components → overrides */
+@layer reset, tokens, legacy, layout, components, overrides;
+@import './tokens/primitives.css';
+@import './tokens/semantic.css';
+@import './app.css';
+@import './ds/layout.css';
+@import './ds/components.css';

@@ -4,56 +4,25 @@
    islands: identity + clock (top-left), line state (top-centre), actions (top-right), the line strip
    (bottom), the simulation console (bottom-right) and inspectors (right) that appear only when needed.
    Monochrome and type-led; colour is reserved for state. */
-:root {
-  color-scheme: light;
-  --bg: #e8ebee;
-  --text: #0f1215;
-  --text-2: #3a434c;
-  --muted: #6a747e;
-  --hair: rgba(16, 22, 28, .10);
-  --hair-2: rgba(16, 22, 28, .18);
-  --fill: rgba(16, 22, 28, .05);
-  --fill-2: rgba(16, 22, 28, .09);
-  --glass: linear-gradient(180deg, rgba(255,255,255,.74), rgba(244,246,248,.56));
-  --glass-solid: rgba(246,247,249,.94);
-  --glass-rim: linear-gradient(160deg, rgba(255,255,255,1), rgba(255,255,255,.35) 38%, rgba(255,255,255,.08) 62%, rgba(255,255,255,.6));
-  --glass-edge: rgba(16, 22, 28, .10);
-  --glass-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(16,22,28,.04) inset, 0 26px 60px -24px rgba(20, 28, 38, .38), 0 6px 18px -8px rgba(20, 28, 38, .16);
-  --brand: #c8102e;
-  --ok: #1f9a66; --warn: #c27f05; --crit: #e03535; --esc: #cc1d5b; --hold: #4a62e0; --transit: #0f8ea6; --paused: #6e7b88;
-  --sim: #a07b06;
-  --call-sup: #7a4fe0; --call-mnt: #0a7fd6; --andon-ok: #1f9a66;
-  --chart-a: #3f7fd0; --chart-b: #c8622f;
-  --primary-bg: #0f1215; --primary-fg: #ffffff;
-  --font-ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --r: 14px;
-  --blur: blur(26px) saturate(175%);
+/* Legacy names → design-system tokens (styles/tokens). New code uses the --ds-* names directly. */
+@layer tokens {
+  :root {
+    --bg: var(--ds-bg); --text: var(--ds-text-primary); --text-2: var(--ds-text-secondary); --muted: var(--ds-text-muted);
+    --hair: var(--ds-border-subtle); --hair-2: var(--ds-border-strong); --fill: var(--ds-layer-1); --fill-2: var(--ds-layer-2);
+    --glass: var(--ds-glass); --glass-solid: var(--ds-layer-solid); --glass-rim: var(--ds-glass-rim); --glass-edge: var(--ds-glass-edge); --glass-shadow: var(--ds-glass-shadow);
+    --brand: var(--ds-brand);
+    --ok: var(--ds-status-normal); --warn: var(--ds-status-warning); --crit: var(--ds-status-critical); --esc: var(--ds-status-escalated);
+    --hold: var(--ds-status-held); --transit: var(--ds-status-moving); --paused: var(--ds-status-paused); --sim: var(--ds-status-sim);
+    --call-sup: var(--ds-call-sup); --call-mnt: var(--ds-call-mnt); --andon-ok: var(--ds-status-normal);
+    --chart-a: var(--ds-chart-1); --chart-b: var(--ds-chart-2);
+    --primary-bg: var(--ds-interactive); --primary-fg: var(--ds-on-interactive);
+    --font-ui: var(--ds-font-ui); --font-mono: var(--ds-font-mono);
+    --r: var(--ds-radius-md);
+    --blur: var(--ds-glass-blur);
+    --mg-band: var(--ds-mg-band); --mg-ring: var(--ds-mg-ring); --mg-field: var(--ds-mg-field); --mg-letter: var(--ds-mg-letter);
+  }
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  color-scheme: dark;
-  --bg: #0c1014; --text: #f2f4f6; --text-2: #c3cad1; --muted: #8b959f;
-  --hair: rgba(255,255,255,.08); --hair-2: rgba(255,255,255,.15); --fill: rgba(255,255,255,.05); --fill-2: rgba(255,255,255,.09);
-  --glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
-  --glass-solid: rgba(18,20,24,.95);
-  --glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
-  --glass-edge: rgba(0,0,0,.45);
-  --glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
-  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52; --call-sup: #b394ff; --call-mnt: #4fb4ff; --andon-ok: #3fc28a;
-  --chart-a: #4f8fd6; --chart-b: #d0743f; --primary-bg: #f2f4f6; --primary-fg: #08090b;
-} }
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0c1014; --text: #f2f4f6; --text-2: #c3cad1; --muted: #8b959f;
-  --hair: rgba(255,255,255,.08); --hair-2: rgba(255,255,255,.15); --fill: rgba(255,255,255,.05); --fill-2: rgba(255,255,255,.09);
-  --glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
-  --glass-solid: rgba(18,20,24,.95);
-  --glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
-  --glass-edge: rgba(0,0,0,.45);
-  --glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
-  --ok: #3fc28a; --warn: #f0a92a; --crit: #ff5452; --esc: #ff4688; --hold: #93a6ff; --transit: #50c4d8; --paused: #9aa6b2; --sim: #e2be52; --call-sup: #b394ff; --call-mnt: #4fb4ff; --andon-ok: #3fc28a;
-  --chart-a: #4f8fd6; --chart-b: #d0743f; --primary-bg: #f2f4f6; --primary-fg: #08090b;
-}
+@layer legacy {
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 body { background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 14px; line-height: 1.4; overflow: hidden; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1; }
@@ -650,9 +619,6 @@ svg.plan text { font-family: var(--font-mono); }
 .lane-h .hchip { padding: 0 4px; gap: 4px; }
 /* MG badge tokens: light = red band, white keyline + field, red letters (official look);
    dark = same red band, field sinks into the dark UI, white letters keep the badge crisp */
-:root { --mg-band: #cf1a1f; --mg-ring: #ffffff; --mg-field: #ffffff; --mg-letter: #cf1a1f; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --mg-band: #e2262b; --mg-ring: #f2f4f6; --mg-field: #121417; --mg-letter: #f2f4f6; } }
-:root[data-theme="dark"] { --mg-band: #e2262b; --mg-ring: #f2f4f6; --mg-field: #121417; --mg-letter: #f2f4f6; }
 .mg-mark { display: block; flex: none; }
 .co-brand { display: flex; align-items: center; gap: 10px; flex: none; }
 .co-brand > i { width: 1px; height: 22px; background: var(--hair); }
@@ -1017,3 +983,4 @@ svg.plan text { font-family: var(--font-mono); }
 .devices tr.problem td { color: var(--crit); }
 @keyframes devflash { from { background: color-mix(in srgb, var(--warn) 30%, transparent); } to { background: transparent; } }
 @media (prefers-reduced-motion: reduce) { .devices tr.flash td { animation: none; background: color-mix(in srgb, var(--warn) 18%, transparent); } }
+}

@@ -1,0 +1,68 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Andon DS · semantic tokens — what components use. Themed light / dark.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer tokens {
+  :root {
+    color-scheme: light;
+    --ds-bg: var(--ds-n-100);
+    --ds-layer-1: rgba(16, 22, 28, .05);         /* panels on the page */
+    --ds-layer-2: rgba(16, 22, 28, .09);         /* hover / nested */
+    --ds-layer-solid: rgba(246, 247, 249, .94);  /* opaque panel over the 3D floor */
+    --ds-text-primary: var(--ds-n-850); --ds-text-secondary: var(--ds-n-700); --ds-text-muted: var(--ds-n-600); --ds-text-disabled: var(--ds-n-300);
+    --ds-border-subtle: rgba(16, 22, 28, .10); --ds-border-strong: rgba(16, 22, 28, .18);
+    --ds-glass: linear-gradient(180deg, rgba(255,255,255,.74), rgba(244,246,248,.56));
+    --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,1), rgba(255,255,255,.35) 38%, rgba(255,255,255,.08) 62%, rgba(255,255,255,.6));
+    --ds-glass-edge: rgba(16, 22, 28, .10);
+    --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(16,22,28,.04) inset, 0 26px 60px -24px rgba(20, 28, 38, .38), 0 6px 18px -8px rgba(20, 28, 38, .16);
+    --ds-glass-blur: blur(26px) saturate(175%);
+    --ds-brand: var(--ds-red-500);
+    --ds-interactive: var(--ds-n-850); --ds-on-interactive: var(--ds-n-0);
+    --ds-focus: var(--ds-azure-l);
+    --ds-status-normal: var(--ds-green-l); --ds-status-warning: var(--ds-amber-l); --ds-status-critical: var(--ds-red-l);
+    --ds-status-escalated: var(--ds-magenta-l); --ds-status-held: var(--ds-blue-l); --ds-status-moving: var(--ds-cyan-l);
+    --ds-status-paused: var(--ds-n-500); --ds-status-sim: var(--ds-gold-l);
+    --ds-call-sup: var(--ds-violet-l); --ds-call-mnt: var(--ds-azure-l);
+    --ds-chart-1: var(--ds-chart-1-l); --ds-chart-2: var(--ds-chart-2-l);
+    --ds-tick: color-mix(in srgb, var(--ds-text-primary) 55%, transparent);
+    --ds-mg-band: var(--ds-red-mg); --ds-mg-ring: var(--ds-n-0); --ds-mg-field: var(--ds-n-0); --ds-mg-letter: var(--ds-red-mg);
+  }
+}
+/* dark values: one block, applied by the system preference or the explicit toggle */
+@layer tokens {
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ds-bg: var(--ds-n-900);
+    --ds-layer-1: rgba(255, 255, 255, .05); --ds-layer-2: rgba(255, 255, 255, .09); --ds-layer-solid: rgba(18, 20, 24, .95);
+    --ds-text-primary: var(--ds-n-50); --ds-text-secondary: var(--ds-n-200); --ds-text-muted: var(--ds-n-400); --ds-text-disabled: var(--ds-n-600);
+    --ds-border-subtle: rgba(255, 255, 255, .08); --ds-border-strong: rgba(255, 255, 255, .15);
+    --ds-glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
+    --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
+    --ds-glass-edge: rgba(0, 0, 0, .45);
+    --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
+    --ds-interactive: var(--ds-n-50); --ds-on-interactive: var(--ds-n-950); --ds-focus: var(--ds-azure-d);
+    --ds-status-normal: var(--ds-green-d); --ds-status-warning: var(--ds-amber-d); --ds-status-critical: var(--ds-red-d);
+    --ds-status-escalated: var(--ds-magenta-d); --ds-status-held: var(--ds-blue-d); --ds-status-moving: var(--ds-cyan-d);
+    --ds-status-paused: var(--ds-n-300); --ds-status-sim: var(--ds-gold-d);
+    --ds-call-sup: var(--ds-violet-d); --ds-call-mnt: var(--ds-azure-d);
+    --ds-chart-1: var(--ds-chart-1-d); --ds-chart-2: var(--ds-chart-2-d);
+    --ds-mg-band: var(--ds-red-mg-d); --ds-mg-ring: var(--ds-n-50); --ds-mg-field: var(--ds-n-800); --ds-mg-letter: var(--ds-n-50);
+  } }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ds-bg: var(--ds-n-900);
+    --ds-layer-1: rgba(255, 255, 255, .05); --ds-layer-2: rgba(255, 255, 255, .09); --ds-layer-solid: rgba(18, 20, 24, .95);
+    --ds-text-primary: var(--ds-n-50); --ds-text-secondary: var(--ds-n-200); --ds-text-muted: var(--ds-n-400); --ds-text-disabled: var(--ds-n-600);
+    --ds-border-subtle: rgba(255, 255, 255, .08); --ds-border-strong: rgba(255, 255, 255, .15);
+    --ds-glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
+    --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
+    --ds-glass-edge: rgba(0, 0, 0, .45);
+    --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
+    --ds-interactive: var(--ds-n-50); --ds-on-interactive: var(--ds-n-950); --ds-focus: var(--ds-azure-d);
+    --ds-status-normal: var(--ds-green-d); --ds-status-warning: var(--ds-amber-d); --ds-status-critical: var(--ds-red-d);
+    --ds-status-escalated: var(--ds-magenta-d); --ds-status-held: var(--ds-blue-d); --ds-status-moving: var(--ds-cyan-d);
+    --ds-status-paused: var(--ds-n-300); --ds-status-sim: var(--ds-gold-d);
+    --ds-call-sup: var(--ds-violet-d); --ds-call-mnt: var(--ds-azure-d);
+    --ds-chart-1: var(--ds-chart-1-d); --ds-chart-2: var(--ds-chart-2-d);
+    --ds-mg-band: var(--ds-red-mg-d); --ds-mg-ring: var(--ds-n-50); --ds-mg-field: var(--ds-n-800); --ds-mg-letter: var(--ds-n-50);
+  }
+}

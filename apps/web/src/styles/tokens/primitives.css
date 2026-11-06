@@ -1,0 +1,50 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Andon DS · primitives — raw values. Never used by components directly:
+   components use the semantic tokens (semantic.css), which point here.
+   Structure follows IBM Carbon (primitive → semantic → component tokens);
+   colour behaviour follows ISA-101 (normal is neutral, colour = abnormal).
+   ════════════════════════════════════════════════════════════════════════ */
+@layer tokens {
+  :root {
+    /* neutrals: cool graphite, light → dark */
+    --ds-n-0: #ffffff; --ds-n-25: #f6f7f9; --ds-n-50: #f2f4f6; --ds-n-100: #e8ebee; --ds-n-200: #c3cad1; --ds-n-300: #9aa6b2;
+    --ds-n-400: #8b959f; --ds-n-500: #6e7b88; --ds-n-600: #6a747e; --ds-n-700: #3a434c; --ds-n-800: #121417; --ds-n-850: #0f1215;
+    --ds-n-900: #0c1014; --ds-n-950: #08090b;
+    /* MG brand (identity only, never a status) */
+    --ds-red-500: #c8102e; --ds-red-mg: #cf1a1f; --ds-red-mg-d: #e2262b;
+    /* status hues: -l for light theme, -d for dark theme */
+    --ds-green-l: #1f9a66;  --ds-green-d: #3fc28a;
+    --ds-amber-l: #c27f05;  --ds-amber-d: #f0a92a;
+    --ds-red-l: #e03535;    --ds-red-d: #ff5452;
+    --ds-magenta-l: #cc1d5b; --ds-magenta-d: #ff4688;
+    --ds-blue-l: #4a62e0;   --ds-blue-d: #93a6ff;
+    --ds-cyan-l: #0f8ea6;   --ds-cyan-d: #50c4d8;
+    --ds-gold-l: #a07b06;   --ds-gold-d: #e2be52;
+    --ds-violet-l: #7a4fe0; --ds-violet-d: #b394ff;
+    --ds-azure-l: #0a7fd6;  --ds-azure-d: #4fb4ff;
+    --ds-chart-1-l: #3f7fd0; --ds-chart-1-d: #4f8fd6; --ds-chart-2-l: #c8622f; --ds-chart-2-d: #d0743f;
+
+    /* spacing: 4-px base */
+    --ds-space-1: 4px; --ds-space-2: 8px; --ds-space-3: 12px; --ds-space-4: 16px; --ds-space-5: 20px;
+    --ds-space-6: 24px; --ds-space-7: 32px; --ds-space-8: 40px; --ds-space-9: 48px; --ds-space-10: 64px;
+    /* type */
+    --ds-font-ui: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --ds-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --ds-size-10: 10px; --ds-size-11: 11px; --ds-size-12: 12px; --ds-size-13: 13px; --ds-size-14: 14px; --ds-size-16: 16px;
+    --ds-size-20: 20px; --ds-size-24: 24px; --ds-size-32: 32px; --ds-size-48: 48px; --ds-size-72: 72px;
+    --ds-tracking-label: .16em;
+    /* corners: slightly softened square (4 px boxes, 3 px small items) */
+    --ds-radius-sm: 3px; --ds-radius-md: 4px; --ds-radius-round: 999px;
+    /* borders */
+    --ds-border-1: 1px; --ds-border-2: 2px; --ds-border-3: 3px;
+    /* control heights */
+    --ds-control-sm: 28px; --ds-control-md: 36px; --ds-control-lg: 44px; --ds-control-xl: 56px;
+    /* motion */
+    --ds-dur-fast: 120ms; --ds-dur-base: 200ms; --ds-dur-slow: 320ms;
+    --ds-ease-standard: cubic-bezier(.2, 0, .38, .9); --ds-ease-emphasised: cubic-bezier(.2, .7, .2, 1);
+    /* stacking layers (named; never raw numbers) */
+    --ds-z-scene: 0; --ds-z-scene-tags: 10; --ds-z-chrome: 20; --ds-z-panel: 30; --ds-z-drawer: 40; --ds-z-overlay: 50; --ds-z-toast: 60; --ds-z-critical: 70;
+    /* breakpoints (documentation; media queries cannot read variables):
+       compact < 1024 · regular 1024–1439 · wide 1440–1919 · ultra ≥ 1920 */
+  }
+}
