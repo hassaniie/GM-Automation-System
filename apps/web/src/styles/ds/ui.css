@@ -160,6 +160,8 @@
   .ds-table--comfortable th, .ds-table--comfortable td { padding: var(--ds-space-2) var(--ds-space-3); font-size: var(--ds-size-13); }
   @media (pointer: coarse) { .ds-table td { padding-top: var(--ds-space-2); padding-bottom: var(--ds-space-2); } }
   .ds-table th { position: sticky; top: 0; z-index: 1; background: var(--ds-bg); color: var(--ds-text-muted); font-size: var(--ds-size-10); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  /* inside glass panels the sticky header is frosted too, not a solid bar across the glass */
+  .glass .ds-table th { background: color-mix(in srgb, var(--ds-bg) 45%, transparent); -webkit-backdrop-filter: var(--ds-glass-blur); backdrop-filter: var(--ds-glass-blur); }
   .ds-a-start { text-align: left; } .ds-a-end { text-align: right; }
   .ds-table .ds-num { font-family: var(--ds-font-mono); font-variant-numeric: tabular-nums; }
   .ds-table .ds-wrap { white-space: normal; }

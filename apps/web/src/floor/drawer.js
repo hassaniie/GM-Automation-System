@@ -13,7 +13,7 @@ const DONE_COLS = [
   { key: 'raised', label: 'Raised', type: 'time', render: (c) => fmtClock(c.raisedT, false) },
   { key: 'resp', label: 'Response', type: 'duration', render: (c) => fmtDur(M.callResponse(c)) },
   { key: 'total', label: 'Total', type: 'duration', render: (c) => fmtDur(M.callDuration(c)) },
-  { key: 'by', label: 'By', render: (c) => (c.clearedBy || '').split(' · ')[0] },
+  { key: 'by', label: 'By', wrap: true, render: (c) => (c.clearedBy || '').split(' · ')[0] },
 ];
 
 export function AlarmDrawer() {
