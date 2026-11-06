@@ -8,7 +8,7 @@ import { PaintChip } from '../lib/misc.js';
 import { go } from '../lib/router.js';
 import { AREAS, M, POS, RT, dispId, fmtClock, fmtDur, html, setUI, shortVin, useEffect, useRef } from '../lib/runtime.js';
 import { ANDON_LABEL, ANDON_TONE, CALL_ICON, Icon, LEVEL_ICON, LevelChip, StatusChip, VinText, tv } from '../lib/ui-kit.js';
-import { Button, DataTable, Meter } from '../ui/index.js';
+import { Button, DataTable, Meter, Switch } from '../ui/index.js';
 
 /* a vehicle's time at each station: cycle against takt (marker), colour only when near or over */
 const stationCols = (S) => [
@@ -109,7 +109,7 @@ function StationInspector({ id }) {
         <div class="note" style=${{ marginTop: 4 }}>Work ${fmtDur(occ.workT)}${occ.waitT ? ` · waiting ${fmtDur(occ.waitT)}` : ''}${occ.plannedT ? ` · breaks ${fmtDur(occ.plannedT)} (excluded)` : ''}</div></div></div>` : null}
       ${isWork ? html`<div class="andon-row" style=${{ padding: '10px 12px', border: '1px solid var(--hair)' }}>
         <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class=${buzzOn ? 'c-crit' : 'c-muted'}><${Icon} n=${buzzEn ? 'buzz' : 'buzzoff'} /></span><span><b>Buzzer</b> <span class="c-muted">· ${!buzzEn ? 'switched off' : buzzOn ? `ringing ${fmtDur(S.t - S.buzzing[id])}` : 'quiet · rings over takt'}</span></span></span>
-        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class="note">${M.stationCount(S, id)} vehicle${M.stationCount(S, id) === 1 ? '' : 's'} here</span><button class="toggle" role="switch" aria-checked=${buzzEn} aria-label=${`Buzzer at ${id}`} disabled=${!can('buzzer')} title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'} onClick=${() => Act.setBuzzer(id, !buzzEn, userName())}></button></span></div>` : null}
+        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class="note">${M.stationCount(S, id)} vehicle${M.stationCount(S, id) === 1 ? '' : 's'} here</span><span title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'}><${Switch} checked=${buzzEn} disabled=${!can('buzzer')} label=${html`<span class="ds-vh">Buzzer at ${id}</span>`} onChange=${() => Act.setBuzzer(id, !buzzEn, userName())} /></span></span></div>` : null}
       ${xf ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--transit)' }}><${Icon} n="arrow" />${M.XFER_FROM[xf.from].label}</div><div>${S.vehicles[xf.vehicleId].vin.slice(-6)} moving from ${S.carriers[S.pos[xf.from].carrierId].id} to ${S.carriers[S.pos[xf.to].carrierId].id} · ${fmtDur(Math.max(0, xf.t1 - S.t))} left</div></div>` : null}
       ${v ? html`<dl class="kv">
         <dt>VIN</dt><dd><button class="linkish" onClick=${() => select({ kind: 'veh', id: v.id })}>${v.vin}</button></dd>

@@ -4,13 +4,11 @@
    all 36 requirements with a "Show me" link into the running system.
    ════════════════════════════════════════════════════════════════════════ */
 import { Scene3D } from '@mg/scene';
-import { PageHead } from './admin.js';
-import { Button } from './ui/index.js';
+import { Button, DataTable, PageHeader, Panel, Tag } from './ui/index.js';
 import { Act } from './lib/act.js';
 import { loadScenario, select } from './floor/scenarios.js';
 import { go } from './lib/router.js';
 import { html, setUI } from './lib/runtime.js';
-import { Icon } from './lib/ui-kit.js';
 import { powerCut, setLink } from './screens.js';
 
 const showFloor = (n, after) => () => { go('floor'); setTimeout(() => { if (n) loadScenario(n); if (after) after(); }, 80); };
@@ -75,26 +73,31 @@ const SIX = [
   ['Number and placement of Final line scanners', 'Two wireless handheld scanners with charging docks at FL2 (covers FL1–FL3) and FL5 (covers FL4–FL7), plus fixed scanners at TL1 (line-in) and TL6 (end of Trim). Four in total. The scan is checked against the VIN tracked at that station.', 'Shown: the docks are marked on the 3D floor.', showFloor(0, () => { setUI({ view: 'FINAL' }); Scene3D.focusView('FINAL'); })],
   ['The downtime calculation (req 11)', 'Station downtime = Σ max(0, cycle time − takt), where cycle time is arrival to departure less planned stops. Line downtime = time during which at least one station on that line is over takt, so overlaps are not double-counted. Breaks and time between shifts are excluded. Each second is also put down to the station that caused it, using the blockage chain.', 'Example: takt 10:00, unit leaves CL2 at 12:30 → CL2 has 2:30 downtime; if CL1 waited behind it, those seconds are attributed to CL2.', () => go('dash')],
 ];
+const COV_COLS = [
+  { key: 'n', label: 'Req', type: 'code', render: (r) => r[0] },
+  { key: 'req', label: 'What the URD asks', wrap: true, render: (r) => r[1] },
+  { key: 'how', label: 'How it is met', wrap: true, render: (r) => html`<span class="c-muted">${r[2]}</span>` },
+  { key: 'st', label: 'Status', render: (r) => html`<${Tag} tone=${r[3] === 'demo' ? 'normal' : 'held'} icon=${null}>${r[3] === 'demo' ? 'Working in demo' : 'Proposal'}<//>` },
+  { key: 'go', label: '', type: 'action', render: (r) => (r[4] ? html`<${Button} size="sm" variant="ghost" onClick=${r[4]}>Show me<//>` : null) },
+];
 export function HowPage() {
   const all = COVERAGE.flatMap(([, rows]) => rows), demo = all.filter((r) => r[3] === 'demo').length;
   return html`<div class="page-wrap how">
-    <${PageHead} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
-    <section class="panel ticks"><h3>Architecture</h3><div class="q">The line server sits on the shop floor, so displays and data collection never depend on the head-office link.</div><${ArchDiagram} /></section>
+    <${PageHeader} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
+    <${Panel} ticks=${true} title="Architecture" sub="The line server sits on the shop floor, so displays and data collection never depend on the head-office link."><${ArchDiagram} /><//>
     <h3 class="how-h">Points the URD asks the supplier to propose (§6)</h3>
-    <div class="six">${SIX.map(([t, a, s, fn], i) => html`<section key=${i} class="panel ticks"><div class="micro">§6 · ${i + 1}</div><h3>${t}</h3><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<${Button} size="sm" icon="target" onClick=${fn}>Show me<//>` : null}</div></section>`)}</div>
+    <div class="six">${SIX.map(([t, a, s, fn], i) => html`<${Panel} key=${i} ticks=${true} title=${html`<span class="ds-label">§6 · ${i + 1}</span><br />${t}`}><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<${Button} size="sm" icon="target" onClick=${fn}>Show me<//>` : null}</div><//>`)}</div>
     <h3 class="how-h">Requirement coverage</h3>
-    ${COVERAGE.map(([g, rows]) => html`<section key=${g} class="panel ticks cov"><h3>${g}</h3><table class="data"><thead><tr><th>Req</th><th>What the URD asks</th><th>How it is met</th><th>Status</th><th></th></tr></thead><tbody>
-      ${rows.map(([n, req, how, st, fn]) => html`<tr key=${n}><td class="mono">${n}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${req}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal', color: 'var(--text-2)' }}>${how}</td>
-        <td><span class=${'chip ' + (st === 'demo' ? 'c-ok' : 'c-hold')}>${st === 'demo' ? 'Working in demo' : 'Proposal'}</span></td><td>${fn ? html`<${Button} size="sm" variant="ghost" onClick=${fn}>Show me<//>` : null}</td></tr>`)}</tbody></table></section>`)}
+    ${COVERAGE.map(([g, rows]) => html`<${Panel} key=${g} ticks=${true} class="cov" title=${g}><${DataTable} columns=${COV_COLS} rows=${rows} rowKey=${(r) => r[0]} /><//>`)}
     <div class="six two">
-      <section class="panel ticks"><h3>Beyond the URD (included, can be switched off)</h3><ul class="how-ul">
+      <${Panel} ticks=${true} title="Beyond the URD (included, can be switched off)"><ul class="how-ul">
         <li>3D digital twin of the shop, with stack lights and the 4-hanger loop.</li><li>Root-cause attribution: downtime is put down to the station that held the line up.</li>
-        <li>Trim Andon preview (req 34) and the optional CL2 engine/gearbox pairing scan, both off by default in the plant build.</li><li>Lock screen for shared shop PCs and a full audit log with CSV export.</li></ul></section>
-      <section class="panel ticks"><h3>Assumptions to confirm with MG JW</h3><ul class="how-ul">
+        <li>Trim Andon preview (req 34) and the optional CL2 engine/gearbox pairing scan, both off by default in the plant build.</li><li>Lock screen for shared shop PCs and a full audit log with CSV export.</li></ul><//>
+      <${Panel} ticks=${true} title="Assumptions to confirm with MG JW"><ul class="how-ul">
         <li>Downtime is based on cycle time (it includes waiting when blocked downstream), with the cause attributed to the root station.</li>
         <li>Shift times, breaks, default targets (30 a shift) and takt (10:00) are placeholders until the plant enters its own.</li>
         <li>Carrier RFID tags and an FL7 photo-eye are acceptable; scanner placement as above.</li>
-        <li>Data retention of 3 years online; integration through REST/webhooks and OPC UA.</li></ul></section>
+        <li>Data retention of 3 years online; integration through REST/webhooks and OPC UA.</li></ul><//>
     </div>
   </div>`;
 }

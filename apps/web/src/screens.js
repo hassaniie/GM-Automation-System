@@ -2,7 +2,8 @@
    Main dashboard (URD req 25–27) and line displays (req 23–24), plus the
    resilience demos: head-office link loss (req 33) and power cut (req 32).
    ════════════════════════════════════════════════════════════════════════ */
-import { downtimeTone } from './lib/tone.js';
+import { downtimeTone, planTone } from './lib/tone.js';
+import { Button, DataTable, Meter, Notice, PageHeader, Panel, Tag } from './ui/index.js';
 import { REMOTE, onConnChange, send } from './lib/source.js';
 import { Auth, ROLES } from './auth.js';
 import { CallRow } from './floor/inspector.js';
@@ -73,23 +74,27 @@ export function DashboardPage() {
   const S = RT.S, L = RT.link, d = L.up ? dashData(S) : L.snap, live = L.up;
   const sh = d.shift || {};
   return html`<div class="page-wrap dash">
-    <div class="pg-head"><div><div class="micro">Main dashboard · all lines</div><h2>General Assembly · ${sh.name || 'No shift'}${d.planned ? html` <span class="chip c-paused" style=${{ verticalAlign: 'middle' }}>${d.planned.label}</span>` : null}</h2>
-      <p class="pg-sub">${sh.name ? `${sh.date} · ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)}` : 'Between shifts'} · counts reset at each shift start.</p></div>
-      <div class="dash-live">${live ? html`<span class="livedot"></span><span>Live · updated ${fmtClock(d.t)}</span>` : html`<span class="c-crit"><${Icon} n="wifioff" /></span><span><b>Link to the shop is down</b> since ${fmtClock(L.downAt, false)}. Showing the last data received (${fmtClock(d.t, false)}). Line displays on the floor are unaffected.</span>`}</div></div>
-    ${L.lastSync && live ? html`<div class="result ok" style=${{ marginBottom: 14 }}><${Icon} n="wifi" /> Link restored after ${fmtDur(L.lastSync.dur)}. ${L.lastSync.n} events recorded during the outage have synced; nothing was lost. <button class="linkish" onClick=${() => { L.lastSync = null; bump(); }}>Dismiss</button></div>` : null}
+    <${PageHeader} k="Main dashboard · all lines" title=${html`General Assembly · ${sh.name || 'No shift'}${d.planned ? html` <${Tag} tone="paused">${d.planned.label}<//>` : null}`} sub=${`${sh.name ? `${sh.date} · ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)}` : 'Between shifts'} · counts reset at each shift start.`}>
+      ${live ? html`<div class="dash-live"><span class="livedot"></span><span>Live · updated ${fmtClock(d.t)}</span></div>` : null}</${PageHeader}>
+    ${!live ? html`<${Notice} kind="critical" title="Link to the shop is down" style=${{ marginBottom: 'var(--ds-space-4)' }}>Since ${fmtClock(L.downAt, false)}. Showing the last data received (${fmtClock(d.t, false)}). Line displays on the floor are unaffected.<//>` : null}
+    ${L.lastSync && live ? html`<${Notice} kind="success" title="Link restored" style=${{ marginBottom: 'var(--ds-space-4)' }} actions=${html`<${Button} size="sm" variant="ghost" onClick=${() => { L.lastSync = null; bump(); }}>Dismiss<//>`}>After ${fmtDur(L.lastSync.dur)}. ${L.lastSync.n} events recorded during the outage have synced; nothing was lost.<//>` : null}
     <div class=${'dash-grid' + (live ? '' : ' stale')}>
       <div class="dash-lines">${d.lines.map((l) => html`<${LineCard} key=${l.a} l=${l} />`)}</div>
       <aside class="dash-side">
-        <section class="panel ticks"><div class="pg-row"><h3>Active calls</h3><span class="mono">${d.calls.length}</span></div>
+        <${Panel} ticks=${true} title="Active calls" actions=${html`<span class="mono">${d.calls.length}</span>`}>
           ${d.calls.length ? d.calls.map((c) => live ? html`<${CallRow} key=${c.id} c=${S.calls.find((x) => x.id === c.id) || c} compact />` : html`<div key=${c.id} class="callrow"><span class=${'lamp ' + c.type.toLowerCase()}></span><div>${M.CALL_TYPES[c.type].label} · ${c.pos}</div><span class="wait">${fmtDur(d.t - c.raisedT)}</span></div>`) : html`<p class="note">No open calls. Each one appears here with its station and waiting time the moment it is pressed.</p>`}
-          <div class="dash-kv"><span>Calls this shift</span><b class="mono">${d.nCalls}</b><span>Average response</span><b class="mono">${d.avgResp != null ? fmtDur(d.avgResp) : '—'}</b></div></section>
-        <section class="panel ticks"><h3>Downtime by cause</h3><div class="q">Time stations spent over takt this shift, put down to the station that caused it.</div>
-          ${d.causes.length ? html`<ul class="mix" style=${{ marginTop: 8 }}>${d.causes.map(([id, sec]) => html`<li key=${id}><button class="linkish mono" onClick=${() => drillStation(id)}>${id}</button><span class="mbar"><i style=${{ width: `${(sec / d.causes[0][1]) * 100}%`, background: 'var(--crit)' }}></i></span><span class="mono">${fmtDur(sec)}</span></li>`)}</ul>` : html`<p class="note">No downtime yet this shift.</p>`}</section>
-        <section class="panel ticks"><h3>Offlined this shift</h3>${d.offline.length ? html`<table class="data"><tbody>${d.offline.slice(-6).reverse().map((o) => html`<tr key=${o.vin + o.t}><td class="mono">${shortVin(o.vin)}</td><td class="mono">${o.pos}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${o.reason}</td><td>${o.returnedT ? html`<span class="c-ok">returned</span>` : 'offline'}</td></tr>`)}</tbody></table>` : html`<p class="note">None. Offlined units are removed from counts and the target.</p>`}</section>
+          <div class="dash-kv"><span>Calls this shift</span><b class="mono">${d.nCalls}</b><span>Average response</span><b class="mono">${d.avgResp != null ? fmtDur(d.avgResp) : '—'}</b></div><//>
+        <${Panel} ticks=${true} title="Downtime by cause" sub="Time stations spent over takt this shift, put down to the station that caused it.">
+          ${d.causes.length ? html`<ul class="mix" style=${{ marginTop: 8 }}>${d.causes.map(([id, sec]) => html`<li key=${id}><button class="linkish mono" onClick=${() => drillStation(id)}>${id}</button><${Meter} size="sm" value=${sec / d.causes[0][1]} label=${`${id} share of downtime`} /><span class="mono">${fmtDur(sec)}</span></li>`)}</ul>` : html`<p class="note">No downtime yet this shift.</p>`}<//>
+        <${Panel} ticks=${true} title="Offlined this shift"><${DataTable} columns=${OFF_COLS} rows=${d.offline.slice(-6).reverse()} rowKey=${(o) => o.vin + o.t} empty="None. Offlined units are removed from counts and the target." /><//>
       </aside>
     </div>
   </div>`;
 }
+const OFF_COLS = [
+  { key: 'vin', label: 'VIN', type: 'vin', render: (o) => shortVin(o.vin) }, { key: 'pos', label: 'At', type: 'code' },
+  { key: 'reason', label: 'Reason', wrap: true }, { key: 'st', label: 'Now', render: (o) => (o.returnedT ? 'returned' : html`<${Tag} tone="warning" icon="exit">Offline<//>`) },
+];
 function drillStation(id) { go('floor'); setTimeout(() => select({ kind: 'pos', id }), 60); }
 function LineCard({ l }) {
   const pct = l.target ? Math.min(1, l.done / l.target) : 0, planPct = l.target ? Math.min(1, l.plan / l.target) : 0, mx = Math.max(1, ...l.hours);
@@ -130,7 +135,7 @@ export function LineDisplay() {
     ${!RT.link.up ? html`<div class="lcd-banner"><${Icon} n="wifioff" />Head-office link down · this display and data collection carry on locally</div>` : null}
     <section class="lcd-kpis">
       ${trim ? html`<div><span>Entered</span><b>${entered}</b></div><div><span>Offlined (TL6)</span><b>${offT}</b></div><div><span>In Trim now</span><b>${p.wip}</b></div><div><span>To Chassis</span><b>${p.done}</b></div>`
-      : html`<div><span>Target</span><b>${p.target}</b></div><div><span>Completed</span><b class=${p.delta < 0 ? 'bad' : 'good'}>${p.done}</b></div><div><span>Remaining</span><b>${p.remaining}</b></div><div><span>Downtime</span><b class=${p.down ? 'bad' : ''}>${fmtDur(p.down)}</b></div><div><span>Takt</span><b>${fmtDur(S.cfg.takt[area])}</b></div>`}
+      : html`<div><span>Target</span><b>${p.target}</b></div><div><span>Completed</span><b style=${{ color: planTone(p.delta) }}>${p.done}</b></div><div><span>Remaining</span><b>${p.remaining}</b></div><div><span>Downtime</span><b style=${{ color: downtimeTone(p.down, area) }}>${fmtDur(p.down)}</b></div><div><span>Takt</span><b>${fmtDur(S.cfg.takt[area])}</b></div>`}
     </section>
     ${showStations ? html`<section class="lcd-st" style=${{ gridTemplateColumns: `repeat(${st.length}, 1fr)` }}>${st.map((id) => { const an = M.andonState(S, id), o = S.pos[id].occ, v = o && o.vehicleId && S.vehicles[o.vehicleId], cs = M.callsAt(S, id), bz = S.buzzing[id] != null;
       return html`<div key=${id} class=${'lcd-cell s-' + an.state + (bz ? ' buzz' : '')}>

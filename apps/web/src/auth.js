@@ -6,7 +6,8 @@
    ════════════════════════════════════════════════════════════════════════ */
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { go } from './lib/router.js';
-import { M, RT, bump, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { M, RT, bump, fmtClock, html, largeTouch, setLargeTouch, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { Button, Switch } from './ui/index.js';
 import { Icon, MgMark, tv } from './lib/ui-kit.js';
 import { api } from './lib/api.js';
 import { REMOTE, reconnect } from './lib/source.js';
@@ -176,11 +177,11 @@ export function SignIn({ lock }) {
             <button type="button" class="si-eye" aria-label=${show ? 'Hide password' : 'Show password'} aria-pressed=${show} onClick=${() => setShow(!show)}><${Icon} n=${show ? 'eyeoff' : 'eye'} /></button></div>
           ${pwErr ? html`<div class="si-hint bad">${pwErr}</div>` : caps ? html`<div class="si-hint warn"><${Icon} n="alert" />Caps Lock is on</div>` : null}</div>
         ${!lock ? html`<label class="si-check"><input type="checkbox" checked=${keep} onChange=${(e) => setKeep(e.target.checked)} /><span>Keep me signed in on this device</span></label>` : null}
-        <button type="submit" class="btn primary lg si-go" aria-busy=${busy ? 'true' : 'false'} disabled=${busy || waitS > 0}>${busy ? 'Checking…' : lock ? 'Unlock' : 'Sign in'}<${Icon} n="chev" /></button>
-        ${lock ? html`<button type="button" class="btn ghost si-alt" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign in as someone else</button>` : html`
+        <${Button} type="submit" variant="primary" size="lg" class="si-go" iconRight="chev" loading=${busy} disabled=${busy || waitS > 0}>${busy ? 'Checking…' : lock ? 'Unlock' : 'Sign in'}<//>
+        ${lock ? html`<${Button} variant="ghost" class="si-alt" icon="logout" onClick=${() => Auth.signOut()}>Sign in as someone else<//>` : html`
           <div class="si-or"><span>or</span></div>
-          ${REMOTE && Auth.cfg.sso ? html`<a class="btn si-alt" href="/api/auth/oidc/start"><${Icon} n="building" />Sign in with ${Auth.cfg.sso.label}</a>`
-            : html`<button type="button" class="btn si-alt" disabled title="Available when deployed on the plant network"><${Icon} n="building" />Sign in with MG JW account (SSO)<span class="si-soon">at deployment</span></button>`}`}
+          ${REMOTE && Auth.cfg.sso ? html`<${Button} class="si-alt" icon="building" href="/api/auth/oidc/start">Sign in with ${Auth.cfg.sso.label}<//>`
+            : html`<${Button} class="si-alt" icon="building" disabled title="Available when deployed on the plant network">Sign in with MG JW account (SSO)<span class="si-soon">at deployment</span><//>`}`}
         ${!lock && (!REMOTE || Auth.cfg.demo) ? html`<div class="si-demo"><button type="button" class="si-demo-h" aria-expanded=${demo} onClick=${() => setDemo(!demo)}><span><${Icon} n="key" />Demo access</span><span class="c-muted">${demo ? 'Hide' : 'Show'} the five role accounts</span></button>
           ${demo ? html`<div class="si-accts">${DEMO_USERS.map((u) => html`<button type="button" key=${u.id} class="si-acct" onClick=${() => fill(u)} title=${ROLES[u.role].desc}>
             <span class=${'av r-' + u.role}>${initials(u.name)}</span><span class="nm"><b>${u.name}</b><small>${ROLES[u.role].label}</small></span><span class="mono c-muted">${u.empId}</span></button>`)}</div>
@@ -213,6 +214,8 @@ export function UserMenu() {
       <p class="note">${ROLES[u.role].desc}</p>
       <div class="micro" style=${{ margin: '8px 0 4px' }}>Switch demo user</div>
       ${Auth.users.filter((x) => x.active && x.id !== u.id).map((x) => html`<button key=${x.id} class="um-item" role="menuitem" onClick=${() => Auth.switchTo(x)}><span class=${'av sm r-' + x.role}>${initials(x.name)}</span>${x.name}<span class="c-muted">${ROLES[x.role].short}</span></button>`)}
+      <div class="um-sep"></div>
+      <div class="um-pref"><${Switch} checked=${largeTouch()} onChange=${setLargeTouch} label="Large touch targets" hint="Bigger buttons on this device, for gloves" /></div>
       <div class="um-sep"></div>
       <button class="um-item" role="menuitem" onClick=${() => { Auth.locked = true; Auth.record('Screen locked', u.name); setUI({ menu: false }); }}><${Icon} n="lock" />Lock screen</button>
       <button class="um-item" role="menuitem" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign out</button>

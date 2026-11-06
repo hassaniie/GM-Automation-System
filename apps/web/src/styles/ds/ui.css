@@ -186,6 +186,8 @@
   .ds-tabs .ico { width: 15px; height: 15px; }
   .ds-tabs__n { font-family: var(--ds-font-mono); font-size: var(--ds-size-11); }
   .drawer-tabs { padding: 0 var(--ds-space-3); }
+  .um-pref { padding: var(--ds-space-1) var(--ds-space-2); }
+  .si-go.ds-btn, .si-alt.ds-btn { width: 100%; }
   .cfg-ds { display: grid; gap: var(--ds-space-2); }
   .cfg-ds .ds-field--inline { grid-template-columns: 1fr 96px; }
   .cfg-ds .ds-field__label { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: var(--ds-size-13); color: var(--ds-text-secondary); }
