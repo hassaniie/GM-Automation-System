@@ -28,6 +28,18 @@ export default tseslint.config(
     },
   },
   {
+    // Design system (step C): screens use the components in apps/web/src/ui, so the old patterns can't come back.
+    files: ['apps/web/src/**/*.js'],
+    ignores: ['apps/web/src/ui/**', 'apps/web/src/stories/**'],
+    rules: {
+      'no-restricted-syntax': ['error',
+        { selector: 'TemplateElement[value.raw=/class="(btn|panel|field|tabs|toggle|result)[ "]/]', message: 'Use the design-system component (Button, Panel, Field, Tabs, Switch, Notice) from ui/index.js.' },
+        { selector: 'TemplateElement[value.raw=/<(input|select|textarea)[ >]/]', message: 'Use the form components (TextInput, NumberInput, Select, Textarea …) inside a Field.' },
+        { selector: 'TemplateElement[value.raw=/<table class="data/]', message: 'Use DataTable.' },
+      ],
+    },
+  },
+  {
     // TypeScript checks names itself (typescript-eslint recommends turning this off for .ts).
     files: ['**/*.{ts,tsx}'],
     rules: {

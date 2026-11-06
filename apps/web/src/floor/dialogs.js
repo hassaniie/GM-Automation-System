@@ -8,7 +8,7 @@ import { api } from '../lib/api.js';
 import { REMOTE } from '../lib/source.js';
 import { go } from '../lib/router.js';
 import { M, POS, RT, WORK_POS, fmtClock, fmtDur, html, setUI, useState } from '../lib/runtime.js';
-import { Button, Cluster, Dialog, Field, Notice, Select, Tabs, Tag, TextInput, Textarea } from '../ui/index.js';
+import { Button, Checkbox, Cluster, Dialog, Field, Notice, Select, Tabs, Tag, TextInput, Textarea } from '../ui/index.js';
 import { VinText } from '../lib/ui-kit.js';
 
 /* Scanner 1 at TL1: line-in (URD req 1). The only routine scan on the line. */
@@ -54,7 +54,7 @@ export function OffLineDialog({ d }) {
         <${Cluster} gap=${2} nowrap=${true}><${TextInput} data-autofocus="true" class="vin-input" style=${{ flex: 1 }} data-state=${scan ? (scanOk ? 'ok' : 'bad') : ''} maxLength="17" spellCheck="false" autoComplete="off" value=${scan} placeholder="Scan or type" onChange=${(x) => { setScan(x.toUpperCase()); setErr(null); }} /><${Button} icon="scan" loading=${scanning} onClick=${doScan}>${scanning ? 'Scanning…' : 'Scan label'}<//></${Cluster}><//>
       <${Field} label="2 · Reason"><${Select} value=${reason} onChange=${setReason} options=${M.OFFLINE_REASONS.map((r) => [r, r])} /><//>
       <${Field} label="Notes for the record"><${Textarea} rows=${2} value=${notes} onChange=${setNotes} placeholder="e.g. Grille clip broken, would not seat" /><//>
-      <label class="confirm-row" for="off-ok"><input id="off-ok" type="checkbox" checked=${ok} onChange=${(e) => setOk(e.target.checked)} /><span>The unit leaves the line now. It is removed from station counts and will <b>not</b> count towards the target unless it returns and completes. Recorded by <b>${userName()}</b>.</span></label>
+      <${Checkbox} boxed tone="critical" id="off-ok" checked=${ok} onChange=${setOk}>The unit leaves the line now. It is removed from station counts and will <b>not</b> count towards the target unless it returns and completes. Recorded by <b>${userName()}</b>.<//>
       ${err ? html`<${Notice} kind="error">${err}<//>` : null}
   </${Dialog}>`;
 }

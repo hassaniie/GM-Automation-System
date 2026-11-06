@@ -7,7 +7,7 @@
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { go } from './lib/router.js';
 import { M, RT, bump, fmtClock, html, largeTouch, setLargeTouch, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
-import { Button, Switch } from './ui/index.js';
+import { Button, Checkbox, Switch } from './ui/index.js';
 import { Icon, MgMark, tv } from './lib/ui-kit.js';
 import { api } from './lib/api.js';
 import { REMOTE, reconnect } from './lib/source.js';
@@ -149,6 +149,7 @@ export function SignIn({ lock }) {
   };
   const fill = (u) => { setId(u.empId); setPw(u.pw); setErr(null); setTouched(false); pwRef.current && pwRef.current.focus(); };
   const keyCaps = (e) => setCaps(!!(e.getModifierState && e.getModifierState('CapsLock')));
+  /* eslint-disable no-restricted-syntax -- the sign-in fields are bespoke on purpose: an icon inside the field, the show-password button and Caps Lock warning (design system step D) */
   return html`<div class="signin">
     <section class="si-brand" aria-hidden=${lock ? 'true' : 'false'}>
       <div class="si-top"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile · General Assembly</div></div></div>
@@ -176,7 +177,7 @@ export function SignIn({ lock }) {
           <div class="si-input"><${Icon} n="lock" /><input id="si-pw" ref=${pwRef} type=${show ? 'text' : 'password'} autoComplete="current-password" value=${pw} aria-invalid=${pwErr ? 'true' : 'false'} onInput=${(e) => { setPw(e.target.value); setErr(null); }} onKeyUp=${keyCaps} onKeyDown=${keyCaps} />
             <button type="button" class="si-eye" aria-label=${show ? 'Hide password' : 'Show password'} aria-pressed=${show} onClick=${() => setShow(!show)}><${Icon} n=${show ? 'eyeoff' : 'eye'} /></button></div>
           ${pwErr ? html`<div class="si-hint bad">${pwErr}</div>` : caps ? html`<div class="si-hint warn"><${Icon} n="alert" />Caps Lock is on</div>` : null}</div>
-        ${!lock ? html`<label class="si-check"><input type="checkbox" checked=${keep} onChange=${(e) => setKeep(e.target.checked)} /><span>Keep me signed in on this device</span></label>` : null}
+        ${!lock ? html`<${Checkbox} class="si-check" checked=${keep} onChange=${setKeep}>Keep me signed in on this device<//>` : null}
         <${Button} type="submit" variant="primary" size="lg" class="si-go" iconRight="chev" loading=${busy} disabled=${busy || waitS > 0}>${busy ? 'Checking…' : lock ? 'Unlock' : 'Sign in'}<//>
         ${lock ? html`<${Button} variant="ghost" class="si-alt" icon="logout" onClick=${() => Auth.signOut()}>Sign in as someone else<//>` : html`
           <div class="si-or"><span>or</span></div>
@@ -191,6 +192,7 @@ export function SignIn({ lock }) {
       </form>
     </section>
   </div>`;
+  /* eslint-enable no-restricted-syntax */
 }
 /* calm animated flow of the three lines, used on the sign-in brand panel */
 function SignInFlow() {

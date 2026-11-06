@@ -71,7 +71,7 @@
   /* the lane header's hanger chips go first when a lane is narrow */
   @container lane (max-width: 420px) { .lane-h .htrack, .lane-h .xp { display: none; } }
   /* narrow lanes: tighter cells so the status mark and the ID both fit */
-  @container lane (max-width: 480px) { .cell { padding: 6px 4px 5px; } .cell .cid { font-size: var(--ds-size-10); } .cell .cid .ico { margin-right: 2px; } }
+  @container lane (max-width: 480px) { .cell { padding: var(--ds-space-2) var(--ds-space-1) var(--ds-space-1); } .cell .cid { font-size: var(--ds-size-10); } .cell .cid .ico { margin-right: 2px; } }
   /* a narrow cell keeps its ID and status mark; the timer moves to the tooltip */
   .cell .mk { display: none; height: 12px; line-height: 0; }
   @container cell (max-width: 55px) {

@@ -8,21 +8,21 @@
   :root {
     /* neutrals: cool graphite, light → dark */
     --ds-n-0: #ffffff; --ds-n-25: #f6f7f9; --ds-n-50: #f2f4f6; --ds-n-100: #e8ebee; --ds-n-200: #c3cad1; --ds-n-300: #9aa6b2;
-    --ds-n-400: #8b959f; --ds-n-500: #6e7b88; --ds-n-600: #6a747e; --ds-n-700: #3a434c; --ds-n-800: #121417; --ds-n-850: #0f1215;
+    --ds-n-400: #8b959f; --ds-n-500: #5f6a76; --ds-n-600: #606972; --ds-n-700: #3a434c; --ds-n-800: #121417; --ds-n-850: #0f1215;
     --ds-n-900: #0c1014; --ds-n-950: #08090b;
     /* MG brand (identity only, never a status) */
     --ds-red-500: #c8102e; --ds-red-mg: #cf1a1f; --ds-red-mg-d: #e2262b;
     /* status hues: -l for light theme, -d for dark theme */
     /* light green and amber darkened from #1f9a66 / #c27f05 to reach 3 : 1 on the light background */
-    --ds-green-l: #1a8a5b;  --ds-green-d: #3fc28a;
-    --ds-amber-l: #ad7104;  --ds-amber-d: #f0a92a;
-    --ds-red-l: #e03535;    --ds-red-d: #ff5452;
+    --ds-green-l: #146a46;  --ds-green-d: #3fc28a;
+    --ds-amber-l: #8f5d03;  --ds-amber-d: #f0a92a;
+    --ds-red-l: #aa1a1a;    --ds-red-d: #ff5452;
     --ds-magenta-l: #cc1d5b; --ds-magenta-d: #ff4688;
-    --ds-blue-l: #4a62e0;   --ds-blue-d: #93a6ff;
-    --ds-cyan-l: #0f8ea6;   --ds-cyan-d: #50c4d8;
-    --ds-gold-l: #a07b06;   --ds-gold-d: #e2be52;
-    --ds-violet-l: #7a4fe0; --ds-violet-d: #b394ff;
-    --ds-azure-l: #0a7fd6;  --ds-azure-d: #4fb4ff;
+    --ds-blue-l: #415adf;   --ds-blue-d: #93a6ff;
+    --ds-cyan-l: #0c7285;   --ds-cyan-d: #50c4d8;
+    --ds-gold-l: #836405;   --ds-gold-d: #e2be52;
+    --ds-violet-l: #7548df; --ds-violet-d: #b394ff;
+    --ds-azure-l: #086bb4;  --ds-azure-d: #4fb4ff;
     --ds-chart-1-l: #3f7fd0; --ds-chart-1-d: #4f8fd6; --ds-chart-2-l: #c8622f; --ds-chart-2-d: #d0743f;
 
     /* spacing: 4-px base */

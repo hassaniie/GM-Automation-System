@@ -2,7 +2,7 @@
 import React from 'react';
 import { html } from '../lib/runtime.js';
 import {
-  Button, Cluster, DataTable, DateInput, Dialog, Drawer, EmptyState, Field, Grid, IconButton, Menu, Meter, Notice, NumberInput,
+  Button, Checkbox, Cluster, DataTable, DateInput, Dialog, Drawer, EmptyState, Field, Grid, IconButton, Menu, Meter, Notice, NumberInput,
   PageHeader, Panel, SegmentedControl, Select, Skeleton, Stack, Stat, Switch, Tabs, Tag, TextInput, Textarea, TimeInput,
 } from '../ui/index.js';
 
@@ -21,13 +21,15 @@ export const Buttons = {
 };
 
 export const Choice = {
-  name: 'Segmented control and switch',
+  name: 'Segmented control, switch and checkbox',
   render: function Story() {
-    const [s, setS] = React.useState(15), [v, setV] = React.useState('overview'), [on, setOn] = React.useState(true);
-    return html`<${Page} title="Segmented control and switch" intro="A segmented control picks one of a few options; arrow keys move the choice. A switch turns a setting on or off and always has a label.">
+    const [s, setS] = React.useState(15), [v, setV] = React.useState('overview'), [on, setOn] = React.useState(true), [keep, setKeep] = React.useState(true), [ok, setOk] = React.useState(false);
+    return html`<${Page} title="Segmented control, switch and checkbox" intro="A segmented control picks one of a few options; arrow keys move the choice. A switch turns a setting on or off at once and always has a label. A checkbox is for a choice that takes effect on submit, or to confirm a consequence (boxed).">
       <${Row} label="Segmented"><${SegmentedControl} label="Simulation speed" value=${s} onChange=${setS} options=${[1, 5, 15, 60].map((x) => ({ value: x, label: `${x}×` }))} />
         <${SegmentedControl} label="View" value=${v} onChange=${setV} options=${[{ value: 'overview', label: 'Shop', icon: 'layers' }, { value: '2D', label: 'Plan', icon: 'map' }]} /></${Row}>
       <${Row} label="Switch"><${Switch} checked=${on} onChange=${setOn} label="Automatic responders" hint="Simulated supervisors answer calls" /><${Switch} checked=${false} onChange=${() => {}} label="Disabled" disabled=${true} /></${Row}>
+      <${Row} label="Checkbox"><${Checkbox} checked=${keep} onChange=${setKeep}>Keep me signed in on this device<//><${Checkbox} checked=${false} onChange=${() => {}} disabled=${true}>Disabled<//></${Row}>
+      <div style=${{ maxWidth: 520 }}><${Checkbox} boxed tone="critical" checked=${ok} onChange=${setOk}>The unit leaves the line now. It is removed from station counts and will <b>not</b> count towards the target unless it returns and completes.<//></div>
     </${Page}>`;
   },
 };

@@ -50,8 +50,8 @@ export function StateIsland() {
 }
 function CallsPill() {
   const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
-  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`${sup} supervisor and ${mnt} maintenance calls open`} title="Assist calls">
-    <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS<span class="n">${open.length}</span></button>`;
+  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`Calls ${open.length}: ${sup} supervisor, ${mnt} maintenance`} title="Assist calls">
+    <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS${' '}<span class="n">${open.length}</span></button>`;
 }
 /* The tools (search, scan, x-ray, theme, sound) as one menu when the top bar is narrow. */
 function ToolsMenu({ themeIcon }) {
@@ -84,7 +84,7 @@ export function ActIsland() {
     <${ToolsMenu} themeIcon=${themeIcon} />
     <span class="sep"></span>
     <div class="hud-alerts"><${CallsPill} />
-    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`${active.length} critical alarms, ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS<span class="n">${active.length}</span></button></div>
+    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`Alarms ${active.length}: ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS${' '}<span class="n">${active.length}</span></button></div>
     <span class="sep"></span>
     <${UserMenu} />
     <span class="sep"></span>

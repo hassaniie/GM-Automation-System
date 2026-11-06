@@ -1,4 +1,4 @@
-/* Andon DS · controls: Button, IconButton, SegmentedControl, Switch.
+/* Andon DS · controls: Button, IconButton, SegmentedControl, Switch, Checkbox.
    Sizes follow the device: 36 px with a mouse, 44 px on touch screens, 56 px with "Large touch targets". */
 import React from 'react';
 import { html } from '../lib/runtime.js';
@@ -44,4 +44,17 @@ export function SegmentedControl({ value, options, onChange, label, size = 'md',
 export function Switch({ checked, onChange, label, id, disabled, hint }) {
   const auto = React.useId(), sid = id || auto;
   return html`<span class="ds-switch-row"><button id=${sid} type="button" class="ds-switch" role="switch" aria-checked=${!!checked} disabled=${disabled} onClick=${() => onChange(!checked)}></button>${label ? html`<label for=${sid}>${label}${hint ? html`<small>${hint}</small>` : null}</label>` : null}</span>`;
+}
+
+/**
+ * A checkbox with its label. Use it to confirm a consequence ("The unit leaves the line now…") or for a
+ * yes/no option that takes effect on submit; use Switch for a setting that applies at once.
+ * @param {{ checked: boolean, onChange: (v: boolean) => void, children?: any, id?: string, disabled?: boolean,
+ *   boxed?: boolean, tone?: 'normal'|'critical', class?: string }} p
+ * boxed: a bordered row that fills when checked, for confirmations in dialogs.
+ */
+export function Checkbox({ checked, onChange, children, id, disabled, boxed, tone = 'normal', class: k }) {
+  const auto = React.useId(), cid = id || auto;
+  return html`<label class=${cx('ds-check', boxed && 'ds-check--boxed', tone === 'critical' && 'ds-check--critical', k)} for=${cid}>
+    <input id=${cid} type="checkbox" class="ds-check__box" checked=${!!checked} disabled=${disabled} onChange=${(e) => onChange(e.target.checked)} /><span>${children}</span></label>`;
 }
