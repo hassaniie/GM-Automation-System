@@ -207,3 +207,30 @@
     .hud .alarm-pill { padding: 0 var(--ds-space-3); }
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Page backdrop: the dashboard, reports, settings and guide sit on soft
+   light and the floor's grid, so their glass cards and menus read as glass
+   (glass needs something behind it). Fixed: it does not scroll.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer layout {
+  .page-shell {
+    --bd-a: color-mix(in srgb, var(--ds-azure-d) 16%, transparent);
+    --bd-b: color-mix(in srgb, var(--ds-violet-d) 10%, transparent);
+    --bd-c: color-mix(in srgb, var(--ds-brand) 8%, transparent);
+    --bd-grid: color-mix(in srgb, var(--ds-text-primary) 5%, transparent);
+    background:
+      radial-gradient(1100px 680px at 12% -8%, var(--bd-a), transparent 62%),
+      radial-gradient(900px 640px at 98% 28%, var(--bd-b), transparent 60%),
+      radial-gradient(800px 520px at 40% 108%, var(--bd-c), transparent 62%),
+      repeating-linear-gradient(0deg, var(--bd-grid) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(90deg, var(--bd-grid) 0 1px, transparent 1px 48px),
+      var(--ds-bg);
+  }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .page-shell { --bd-a: color-mix(in srgb, var(--ds-azure-l) 12%, transparent); --bd-b: color-mix(in srgb, var(--ds-violet-l) 8%, transparent); } }
+  :root[data-theme="light"] .page-shell { --bd-a: color-mix(in srgb, var(--ds-azure-l) 12%, transparent); --bd-b: color-mix(in srgb, var(--ds-violet-l) 8%, transparent); }
+  @media print {
+    .page-shell { background: none; }
+    .page-shell .ds-panel { background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+}
