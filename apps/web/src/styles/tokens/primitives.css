@@ -13,8 +13,9 @@
     /* MG brand (identity only, never a status) */
     --ds-red-500: #c8102e; --ds-red-mg: #cf1a1f; --ds-red-mg-d: #e2262b;
     /* status hues: -l for light theme, -d for dark theme */
-    --ds-green-l: #1f9a66;  --ds-green-d: #3fc28a;
-    --ds-amber-l: #c27f05;  --ds-amber-d: #f0a92a;
+    /* light green and amber darkened from #1f9a66 / #c27f05 to reach 3 : 1 on the light background */
+    --ds-green-l: #1a8a5b;  --ds-green-d: #3fc28a;
+    --ds-amber-l: #ad7104;  --ds-amber-d: #f0a92a;
     --ds-red-l: #e03535;    --ds-red-d: #ff5452;
     --ds-magenta-l: #cc1d5b; --ds-magenta-d: #ff4688;
     --ds-blue-l: #4a62e0;   --ds-blue-d: #93a6ff;

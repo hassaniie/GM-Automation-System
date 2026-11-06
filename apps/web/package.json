@@ -9,7 +9,10 @@
     "build:demo": "vite build --mode demo",
     "preview": "vite preview",
     "build:edge": "vite build --mode edge",
-    "dev:remote": "vite --mode edge"
+    "dev:remote": "vite --mode edge",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build-storybook": "storybook build -o storybook-static --quiet",
+    "test:layout": "vite build --mode demo && playwright test --trace off"
   },
   "dependencies": {
     "@mg/contracts": "workspace:*",
@@ -25,6 +28,8 @@
     "xlsx": "0.18.5"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0"
+    "@playwright/test": "1.63.0",
+    "@storybook/react-vite": "10.6.3",
+    "storybook": "10.6.3"
   }
 }

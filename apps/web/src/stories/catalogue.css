@@ -1,0 +1,21 @@
+/* Layout of the catalogue pages themselves (not part of the product). */
+@layer components {
+  .cat { min-height: 100vh; padding: var(--ds-space-7); background: var(--ds-bg); color: var(--ds-text-primary); font-family: var(--ds-font-ui); display: grid; gap: var(--ds-space-7); align-content: start; }
+  .cat h1 { margin: 0; font-size: var(--ds-size-24); font-weight: 600; }
+  .cat h2 { margin: 0 0 var(--ds-space-3); font-size: var(--ds-size-14); font-weight: 600; letter-spacing: var(--ds-tracking-label); text-transform: uppercase; color: var(--ds-text-secondary); }
+  .cat p { margin: 0; color: var(--ds-text-secondary); max-width: 72ch; line-height: 1.5; }
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--ds-space-3); }
+  .cat-sw { display: grid; gap: var(--ds-space-1); padding: var(--ds-space-3); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-md); font: 500 var(--ds-size-12) / 1.4 var(--ds-font-mono); }
+  .cat-sw i { display: block; height: 44px; border-radius: var(--ds-radius-sm); border: var(--ds-border-1) solid var(--ds-border-subtle); }
+  .cat-sw small { color: var(--ds-text-muted); }
+  .cat-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-4); }
+  .cat-box { width: 160px; height: 96px; display: grid; place-items: center; border: var(--ds-border-1) solid var(--ds-border-strong); background: var(--ds-layer-1); font: 500 var(--ds-size-12) / 1 var(--ds-font-mono); color: var(--ds-text-secondary); }
+  .cat-space { display: flex; align-items: center; gap: var(--ds-space-3); font: 500 var(--ds-size-12) / 1 var(--ds-font-mono); }
+  .cat-space i { display: block; height: 12px; background: var(--ds-status-moving); border-radius: var(--ds-radius-sm); }
+  .cat-type { display: grid; grid-template-columns: 180px 1fr; gap: var(--ds-space-3); align-items: baseline; border-bottom: var(--ds-border-1) solid var(--ds-border-subtle); padding: var(--ds-space-2) 0; }
+  .cat-type code { font: 500 var(--ds-size-12) / 1 var(--ds-font-mono); color: var(--ds-text-muted); }
+  .cat-stage { position: relative; height: 200px; border: var(--ds-border-1) dashed var(--ds-border-strong); border-radius: var(--ds-radius-md); background: var(--ds-bg); }
+  .cat-stage > * { position: absolute !important; }
+  .cat-motion i { display: block; width: 24px; height: 24px; border-radius: var(--ds-radius-sm); background: var(--ds-text-primary); animation: cat-slide 1.6s infinite alternate; }
+  @keyframes cat-slide { to { transform: translateX(240px); } }
+}
