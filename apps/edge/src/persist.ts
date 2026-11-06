@@ -113,8 +113,11 @@ export class Persistence {
     if (prod.length) await upsert(q, 'production', ['area', 'vin', 't', 'shift_key', 'returned'], prod.map((r) => [r.area, r.vin, r.t, r.shiftKey, !!r.returned]), ['area', 'vin', 't']);
     const seg = recent(S.stats.segments as { t: number; vin: string; pos: string; area: string; shiftKey: string; cycle: number; work: number; wait: number; target: number; over: number }[]);
     if (seg.length) await upsert(q, 'segments', ['vin', 'pos', 't', 'area', 'shift_key', 'cycle', 'work', 'wait', 'target', 'over'], seg.map((r) => [r.vin, r.pos, r.t, r.area, r.shiftKey, r.cycle, r.work, r.wait, r.target, r.over]), ['vin', 'pos', 't']);
-    const off = recent(S.stats.offline as { t: number; vin: string; pos: string; area: string; reason: string; by: string }[]);
-    if (off.length) await upsert(q, 'offline_records', ['vin', 't', 'pos', 'area', 'reason', 'by', 'record'], off.map((r) => [r.vin, r.t, r.pos, r.area, r.reason, r.by, JSON.stringify(r)]), ['vin', 't'], true);
+    // also records whose unit came back since the last save, however long ago it was taken off
+    const off = (S.stats.offline as { t: number; vin: string; pos: string; area: string; reason: string; by: string; shiftKey: string; returnedT: number | null }[])
+      .filter((r) => r.t >= since || (r.returnedT != null && r.returnedT >= since));
+    if (off.length) await upsert(q, 'offline_records', ['vin', 't', 'pos', 'area', 'reason', 'by', 'shift_key', 'returned_t', 'record'],
+      off.map((r) => [r.vin, r.t, r.pos, r.area, r.reason, r.by, r.shiftKey, r.returnedT == null ? null : Math.round(r.returnedT), JSON.stringify(r)]), ['vin', 't'], true);
     const audit = S.audit.filter((a) => a.t >= since);
     if (audit.length) await upsert(q, 'audit', ['id', 't', 'date', 'by', 'action', 'target', 'before', 'after', 'reason'], audit.map((a) => [a.id, a.t, a.date ?? null, a.by, a.action, a.target, str(a.before), str(a.after), a.reason || '']), ['id']);
     const calls = S.calls.filter((c) => c.clearedT == null || c.clearedT >= since || c.raisedT >= since);

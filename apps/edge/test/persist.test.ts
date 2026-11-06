@@ -100,4 +100,20 @@ describe('persistence', () => {
     expect(r.restored).toBeGreaterThan(5);
     expect(pick(host.S)).toEqual(before);
   }, 240_000);
+  test('a unit returned hours after it was taken off has its return stored', async () => {
+    const db2 = await freshDatabase();
+    const host = new EngineHost({ seed: 11 });
+    const p = new Persistence(db2.db, host);
+    await drive(host, p, 9 * 3600);
+    const vid = ['FL4', 'FL5', 'FL3', 'FL6', 'FL2'].map((x) => host.S.pos[x].occ?.vehicleId).find(Boolean)!;
+    const vin = host.S.vehicles[vid].vin;
+    expect((await runCommand(host, { type: 'TAKE_OFFLINE', vehicleId: vid, reason: 'Part fitment issue', scan: vin }, planner)).ok).toBe(true);
+    await drive(host, p, 12.5 * 3600); // well past the writer's one-hour overlap
+    expect((await runCommand(host, { type: 'RETURN_TO_LINE', vehicleId: vid }, planner)).ok).toBe(true);
+    await drive(host, p, 13 * 3600);
+    const row = await db2.db.one<{ shift_key: string; returned_t: number | null }>('SELECT shift_key, returned_t FROM offline_records WHERE vin = $1', [vin]);
+    expect(row!.shift_key).toMatch(/Shift A$/);
+    expect(row!.returned_t).toBeGreaterThan(12.5 * 3600 - 1);
+    await db2.drop();
+  }, 240_000);
 });
