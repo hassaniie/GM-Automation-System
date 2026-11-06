@@ -12,7 +12,9 @@
     "dev:remote": "vite --mode edge",
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build -o storybook-static --quiet",
-    "test:layout": "vite build --mode demo && playwright test --trace off"
+    "test:layout": "vite build --mode demo && playwright test e2e/layout.spec.ts --trace off",
+    "test:ui": "vite build --mode demo && storybook build -o storybook-static --quiet && playwright test --trace off",
+    "test:visual": "playwright test e2e/visual.spec.ts --trace off"
   },
   "dependencies": {
     "@mg/contracts": "workspace:*",
@@ -28,6 +30,9 @@
     "xlsx": "0.18.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@fontsource/barlow": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@playwright/test": "1.63.0",
     "@storybook/react-vite": "10.6.3",
     "storybook": "10.6.3"

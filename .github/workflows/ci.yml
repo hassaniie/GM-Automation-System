@@ -44,10 +44,20 @@ jobs:
       - run: pnpm build
       - run: pnpm build:demo
       - run: pnpm --filter @mg/web build:edge
-      # design-system guardrail: the top bar and the station strip fit at every supported width, both themes
+      - run: pnpm --filter @mg/web build-storybook
+      # design-system guardrails, both themes: the top bar and strip fit at every width (layout), screens and
+      # Storybook stories match the committed baselines (visual), and axe finds no serious or critical issue (a11y)
       - run: pnpm --filter @mg/web exec playwright install --with-deps chromium
       - run: pnpm --filter @mg/web exec playwright test --trace off
-      - run: pnpm --filter @mg/web build-storybook
+      - name: Upload Playwright report (screenshot diffs)
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mg-andon-playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 14
       - name: Upload Storybook (design system catalogue)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
