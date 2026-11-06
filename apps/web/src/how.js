@@ -5,6 +5,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 import { Scene3D } from '@mg/scene';
 import { PageHead } from './admin.js';
+import { Button } from './ui/index.js';
 import { Act } from './lib/act.js';
 import { loadScenario, select } from './floor/scenarios.js';
 import { go } from './lib/router.js';
@@ -80,11 +81,11 @@ export function HowPage() {
     <${PageHead} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
     <section class="panel ticks"><h3>Architecture</h3><div class="q">The line server sits on the shop floor, so displays and data collection never depend on the head-office link.</div><${ArchDiagram} /></section>
     <h3 class="how-h">Points the URD asks the supplier to propose (§6)</h3>
-    <div class="six">${SIX.map(([t, a, s, fn], i) => html`<section key=${i} class="panel ticks"><div class="micro">§6 · ${i + 1}</div><h3>${t}</h3><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<button class="btn sm" onClick=${fn}><${Icon} n="target" />Show me</button>` : null}</div></section>`)}</div>
+    <div class="six">${SIX.map(([t, a, s, fn], i) => html`<section key=${i} class="panel ticks"><div class="micro">§6 · ${i + 1}</div><h3>${t}</h3><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<${Button} size="sm" icon="target" onClick=${fn}>Show me<//>` : null}</div></section>`)}</div>
     <h3 class="how-h">Requirement coverage</h3>
     ${COVERAGE.map(([g, rows]) => html`<section key=${g} class="panel ticks cov"><h3>${g}</h3><table class="data"><thead><tr><th>Req</th><th>What the URD asks</th><th>How it is met</th><th>Status</th><th></th></tr></thead><tbody>
       ${rows.map(([n, req, how, st, fn]) => html`<tr key=${n}><td class="mono">${n}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${req}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal', color: 'var(--text-2)' }}>${how}</td>
-        <td><span class=${'chip ' + (st === 'demo' ? 'c-ok' : 'c-hold')}>${st === 'demo' ? 'Working in demo' : 'Proposal'}</span></td><td>${fn ? html`<button class="btn sm ghost" onClick=${fn}>Show me</button>` : null}</td></tr>`)}</tbody></table></section>`)}
+        <td><span class=${'chip ' + (st === 'demo' ? 'c-ok' : 'c-hold')}>${st === 'demo' ? 'Working in demo' : 'Proposal'}</span></td><td>${fn ? html`<${Button} size="sm" variant="ghost" onClick=${fn}>Show me<//>` : null}</td></tr>`)}</tbody></table></section>`)}
     <div class="six two">
       <section class="panel ticks"><h3>Beyond the URD (included, can be switched off)</h3><ul class="how-ul">
         <li>3D digital twin of the shop, with stack lights and the 4-hanger loop.</li><li>Root-cause attribution: downtime is put down to the station that held the line up.</li>

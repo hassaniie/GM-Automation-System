@@ -162,6 +162,7 @@
   .ds-notice__title { font-size: var(--ds-size-12); letter-spacing: .08em; text-transform: uppercase; color: var(--tone); }
   .ds-notice--critical { background: color-mix(in srgb, var(--tone) 10%, transparent); }
   .ds-notice__actions { display: flex; gap: var(--ds-space-2); flex: none; }
+  .ds-list { margin: var(--ds-space-1) 0 0; padding-left: 18px; color: var(--ds-text-secondary); }
 
   /* ── page header ── */
   .ds-page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--ds-space-4); flex-wrap: wrap; margin-bottom: var(--ds-space-5); }
@@ -184,6 +185,10 @@
   .ds-tabs button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ds-focus); }
   .ds-tabs .ico { width: 15px; height: 15px; }
   .ds-tabs__n { font-family: var(--ds-font-mono); font-size: var(--ds-size-11); }
+  .drawer-tabs { padding: 0 var(--ds-space-3); }
+  .cfg-ds { display: grid; gap: var(--ds-space-2); }
+  .cfg-ds .ds-field--inline { grid-template-columns: 1fr 96px; }
+  .cfg-ds .ds-field__label { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: var(--ds-size-13); color: var(--ds-text-secondary); }
   .ds-tabs--vertical { flex-direction: column; border-bottom: 0; flex-wrap: nowrap; }
   .ds-tabs--vertical button { justify-content: flex-start; width: 100%; border-radius: var(--ds-radius-md); height: var(--ds-h-md); text-transform: none; letter-spacing: 0; font-size: var(--ds-size-14); font-weight: 500; }
   .ds-tabs--vertical button[aria-selected="true"] { background: var(--ds-layer-2); box-shadow: inset 2px 0 0 var(--ds-text-primary); }

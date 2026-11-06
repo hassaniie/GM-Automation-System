@@ -8,6 +8,16 @@ import { PaintChip } from '../lib/misc.js';
 import { go } from '../lib/router.js';
 import { AREAS, M, POS, RT, dispId, fmtClock, fmtDur, html, setUI, shortVin, useEffect, useRef } from '../lib/runtime.js';
 import { ANDON_LABEL, ANDON_TONE, CALL_ICON, Icon, LEVEL_ICON, LevelChip, StatusChip, VinText, tv } from '../lib/ui-kit.js';
+import { Button, DataTable, Meter } from '../ui/index.js';
+
+/* a vehicle's time at each station: cycle against takt (marker), colour only when near or over */
+const stationCols = (S) => [
+  { key: 'pos', label: 'Station', type: 'code', render: (r) => `${r.pos}${r.corrected ? ' ·c' : ''}` },
+  { key: 'arr', label: 'Arrived', type: 'time', render: (r) => fmtClock(r.arriveT, false) },
+  { key: 'cyc', label: 'Cycle', type: 'duration', render: (r) => html`<span style=${{ color: r.cyc > r.target ? 'var(--ds-status-critical)' : null }}>${fmtDur(r.cyc)}${r.live ? ' ●' : ''}</span>` },
+  { key: 'bar', label: '', width: 90, render: (r) => html`<${Meter} size="sm" value=${r.cyc / (r.target * 1.5)} marker=${1 / 1.5} tone=${r.cyc > r.target ? 'critical' : r.cyc >= r.target * S.cfg.warnPct ? 'warning' : null} label=${`${r.pos} cycle against takt`} valueText=${`${fmtDur(r.cyc)} of ${fmtDur(r.target)}`} />` },
+  { key: 'left', label: 'Left', type: 'time', render: (r) => (r.end === 'departed' ? fmtClock(r.departT, false) : r.end === 'taken off line' ? 'offline' : r.end === 'corrected' ? 'corrected' : r.live ? 'here now' : '—') },
+];
 
 function Ring({ r, tone }) {
   const R = 36, C = 2 * Math.PI * R, f = Math.min(1, r), over = Math.max(0, Math.min(1, r - 1));
@@ -42,7 +52,7 @@ function AlarmMini({ a }) {
     <div>${a.msg}</div>
     ${a.ackT != null ? html`<div class="note">Acknowledged ${fmtClock(a.ackT, false)} by ${a.ackBy}. The condition is still open.</div>` : null}
     <div class="actions">
-      ${a.ackT == null && a.level !== 'WARNING' ? html`<button class="btn sm warn" onClick=${() => Act.ackAlarm(a.id)}><${Icon} n="check" />Acknowledge</button>` : null}
+      ${a.ackT == null && a.level !== 'WARNING' ? html`<${Button} size="sm" tone="warning" onClick=${() => Act.ackAlarm(a.id)}><${Icon} n="check" />Acknowledge<//>` : null}
     </div></div>`;
 }
 function BuildList({ v, only }) {
@@ -63,8 +73,8 @@ export function CallRow({ c, compact }) {
     <div style=${{ minWidth: 0 }}><div style=${{ fontWeight: 600 }}>${T.label}${compact ? html` · <button class="linkish mono" onClick=${() => { setUI({ drawer: null }); select({ kind: 'pos', id: c.pos }); }}>${c.pos}</button>` : null}</div>
       <div class="who">${c.respondedT == null ? `Called ${fmtClock(c.raisedT, false)} · waiting for ${T.label.toLowerCase()}` : `${c.respondedBy} responded after ${fmtDur(c.respondedT - c.raisedT)} · helping ${fmtDur(S.t - c.respondedT)}`}</div></div>
     <div style=${{ display: 'grid', justifyItems: 'end', gap: 6 }}><span class="wait" style=${{ color: c.respondedT == null && waiting > 180 ? 'var(--crit)' : null }} title="Time since the call">${fmtDur(waiting)}</span>
-      <span class="actions" style=${{ gap: 6 }}>${c.respondedT == null ? html`<button class=${'btn sm ' + c.type.toLowerCase()} disabled=${!canAct} title=${canAct ? 'Help has arrived at the station' : `Only ${T.label.toLowerCase()} users respond to this call`} onClick=${() => Act.respondCall(c.id, userName())}>Respond</button>` : null}
-        <button class="btn sm" disabled=${!canAct} title=${canAct ? 'Help given · clear the call' : `Only ${T.label.toLowerCase()} users clear this call`} onClick=${() => Act.clearCall(c.id, userName())}><${Icon} n="check" />Clear</button></span></div>
+      <span class="actions" style=${{ gap: 6 }}>${c.respondedT == null ? html`<${Button} size="sm" tone=${c.type.toLowerCase()} disabled=${!canAct} title=${canAct ? 'Help has arrived at the station' : `Only ${T.label.toLowerCase()} users respond to this call`} onClick=${() => Act.respondCall(c.id, userName())}>Respond<//>` : null}
+        <${Button} size="sm" disabled=${!canAct} title=${canAct ? 'Help given · clear the call' : `Only ${T.label.toLowerCase()} users clear this call`} onClick=${() => Act.clearCall(c.id, userName())}><${Icon} n="check" />Clear<//></span></div>
   </div>`;
 }
 function StationInspector({ id }) {
@@ -86,11 +96,11 @@ function StationInspector({ id }) {
       <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
       <div class="id">${id}</div><div class="sub">${P.op}</div>
       <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
-      <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
+      <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">
       ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
-        return html`<button key=${t} class=${'btn lg callbtn ' + t.toLowerCase() + (oc ? ' on' : '')} aria-pressed=${!!oc} disabled=${!can('call')} title=${oc ? `${T.label} call open since ${fmtClock(oc.raisedT, false)} · cleared by the responder` : `Call ${T.label.toLowerCase()} to ${id}`} onClick=${() => press(t)}>
-          <span class="cb-top"><${Icon} n=${CALL_ICON[t]} />${T.label}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `calling · ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} here`) : 'Call'}</span></button>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
+        return html`<${Button} key=${t} size="lg" class="callbtn" tone=${t.toLowerCase()} pressed=${!!oc} disabled=${!can('call')} title=${oc ? `${T.label} call open since ${fmtClock(oc.raisedT, false)} · cleared by the responder` : `Call ${T.label.toLowerCase()} to ${id}`} onClick=${() => press(t)}>
+          <span class="cb-top"><${Icon} n=${CALL_ICON[t]} />${T.label}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `calling · ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} here`) : 'Call'}</span><//>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
       ${calls.length ? html`<div>${calls.map((cl) => html`<${CallRow} key=${cl.id} c=${cl} />`)}</div>` : null}
       ${live ? html`<div class="timer"><${Ring} r=${an.ratio} tone=${tone === 'ok' ? 'text' : tone} /><div>
         <div class="num" style=${{ color: an.state === 'over' ? 'var(--crit)' : 'var(--text)' }}>${fmtDur(an.cycle)}</div>
@@ -111,25 +121,25 @@ function StationInspector({ id }) {
       </dl>` : html`<p class="note">${p.reservedBy ? `${S.carriers[p.reservedBy].kind} ${p.reservedBy} is on its way. The position becomes occupied when arrival is confirmed.` : c ? `${c.kind} ${c.id} is here and empty, ready for the next body.` : 'No carrier present. The position is ready to receive the next one.'}</p>`}
       ${v && id === 'CL2' && v.engine ? html`<div class=${'callout ' + (v.engine.ok ? '' : 'crit')}><div class="ttl" style=${{ color: v.engine.ok ? 'var(--ok)' : 'var(--crit)' }}><${Icon} n="link" />Engine / transmission ${v.engine.ok ? 'paired' : 'mismatch'} · option</div>
         <div class="mono" style=${{ fontSize: 12 }}>${v.engine.engineNo} · ${v.engine.transNo}</div>
-        ${v.engine.ok ? null : html`<div><button class="btn sm ok" onClick=${() => Act.rescanEngine('CL2')}><${Icon} n="scan" />Rescan correct unit</button></div>`}</div>` : null}
-      ${live && an.state === 'over' && offOk && occ.completeT == null && occ.workT - an.takt >= S.cfg.escalateAfter ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Consider taking this unit offline</div><div>${fmtDur(an.cycle - an.takt)} over takt. Taking it offline keeps the line moving; it is recorded, not repaired here.</div><div><button class="btn sm danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take offline…</button></div></div>` : null}
+        ${v.engine.ok ? null : html`<div><${Button} size="sm" tone="normal" onClick=${() => Act.rescanEngine('CL2')}><${Icon} n="scan" />Rescan correct unit<//></div>`}</div>` : null}
+      ${live && an.state === 'over' && offOk && occ.completeT == null && occ.workT - an.takt >= S.cfg.escalateAfter ? html`<div class="callout crit"><div class="ttl" style=${{ color: 'var(--esc)' }}><${Icon} n="exit" />Consider taking this unit offline</div><div>${fmtDur(an.cycle - an.takt)} over takt. Taking it offline keeps the line moving; it is recorded, not repaired here.</div><div><${Button} size="sm" variant="danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id, reason: M.OFFLINE_REASONS[0] } })}><${Icon} n="exit" />Take offline…<//></div></div>` : null}
       ${P.hangerPoint ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--text-2)' }}><${Icon} n="hanger" />Hanger point</div><div>${c ? html`Hanger <b class="mono">${c.id}</b> is here${c.vehicleId ? ' carrying this unit' : ' and empty'}.` : p.reservedBy ? html`Hanger <b class="mono">${p.reservedBy}</b> is on its way.` : 'No hanger here right now.'}</div><div class="note">${id === 'TL6' ? 'Bodies are loaded from the Trim conveyor onto a hanger here. TL6 is the end of Trim, where a unit can be taken offline with a scan.' : id === 'FL1' ? 'Bodies are lowered from the hanger onto the Final conveyor here. The empty hanger returns to TL6 on its own rail.' : 'One of the 4 hangers carries the body through this point. Tracking follows the hanger, so no scan is needed here.'}</div><div style=${{ marginTop: 4 }}><${HangerTracker} /></div></div>` : null}
       <${RootCallout} posId=${posId} />
       ${alarms.length ? html`<div class="sec"><div class="micro">Alarms</div>${alarms.map((a) => html`<${AlarmMini} key=${a.id} a=${a} />`)}</div>` : null}
       ${v && isWork ? html`<div class="sec"><div class="micro"><span>Installed here</span><span>${v.variant.name}</span></div><${BuildList} v=${v} only=${id} /></div>` : null}
       ${pm ? html`<div class="sec"><div class="micro">Transfer readiness → ${M.XFER_FROM[posId] ? dispId(M.XFER_FROM[posId].to) + ' carrier' : M.NEXT[posId] ? dispId(M.NEXT[posId]) : 'carrier return'}</div><${Checklist} pm=${pm} /><p class="note">Simulated permissives. In production, motion authority stays with the PLC and safety system.</p></div>` : null}
       <div class="sec"><div class="micro">Unit</div><div class="actions">
-        ${offOk ? html`<button class="btn danger" disabled=${!can('offline')} title=${can('offline') ? 'Scan the VIN here to take the unit offline' : 'Your role cannot take units offline'} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : v && M.isActive(v) && !M.OFFLINE_POS.includes(id) ? html`<span class="note">Units are taken offline only at TL6 (end of Trim) and on the Final line.</span>` : null}
-        ${id === 'TL1' ? html`<button class="btn" onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1 · line-in</button>` : null}
-        ${v && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: id } })}><${Icon} n="swap" />Correct position…</button>` : null}
+        ${offOk ? html`<${Button} variant="danger" disabled=${!can('offline')} title=${can('offline') ? 'Scan the VIN here to take the unit offline' : 'Your role cannot take units offline'} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…<//>` : v && M.isActive(v) && !M.OFFLINE_POS.includes(id) ? html`<span class="note">Units are taken offline only at TL6 (end of Trim) and on the Final line.</span>` : null}
+        ${id === 'TL1' ? html`<${Button} onClick=${() => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })}><${Icon} n="scanin" />Scanner 1 · line-in<//>` : null}
+        ${v && can('correct') ? html`<${Button} variant="ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: id } })}><${Icon} n="swap" />Correct position…<//>` : null}
       </div>
       <div class="micro" style=${{ marginTop: 6, color: 'var(--sim)' }}>Simulation only</div><div class="actions">
-        ${c && c.fault ? html`<button class="btn sm sim" onClick=${() => Act.clearFault('C', c.id)}>Clear ${c.kind.toLowerCase()} fault</button>` : c ? html`<button class="btn sm sim" onClick=${() => Act.faultCarrier(c.id, posId)}>Inject ${c.kind.toLowerCase()} fault</button>` : null}
-        ${p.fault ? html`<button class="btn sm sim" onClick=${() => Act.clearFault('P', posId)}>Clear sensor fault</button>` : html`<button class="btn sm sim" onClick=${() => Act.faultSensor(posId, dispId(posId))}>Inject sensor fault</button>`}
-        ${isWork ? html`<button class=${'btn sm sim' + (emerg ? ' on' : '')} onClick=${() => Act.emergency(id, !emerg)}><${Icon} n="siren" />${emerg ? 'Clear emergency stop' : 'Test emergency stop'}</button>` : null}
-        ${isWork && v && occ && occ.completeT == null ? html`<button class="btn sm sim" title="Simulate the team finishing now" onClick=${() => Act.manualComplete(id)}><${Icon} n="check" />Finish work now</button>` : null}
+        ${c && c.fault ? html`<${Button} size="sm" tone="sim" onClick=${() => Act.clearFault('C', c.id)}>Clear ${c.kind.toLowerCase()} fault<//>` : c ? html`<${Button} size="sm" tone="sim" onClick=${() => Act.faultCarrier(c.id, posId)}>Inject ${c.kind.toLowerCase()} fault<//>` : null}
+        ${p.fault ? html`<${Button} size="sm" tone="sim" onClick=${() => Act.clearFault('P', posId)}>Clear sensor fault<//>` : html`<${Button} size="sm" tone="sim" onClick=${() => Act.faultSensor(posId, dispId(posId))}>Inject sensor fault<//>`}
+        ${isWork ? html`<${Button} size="sm" tone="sim" icon="siren" pressed=${emerg} onClick=${() => Act.emergency(id, !emerg)}>${emerg ? 'Clear emergency stop' : 'Test emergency stop'}<//>` : null}
+        ${isWork && v && occ && occ.completeT == null ? html`<${Button} size="sm" tone="sim" title="Simulate the team finishing now" onClick=${() => Act.manualComplete(id)}><${Icon} n="check" />Finish work now<//>` : null}
       </div></div>
-      ${isWork ? html`<div class="sec"><div class="micro">Takt</div><div class="andon-row"><span>${AREAS[P.area].name} takt <b class="mono">${fmtDur(S.cfg.takt[P.area])}</b> · close to limit at <span class="mono">${fmtDur(S.cfg.takt[P.area] * S.cfg.warnPct)}</span></span>${can('takt') ? html`<button class="btn sm ghost" onClick=${() => go('admin', 'takt')}><${Icon} n="cog" />Change takt</button>` : null}</div></div>` : null}
+      ${isWork ? html`<div class="sec"><div class="micro">Takt</div><div class="andon-row"><span>${AREAS[P.area].name} takt <b class="mono">${fmtDur(S.cfg.takt[P.area])}</b> · close to limit at <span class="mono">${fmtDur(S.cfg.takt[P.area] * S.cfg.warnPct)}</span></span>${can('takt') ? html`<${Button} size="sm" variant="ghost" onClick=${() => go('admin', 'takt')}><${Icon} n="cog" />Change takt<//>` : null}</div></div>` : null}
       <div class="sec"><div class="micro">Recent activity</div>${events.length ? html`<ul class="timeline">${events.map((e) => html`<li key=${e.id}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul>` : html`<p class="note">No events here yet this shift.</p>`}</div>
     </div></${React.Fragment}>`;
 }
@@ -153,7 +163,7 @@ function VehicleInspector({ id }) {
       <div class="micro">Vehicle record</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
       <div class="sub">${v.variant.name} · ${v.variant.ptLabel} · <${PaintChip} p=${v.paint} /></div>
       <div style=${{ marginTop: 10 }}><span class=${'chip c-' + tone}><${Icon} n=${ic} />${lbl}</span></div></div>
-      <button class="btn sm ghost icon" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><${Icon} n="x" /></button></div>
+      <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">
       <div class="sec"><div class="micro">${tl}</div><div class="num" style=${{ fontSize: 44 }}>${fmtDur(tval)}</div></div>
       <dl class="kv"><dt>Where</dt><dd>${at ? html`<${PosLink} id=${at} /> <span class="c-muted">· ${AREAS[POS[at].area].name}</span>` : M.locationLabel(S, v)}</dd>
@@ -167,15 +177,14 @@ function VehicleInspector({ id }) {
         ${r ? html`<dt>Returned</dt><dd class="mono">${fmtClock(r.t, false)} at ${r.pos} · ${fmtDur(r.t - o.t)} offline · ${r.by}</dd>` : null}</dl>
         ${!r ? html`<div class="note">Removed from station counts; not counted towards the target unless it returns and completes.</div>` : null}</div>`; })}
       <div class="sec"><div class="micro">Actions</div><div class="actions">
-        ${M.isActive(v) && at && M.OFFLINE_POS.includes(at) ? html`<button class="btn danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…</button>` : null}
+        ${M.isActive(v) && at && M.OFFLINE_POS.includes(at) ? html`<${Button} variant="danger" disabled=${!can('offline')} onClick=${() => setUI({ dialog: { type: 'offline', vehicleId: v.id } })}><${Icon} n="exit" />Take offline…<//>` : null}
         ${M.isActive(v) && at && !M.OFFLINE_POS.includes(at) ? html`<span class="note">Offline points: TL6 and FL1–FL7.</span>` : null}
-        ${v.state === 'OFF_LINE' ? html`<button class="btn primary" disabled=${!can('offline') || !ret.ok} title=${ret.ok ? `Rejoin at ${ret.pos} when it is free` : ret.reason} onClick=${() => setUI({ dialog: { type: 'return', vehicleId: v.id } })}><${Icon} n="ret" />Return to line at ${v.offline.pos}…</button>` : null}
+        ${v.state === 'OFF_LINE' ? html`<${Button} variant="primary" disabled=${!can('offline') || !ret.ok} title=${ret.ok ? `Rejoin at ${ret.pos} when it is free` : ret.reason} onClick=${() => setUI({ dialog: { type: 'return', vehicleId: v.id } })}><${Icon} n="ret" />Return to line at ${v.offline.pos}…<//>` : null}
         ${v.state === 'RETURN_QUEUED' ? html`<span class="note">Waiting for ${v.returnReq.pos} to be free. It rejoins automatically.</span>` : null}
-        ${M.isActive(v) && at && can('correct') ? html`<button class="btn ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: at, vin: v.vin } })}><${Icon} n="swap" />Correct position…</button>` : null}
+        ${M.isActive(v) && at && can('correct') ? html`<${Button} variant="ghost" onClick=${() => setUI({ dialog: { type: 'correct', pos: at, vin: v.vin } })}><${Icon} n="swap" />Correct position…<//>` : null}
         ${v.state === 'LINED_OFF' ? html`<span class="note">Completed. This record is closed.</span>` : null}
       </div></div>
-      ${rows.length ? html`<div class="sec"><div class="micro"><span>Time at each station</span><span>cycle vs takt</span></div><div style=${{ overflowX: 'auto' }}><table class="stimeline"><thead><tr><th>Station</th><th>Arrived</th><th>Cycle</th><th></th><th>Left</th></tr></thead><tbody>
-        ${rows.map((r, i) => { const over = r.cyc > r.target, w = Math.min(1, r.cyc / (r.target * 1.5)); return html`<tr key=${i}><td>${r.pos}${r.corrected ? ' ·c' : ''}</td><td class="c-muted">${fmtClock(r.arriveT, false)}</td><td style=${{ color: over ? 'var(--crit)' : null }}>${fmtDur(r.cyc)}${r.live ? ' ●' : ''}</td><td><span class="cbar" title=${`takt ${fmtDur(r.target)}`}><i style=${{ width: `${w * 100}%`, background: over ? 'var(--crit)' : r.cyc >= r.target * S.cfg.warnPct ? 'var(--warn)' : 'var(--ok)' }}></i><b style=${{ left: `${(1 / 1.5) * 100}%` }}></b></span></td><td class="l c-muted">${r.end === 'departed' ? fmtClock(r.departT, false) : r.end === 'taken off line' ? 'offline' : r.end === 'corrected' ? 'corrected' : r.live ? 'here now' : '—'}</td></tr>`; })}</tbody></table></div></div>` : null}
+      ${rows.length ? html`<div class="sec"><div class="micro"><span>Time at each station</span><span>cycle vs takt</span></div><${DataTable} columns=${stationCols(S)} rows=${rows} /></div>` : null}
       <div class="sec"><div class="micro"><span>Build</span><span>${installed} / ${items.length} components</span></div><${BuildList} v=${v} /></div>
       <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-14).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
     </div></${React.Fragment}>`;
@@ -238,7 +247,7 @@ export function Legend() {
     ${row('var(--transit)', 'Bright parts on a car are being installed right now')}
     <p class="note">X-ray (X) makes the body glass so interior and underbody parts are visible. Every state also shows as text with an icon.</p>
     <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>/</b> find VIN · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
-    <button class="btn sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />How it works · URD coverage</button>
+    <${Button} size="sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />How it works · URD coverage<//>
   </div>`;
 }
 
