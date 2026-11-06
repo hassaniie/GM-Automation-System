@@ -16,7 +16,7 @@ export const { POS, STATIONS, WORK_POS, AREAS, fmtClock, fmtDur, shortVin, dispI
 /* ── runtime ── */
 export const RT = {
   S: null, speed: 5, running: true, acc: 0, scenario: 1, rev: 0,
-  ui: { selection: null, hover: null, drawer: null, dialog: null, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto' },
+  ui: { selection: null, hover: null, drawer: null, dialog: null, simOpen: false, legend: false, view2D: false, panelWidth: 0, muted: false, logFilter: 'all', xray: false, xraySel: true, view: 'overview', theme: 'auto', stripLane: 'FINAL' },
   listeners: new Set(),
 };
 export function setUI(patch) { Object.assign(RT.ui, patch); RT.rev++; RT.listeners.forEach((f) => f()); }

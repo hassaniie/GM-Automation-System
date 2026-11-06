@@ -97,7 +97,7 @@ export function Strip() {
   const S = RT.S, sel = RT.ui.selection;
   const lanes = [['TRIM', 'Trim', ['TL1', 'TL2', 'TL3', 'TL4', 'TL5', 'TL6']], ['CHASSIS', 'Chassis', ['CL1', 'CL2', 'CL3', 'BUF', 'CL4']], ['FINAL', 'Final', ['FL1', 'FL2', 'FL3', 'FL4', 'FL5', 'FL6', 'FL7']]];
   const go = (v) => { setUI({ view: v, selection: null, view2D: v === '2D' ? !RT.ui.view2D : false }); if (v !== '2D') Scene3D.focusView(v); };
-  const top = topAlarm(S);
+  const top = topAlarm(S), stripLane = RT.ui.stripLane || 'FINAL';
   return html`<section class="glass strip ticks in" aria-label="Line strip">
     <div class="views" role="toolbar" aria-label="Views">
       <button aria-pressed=${RT.ui.view === 'overview' && !RT.ui.view2D} onClick=${() => go('overview')}><${Icon} n="layers" size=${14} />Shop</button>
@@ -105,7 +105,8 @@ export function Strip() {
       <button class=${top ? 'alert' : ''} disabled=${!top} onClick=${() => top && openAlarm(top)} title="Focus the most urgent alarm (A)"><${Icon} n="target" size=${14} />Alarm</button>
       <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend })}><${Icon} n="info" size=${14} />Key</button>
     </div>
-    <div class="lanes">${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} style=${{ '--n': k === 'CHASSIS' ? 6.6 : ids.length }}>
+    <div class="lane-tabs" role="tablist" aria-label="Line">${lanes.map(([k, name]) => html`<button key=${k} role="tab" aria-selected=${stripLane === k} onClick=${() => setUI({ stripLane: k })}>${name}</button>`)}</div>
+    <div class="lanes" data-lane=${stripLane}>${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} data-k=${k} style=${{ '--n': ids.length }}>
       <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
       <div class="cells ticks">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
     </div>`)}</div>
@@ -125,12 +126,16 @@ function Cell({ id, sel }) {
   else if (sv && !['FAULT', 'TRANSFER', 'SCAN', 'REMOVAL'].includes(st.code)) txt = sv.v.vin.slice(-6);
   const tone = live ? ANDON_TONE[an.state] : null, barC = tone === 'ok' ? 'var(--text)' : tone ? tv(tone) : 'var(--hair-2)';
   const calls = M.callsAt(S, id), buzz = S.buzzing[id] != null;
-  const cls = 'cell' + (live && an.state === 'over' ? ' over' : live && an.state === 'near' ? ' near' : st.code === 'FAULT' ? ' x' : '') + (st.code === 'EMPTY' ? ' idle' : '');
+  // status by an edge and an icon as well as colour (never colour alone)
+  const kind = live && an.state === 'over' ? 'over' : st.code === 'FAULT' ? 'x' : ['WAITING', 'HOLD'].includes(st.code) ? 'held' : live && an.state === 'near' ? 'near' : '';
+  const cls = 'cell' + (kind ? ' ' + kind : '') + (st.code === 'EMPTY' ? ' idle' : '');
+  const mark = { over: 'alert', x: 'fault', held: 'pause', near: 'hour' }[kind];
   const title = `${id} · ${live ? `${ANDON_LABEL[an.state]} · cycle ${fmtDur(an.cycle)} of ${fmtDur(an.takt)} takt` : st.label}${sv ? ' · ' + sv.v.vin : ''}${calls.length ? ' · ' + calls.map((c) => M.CALL_TYPES[c.type].label + ' call').join(', ') : ''}${buzz ? ' · buzzer on' : ''}`;
   return html`<button class=${cls} aria-pressed=${!!sel} onClick=${() => select({ kind: 'pos', id })} title=${title}><span class="cin">
-    <span class="cid"><span>${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span><span class="lamps">${calls.map((c) => html`<i key=${c.id} class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></i>`)}${buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : ['FAULT', 'HOLD'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span></span>
+    <span class="cid"><span>${mark ? html`<${Icon} n=${mark} size=${11} />` : null}${id}${S.pos[id].carrierId && S.carriers[S.pos[id].carrierId].kind === 'Hanger' ? html`<i class="hg">${S.pos[id].carrierId}</i>` : ''}</span><span class="lamps">${calls.map((c) => html`<i key=${c.id} class=${'lamp ' + c.type.toLowerCase() + (c.respondedT == null ? ' blink' : '')}></i>`)}${buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : ['FAULT', 'HOLD'].includes(st.code) ? html`<span class=${'c-' + st.tone}><${Icon} n=${STATUS_ICON[st.code]} /></span>` : null}</span></span>
     <span class="bar"><i style=${{ width: `${(P.kind === 'work' ? r : sv ? 1 : 0) * 100}%`, background: P.kind === 'work' ? barC : 'var(--hair-2)' }}></i></span>
     <span class="ct">${txt}</span>
+    ${mark ? html`<span class="mk"><${Icon} n=${mark} size=${12} /></span>` : null}
   </span></button>`;
 }
 

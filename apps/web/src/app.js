@@ -56,7 +56,15 @@ function App() {
         if (RT.running) { RT.acc += dt * RT.speed; let n = 0; while (RT.acc >= 1 && n < 400) { M.step(RT.S, 1); RT.acc -= 1; n++; } }
       }
       const floor = RT.route.page === 'floor';
-      if (floor && !RT.ui.view2D) Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
+      if (floor && !RT.ui.view2D) {
+        // the camera frames the line inside the space the top bar and strip leave free (checked twice a second)
+        if (now - (RT._safeAt || 0) > 500) {
+          RT._safeAt = now;
+          const hud = document.querySelector('.stage header.hud'), strip = document.querySelector('.strip');
+          Scene3D.setSafeArea({ top: hud ? hud.getBoundingClientRect().bottom : 0, bottom: strip ? window.innerHeight - strip.getBoundingClientRect().top : 0 });
+        }
+        Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
+      }
       Horn.tick(now);
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
       if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined && floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }

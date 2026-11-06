@@ -38,7 +38,10 @@ export const Scene3D = (function () {
   const themed = []; // { mat, key, prop }
   const texts = []; // { mesh, text, opts }
   let chevrons, chevronData = [], chevronSig = '';
-  let camAnim = null, viewShift = 0, lastScanId = null, down = null, hoverKey = null, ok = false;
+  let camAnim = null, viewShift = 0, viewShiftY = 0, lastScanId = null, down = null, hoverKey = null, ok = false;
+  /** Pixels of the window covered by the UI (top bar, strip, side panels); the camera frames the line inside the rest. */
+  let safe = { top: 0, right: 0, bottom: 0, left: 0 };
+  function setSafeArea(a) { safe = { ...safe, ...a }; }
 
   /* ── helpers ── */
   const tcol = (k) => (k.startsWith('tone_') ? T.tone[k.slice(5)] : T[k]);
@@ -748,10 +751,12 @@ export const Scene3D = (function () {
     const S = getState(), ui = getUI();
     if (camAnim) { const u = Math.min(1, (now - camAnim.t0) / camAnim.ms), e = 1 - Math.pow(1 - u, 3); camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, e); controls.target.lerpVectors(camAnim.fromTgt, camAnim.toTgt, e); if (u >= 1) camAnim = null; }
     controls.target.x = E.clamp(controls.target.x, -60, 75); controls.target.z = E.clamp(controls.target.z, -30, 25); controls.target.y = E.clamp(controls.target.y, 0, 5); controls.update();
-    viewShift += ((ui.panelWidth || 0) - viewShift) * 0.12;
+    // frame the line inside the UI safe area: the inspector on the right, the top bar and the strip
+    viewShift += ((ui.panelWidth || 0) + safe.right - safe.left - viewShift) * 0.12;
+    viewShiftY += (safe.bottom - safe.top - viewShiftY) * 0.12;
     if (floorBadge) floorBadge.material.opacity = T.badge * E.clamp((camera.position.distanceTo(controls.target) - 30) / 70, 0.35, 1);
     const w = el.clientWidth, h = el.clientHeight;
-    if (Math.abs(viewShift) > 0.5) camera.setViewOffset(w, h, viewShift / 2, 0, w, h); else camera.clearViewOffset();
+    if (Math.abs(viewShift) > 0.5 || Math.abs(viewShiftY) > 0.5) camera.setViewOffset(w, h, viewShift / 2, viewShiftY / 2, w, h); else camera.clearViewOffset();
     const pulse = 0.5 + 0.5 * Math.sin(now / 320), sel = ui.selection, hov = ui.hover;
     const roots = S._analysis ? S._analysis.significant || {} : {};
     const selVeh = sel && sel.kind === 'veh' ? sel.id : sel && sel.kind === 'pos' ? (E.stationVehicle(S, sel.id) || {}).v?.id : null;
@@ -848,5 +853,5 @@ export const Scene3D = (function () {
     const nodes = el.parentElement.querySelectorAll('[data-anchor]'), w = el.clientWidth, h = el.clientHeight;
     nodes.forEach((n) => { const p = anchorWorld(n.getAttribute('data-anchor')); if (!p) { n.style.visibility = 'hidden'; return; } p.project(camera); const vis = p.z < 1 && p.x > -1.1 && p.x < 1.1 && p.y > -1.1 && p.y < 1.1; n.style.visibility = vis ? 'visible' : 'hidden'; n.style.transform = `translate(${((p.x + 1) / 2) * w}px, ${((1 - p.y) / 2) * h}px)`; });
   }
-  return { init, render, setTheme, focusView, focusPos, focusVehicle, focusAny, get ok() { return ok; }, get theme() { return themeName; }, _debug: () => ({ scene, camera, controls, carObjs, flyTo }) };
+  return { init, render, setTheme, setSafeArea, focusView, focusPos, focusVehicle, focusAny, get ok() { return ok; }, get theme() { return themeName; }, _debug: () => ({ scene, camera, controls, carObjs, flyTo }) };
 })();

@@ -50,3 +50,61 @@
     .hud:has(> .state-island) .nav-b span, .hud:has(> .state-island) .brand > div { display: none; }
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Station strip: fixed height, never scrolls. Lanes share the width by
+   their station count; each cell lays itself out by its own width
+   (container query): ID + bar + timer when wide, ID + status mark when
+   narrow. Below 1024 px one lane shows at a time, chosen with tabs.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer layout {
+  .strip { --ds-strip-h: var(--strip-h); height: calc(var(--ds-strip-h) + env(safe-area-inset-bottom, 0px)); overflow: hidden; z-index: var(--ds-z-chrome); }
+  .strip .lanes { display: grid; grid-template-columns: 6fr 5fr 7fr; gap: var(--ds-space-3); overflow: hidden; min-width: 0; padding: 1px; }
+  .strip .lane { display: grid; grid-template-rows: auto 1fr; gap: var(--ds-space-2); min-width: 0; overflow: hidden; container: lane / inline-size; }
+  .strip .lane-h { min-width: 0; overflow: hidden; }
+  .strip .lane-h > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .strip .cells { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); grid-auto-flow: row; overflow: hidden; margin: 0; }
+  .strip .cell { height: 52px; min-width: 0; overflow: hidden; container: cell / inline-size; }
+  .strip .cell .cid { overflow: hidden; }
+  .strip .cell .cid > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+  .strip .cell .cid .ico { flex: none; }
+  /* the lane header's hanger chips go first when a lane is narrow */
+  @container lane (max-width: 420px) { .lane-h .htrack, .lane-h .xp { display: none; } }
+  /* narrow lanes: tighter cells so the status mark and the ID both fit */
+  @container lane (max-width: 480px) { .cell { padding: 6px 4px 5px; } .cell .cid { font-size: var(--ds-size-10); } .cell .cid .ico { margin-right: 2px; } }
+  /* a narrow cell keeps its ID and status mark; the timer moves to the tooltip */
+  .cell .mk { display: none; height: 12px; line-height: 0; }
+  @container cell (max-width: 55px) {
+    .cell .ct, .cell .hg, .cell .cid .ico { display: none; }
+    .cell .mk { display: block; }
+  }
+  .lane-tabs { display: none; }
+  @media (max-width: 1023px) {
+    :root { --strip-h: 136px; }
+    .strip { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: var(--ds-space-3); row-gap: var(--ds-space-2); align-items: start; }
+    .strip .views { grid-column: 1; grid-row: 1 / 3; }
+    .strip .lane-tabs { grid-column: 2; grid-row: 1; }
+    .strip .lanes { grid-column: 2; grid-row: 2; grid-template-columns: 1fr; }
+    .strip .lanes[data-lane="TRIM"] .lane:not([data-k="TRIM"]), .strip .lanes[data-lane="CHASSIS"] .lane:not([data-k="CHASSIS"]), .strip .lanes[data-lane="FINAL"] .lane:not([data-k="FINAL"]) { display: none; }
+    .lane-tabs { display: flex; gap: var(--ds-space-1); }
+    .lane-tabs button { height: var(--ds-control-sm); padding: 0 var(--ds-space-3); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-sm); background: transparent; color: var(--ds-text-secondary); font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: .12em; text-transform: uppercase; }
+    .lane-tabs button[aria-selected="true"] { background: var(--ds-interactive); color: var(--ds-on-interactive); }
+  }
+}
+
+/* cell status: a coloured top edge and an icon instead of tinting the whole cell (ISA-101: normal is quiet) */
+@layer components {
+  .strip .cell.over, .strip .cell.near, .strip .cell.x, .strip .cell.held { background: color-mix(in srgb, var(--ds-bg) 55%, transparent); }
+  .strip .cell.over { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-critical); }
+  .strip .cell.x { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-critical); }
+  .strip .cell.near { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-warning); }
+  .strip .cell.held { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-held); }
+  .strip .cell .cid .ico { margin-right: 3px; vertical-align: -1px; }
+  .strip .cell.over .cid .ico, .strip .cell.x .cid .ico { color: var(--ds-status-critical); }
+  .strip .cell.near .cid .ico { color: var(--ds-status-warning); }
+  .strip .cell.held .cid .ico { color: var(--ds-status-held); }
+  .strip .cell.over .mk, .strip .cell.x .mk { color: var(--ds-status-critical); }
+  .strip .cell.near .mk { color: var(--ds-status-warning); }
+  .strip .cell.held .mk { color: var(--ds-status-held); }
+  .strip .cell[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--ds-text-secondary); }
+}

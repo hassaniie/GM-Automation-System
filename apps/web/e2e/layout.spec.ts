@@ -48,6 +48,7 @@ for (const theme of ['light', 'dark'] as const) {
       await page.setViewportSize({ width: w, height: Math.round(w * 0.5625) });
       for (const p of PAGES) {
         await page.evaluate((h) => { location.hash = '#/' + h; }, p);
+        await page.waitForSelector('header.hud', { timeout: 15_000 });
         await page.waitForTimeout(400);
         for (const x of await problems(page)) found.push(`${w}px ${p}: ${x}`);
       }
