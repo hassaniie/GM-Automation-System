@@ -39,6 +39,7 @@ export class EngineHost {
     this.seed = opts.seed ?? 11;
     this.tickMs = opts.tickMs ?? 250;
     this.clock = { speed: opts.speed ?? 15, running: true, mode: opts.mode ?? 'simulation' };
+    if (this.clock.mode === 'live') this.clock.speed = 1; // real time
     this.tz = opts.tz ?? 'Asia/Karachi';
     const restoredLive = opts.state && (opts.state as { plantMode?: string }).plantMode === 'live';
     if (this.clock.mode === 'live') {
@@ -87,7 +88,7 @@ export class EngineHost {
   /** Advance the plant and publish what changed. Also called after each command. */
   tick() {
     const now = Date.now(), dt = (now - this.last) / 1000; this.last = now;
-    if (this.clock.mode === 'live') {
+    if (this.clock.mode === 'live' && (this.S as { plantMode?: string }).plantMode === 'live') {
       // live: plant time follows the plant clock; device events are applied in the second they happened
       const target = plantT(this.tz, (this.S.cfg as { baseDate: string }).baseDate);
       let n = 0;

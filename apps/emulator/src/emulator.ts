@@ -4,13 +4,16 @@
    - a network scanner on TL1: a TCP server that sends each VIN read, one per line
    The simulator starts with an empty line on the plant clock, like a real go-live. Within each simulated
    second, arrivals come first, then pulses (transfer done, work done, calls, photo-eye), then departures,
-   so a carrier passing through a position still turns its sensor on and off. Pulses last 250 ms. */
+   so a carrier passing through a position still turns its sensor on and off. Pulses last 250 ms.
+   With waitForClient the line only starts when a line server connects to the scanner. */
 import net from 'node:net';
 import { createState } from '@mg/core';
 import { runEmitting } from '@mg/sim';
 import { plantSignals, type PlantSignal } from './map.ts';
 
-export interface EmulatorOptions { seed?: number; speed?: number; tz?: string; opcuaPort?: number; modbusPort?: number; scannerPort?: number; host?: string; log?: (m: string) => void }
+export interface EmulatorOptions { seed?: number; speed?: number; tz?: string; opcuaPort?: number; modbusPort?: number; scannerPort?: number; host?: string; log?: (m: string) => void;
+  /** Hold the line until a line server connects to the scanner, so nothing is missed while it starts. */
+  waitForClient?: boolean }
 
 function plantNow(tz: string) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).map((x) => [x.type, x.value]));
@@ -36,7 +39,7 @@ export class PlantEmulator {
   readonly opts: Required<Omit<EmulatorOptions, 'log'>> & { log: (m: string) => void };
 
   constructor(o: EmulatorOptions = {}) {
-    this.opts = { seed: 11, speed: 1, tz: 'Asia/Karachi', opcuaPort: 4840, modbusPort: 5020, scannerPort: 5101, host: '127.0.0.1', log: () => {}, ...o };
+    this.opts = { seed: 11, speed: 1, tz: 'Asia/Karachi', opcuaPort: 4840, modbusPort: 5020, scannerPort: 5101, host: '127.0.0.1', log: () => {}, waitForClient: false, ...o };
     for (const s of this.signals) { this.values.set(s.key, false); this.byPosMeans.set(`${s.means}|${s.pos}|${s.callType || ''}`, s); }
     const now = plantNow(this.opts.tz);
     this.S = createState(this.opts.seed, { delayRate: 0.04, baseDate: now.date });
@@ -47,8 +50,14 @@ export class PlantEmulator {
     await this.startOpcUa();
     await this.startModbus();
     await this.startScanner();
-    this.loop = setInterval(() => this.second(), 1000 / this.opts.speed);
+    if (!this.opts.waitForClient) this.run();
     this.opts.log(`plant emulator: OPC UA opc.tcp://${this.opts.host}:${this.opts.opcuaPort}/UA/MGPlant · Modbus TCP ${this.opts.host}:${this.opts.modbusPort} · scanner ${this.opts.host}:${this.opts.scannerPort} · ${this.signals.length} signals`);
+  }
+
+  private run() {
+    if (this.loop) return;
+    if (this.opts.waitForClient) { const now = plantNow(this.opts.tz); this.S.t = Math.max(this.S.t, now.sec); this.opts.log('line server connected: the emulated line starts'); }
+    this.loop = setInterval(() => this.second(), 1000 / this.opts.speed);
   }
 
   async stop() {
@@ -126,7 +135,7 @@ export class PlantEmulator {
 
   private startScanner() {
     return new Promise<void>((resolve) => {
-      this.scanner = net.createServer((c) => { this.scannerClients.add(c); c.on('close', () => this.scannerClients.delete(c)); c.on('error', () => {}); });
+      this.scanner = net.createServer((c) => { this.scannerClients.add(c); if (this.opts.waitForClient) this.run(); c.on('close', () => this.scannerClients.delete(c)); c.on('error', () => {}); });
       this.scanner.listen(this.opts.scannerPort, this.opts.host, () => resolve());
     });
   }

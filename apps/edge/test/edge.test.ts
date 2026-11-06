@@ -109,7 +109,7 @@ describe('edge server', () => {
     srv.host.clock.mode = 'live';
     const refused = await a.send({ type: 'SIM_SPEED', speed: 60 });
     expect(refused.ok).toBe(false);
-    expect(refused.error).toMatch(/simulation mode/);
+    expect(refused.error).toMatch(/runs live/);
     srv.host.clock.mode = 'simulation';
     a.close();
   });

@@ -7,14 +7,18 @@ import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI } 
 import { ANDON_LABEL, ANDON_TONE, Horn, Icon, MgMark, STATUS_ICON, tv } from '../lib/ui-kit.js';
 
 export function IdIsland() {
-  const S = RT.S, p = M.pace(S), sh = S.shift || {};
+  const S = RT.S, p = M.pace(S), sh = S.shift || {}, devDown = S.alarms.filter((a) => a.type === 'DEVICE' && a.resolvedT == null);
   return html`<div class="seg id-island">
     <div class="brand"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile</div></div></div>
     <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro" style=${{ color: S.planned ? 'var(--paused)' : null }}>${S.planned ? (S.planned.kind === 'OFF' ? 'No shift' : S.planned.label) : sh.name}</span></div>
     ${RT.conn.mode === 'local'
       ? html`<span class="sim-tag" title="All data is simulated in this browser. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>`
       : RT.conn.state === 'live'
-        ? html`<span class="sim-tag edge" title=${`Live from the line server (edge ${RT.conn.server || ''}). Every screen shows the same plant. The plant itself is still simulated.`}><${Icon} n="flask" size=${10} />SIM · EDGE</span>`
+        ? RT.conn.mode === 'live'
+          ? devDown.length
+            ? html`<span class="sim-tag down" role="status" title=${devDown.map((a) => a.msg).join(' · ')}><${Icon} n="wifioff" size=${10} />DEVICE DOWN</span>`
+            : html`<span class="sim-tag live" title="Live: the plant's PLC and scanners drive what every screen shows."><${Icon} n="link" size=${10} />LIVE</span>`
+          : html`<span class="sim-tag edge" title=${RT.conn.mode === 'shadow' ? 'Shadow: the plant devices are connected and logged (Settings → Devices), but the screens show the simulator.' : `Live from the line server (edge ${RT.conn.server || ''}). Every screen shows the same plant. The plant itself is still simulated.`}><${Icon} n="flask" size=${10} />${RT.conn.mode === 'shadow' ? 'SIM · SHADOW' : 'SIM · EDGE'}</span>`
         : html`<span class="sim-tag down" role="status" title="Lost the line server. Showing the last data received; reconnecting."><${Icon} n="wifioff" size=${10} />RECONNECTING</span>`}
     <div class="shiftbar" title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;

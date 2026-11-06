@@ -21,7 +21,7 @@ const listeners = new Set();
 export const onConnChange = (f) => (listeners.add(f), () => listeners.delete(f));
 const setConn = (state) => { if (RT.conn.state === state) return; RT.conn.state = state; RT.conn.since = Date.now(); listeners.forEach((f) => f(state)); bump(); };
 
-function applyClock(c) { if (!c) return; RT.speed = c.speed; RT.running = c.running; RT.conn.mode = c.mode === 'live' ? 'live' : 'remote'; }
+function applyClock(c) { if (!c) return; RT.speed = c.speed; RT.running = c.running; RT.conn.mode = c.mode === 'live' ? 'live' : c.mode === 'shadow' ? 'shadow' : 'remote'; }
 
 function onMessage(m) {
   RT.conn.lastAt = performance.now();

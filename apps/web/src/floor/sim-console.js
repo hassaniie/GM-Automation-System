@@ -6,6 +6,7 @@ import { Icon } from '../lib/ui-kit.js';
 import { powerCut, setLink } from '../screens.js';
 
 export function SimConsole() {
+  if (RT.conn.mode === 'live') return null; // the real plant: no simulator controls
   const S = RT.S, C = S.cfg, open = RT.ui.simOpen;
   const setC = (k, v) => Act.simConfig(k, v);
   // called as a function, not as <${Tog}>: a component defined in render would remount on every update

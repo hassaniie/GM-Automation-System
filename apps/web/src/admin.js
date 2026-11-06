@@ -10,6 +10,7 @@ import { Auth, ROLES, can, hashPw, initials, jget, jset, userName } from './auth
 import { go } from './lib/router.js';
 import { AREAS, M, POS, RT, fmtClock, fmtDur, html, setUI, useEffect, useReducer, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
+import { DeviceAdmin } from './devices.js';
 
 const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
 export function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
@@ -26,10 +27,10 @@ const fromHM = (s) => { const [h, m] = (s || '0:0').split(':').map(Number); retu
 const ADMIN_TABS = [
   ['takt', 'Takt time', 'clock', 'takt'], ['plan', 'Targets & plan', 'calendar', 'plan'], ['shifts', 'Shifts & breaks', 'hour', 'plan'],
   ['buzzers', 'Buzzers', 'buzz', 'buzzer'], ['correct', 'Position correction', 'swap', 'correct'], ['users', 'Users', 'users', 'users'],
-  ...(REMOTE ? [['displays', 'Displays', 'tv', 'users']] : []), ['audit', 'Audit log', 'shield', 'audit'],
+  ...(REMOTE ? [['displays', 'Displays', 'tv', 'users'], ['devices', 'Devices', 'link', 'users']] : []), ['audit', 'Audit log', 'shield', 'audit'],
 ];
 export const adminAllowed = () => ADMIN_TABS.some((t) => can(t[3]));
-const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), displays: (p) => DisplayAdmin(p), audit: (p) => AuditAdmin(p) };
+const ADMIN_VIEWS = { takt: (p) => TaktAdmin(p), plan: (p) => PlanAdmin(p), shifts: (p) => ShiftAdmin(p), buzzers: (p) => BuzzerAdmin(p), correct: (p) => CorrectAdmin(p), users: (p) => UserAdmin(p), displays: (p) => DisplayAdmin(p), devices: () => html`<${DeviceAdmin} />`, audit: (p) => AuditAdmin(p) };
 
 export function AdminPage() {
   const tabs = ADMIN_TABS.filter((t) => can(t[3]));

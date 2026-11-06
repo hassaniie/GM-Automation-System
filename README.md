@@ -59,11 +59,45 @@ For development, `pnpm dev:all` runs the server with reload and Vite with `/api`
 | `/api/auth/*` | Sign-in, sign-out, me, unlock, config, demo switch, display link exchange, single sign-on |
 | `/api/users`, `/api/displays` | Accounts and TV links (administrators) |
 | `GET /api/reports?from&to&shift&line` | Report tables and figures (JSON); `/api/reports/file.xlsx` and `/file.pdf` take the same query. `GET /api/reports/saved`, `/saved/:id`: end-of-shift reports |
+| `GET /api/devices`, `POST /api/devices/test` | Device status, live signal values and log; a signal by hand in simulation or shadow mode (administrators) |
 | `GET /api/audit`, `GET /api/vehicles/:vin`, `GET /api/snapshot` | Audit log, vehicle record, full state |
 
 State-changing REST calls need the `X-MG-Client: web` header; responses carry a Content Security Policy and the usual security headers.
 
 **Running it at the plant.** Serve it behind HTTPS (a reverse proxy such as Caddy or nginx with the plant's certificate) so cookies are marked Secure. Back up the database nightly (`pg_dump -Fc`) to another machine. Full installation and operations are Phase 7.
+
+### Connecting the plant (PLC and scanners)
+
+The Andon rules only listen to plant events. In simulation they come from the simulator; on site they come from the plant's devices through the line server (`apps/edge/src/devices`). Nothing is ever written to a device.
+
+| `PLANT_MODE` | What happens |
+|---|---|
+| `simulation` (default) | No devices; the simulator runs the plant |
+| `shadow` | Devices are connected and every signal is logged in Settings → Devices, but the screens keep showing the simulator. Use it to check each signal before going live |
+| `live` | Device signals drive the plant on the plant clock (`PLANT_TZ`, default `Asia/Karachi`). Simulator controls are refused |
+
+**The device map** (`config/devices.json`, or `DEVICES_FILE`) says what each address means. It is checked at start-up, and a mistake stops the server with a clear message. Examples: `config/devices.example.json` (OPC UA) and `config/devices.modbus.example.json` (Modbus TCP).
+- Devices: `opcua` (endpoint, security mode and policy, optional user with the password in `DEVICE_<ID>_PASSWORD`), `modbus` (host, port, unit id, poll interval; addresses `coil:N` or `input:N`), `scanner-tcp` (a network scanner at TL1 sending one VIN per line; serial scanners connect through a serial-to-Ethernet converter).
+- Signals: `presence` (carrier at a position: on = arrived, off = left), `transfer-done` (TL5 → TL6 skid to hanger, FL1 → FL2 hanger to fixture), `photo-eye` (FL7 line-off), `call-button` (with `callType` SUP or MNT), `work-done` (optional). Each has `invert` for active-low inputs and `debounceMs`.
+- The PLC does not need to know carrier or vehicle ids: tracking works them out. Anything tracking cannot follow raises a TRACKING alarm asking for Correct position, and the line keeps running.
+- A device that disconnects or sends nothing for `silentAfterSec` raises a DEVICE alarm and the top bar shows DEVICE DOWN until it is back.
+
+**Without hardware.** `pnpm emulate:plant` runs the simulator behind a real OPC UA server, a Modbus TCP server and a network scanner, starting from an empty line on the plant clock, and writes a matching map to `config/devices.emulator.json`. Then:
+
+```sh
+PLANT_MODE=live DEVICES_FILE=config/devices.emulator.json pnpm start:edge
+```
+
+The emulated line starts when the server connects. `PROTOCOL=modbus` serves the Modbus map instead.
+
+**Commissioning on site.**
+1. Fill in `config/devices.json` from MG JW's PLC address list and scanner settings (clarification questions 12–15).
+2. Run in `shadow` mode. In Settings → Devices, check each device connects, then move each carrier, press each button and pass the photo-eye, and watch the matching signal flash and the right event appear in the log.
+3. Switch to `live` at a shift boundary. Carriers the PLC reports on first connection are seated. Units already on the line are entered with Correct position; new units are registered by the TL1 scanner.
+
+**How it was proved without hardware.**
+- `packages/sim/test/live-replay.test.ts` reduces a simulated day to what the devices would report (no ids) and drives a live engine with it alone: the same units line off in the same order at the same times, with the same production, calls, cycle times and downtime.
+- `apps/edge/test/devices.test.ts` runs the line server against the emulator over real OPC UA, Modbus and TCP connections, including dropped and silent devices.
 
 The top bar shows where data comes from: `SIMULATION` (engine in this browser), `SIM · EDGE` (live from the edge server) or `RECONNECTING` (server unreachable; the last data stays on screen).
 
@@ -102,7 +136,9 @@ A pnpm workspace:
 | `packages/engine` | Facade: the `MGE` object the screens and scene use, assembled from `core` and `sim`. Its tests are the 42 URD checks |
 | `packages/sync` | Snapshot and patch format between the edge server and the screens |
 | `packages/reports` | Report definitions shared by the browser and the server: the tables from the live state or from the database, figures, export sheets |
-| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, sign-in and permissions (`src/auth`), PostgreSQL storage, migrations and checkpoints (`src/db`, `src/persist.ts`), reports, Excel and PDF (`src/reports`), serves the screens |
+| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, sign-in and permissions (`src/auth`), PostgreSQL storage, migrations and checkpoints (`src/db`, `src/persist.ts`), reports, Excel and PDF (`src/reports`), plant devices (`src/devices`), serves the screens |
+| `apps/emulator` | Plant emulator: the simulator served as an OPC UA PLC, a Modbus TCP PLC and a network VIN scanner, for testing without hardware (not deployed) |
+| `config/` | Device maps: examples for OPC UA and Modbus TCP |
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |

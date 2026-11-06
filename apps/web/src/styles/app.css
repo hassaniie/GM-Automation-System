@@ -127,6 +127,7 @@ button { cursor: pointer; }
 @keyframes pulse-n { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--crit) 70%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
 .sim-tag { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: .16em; color: var(--sim); border: 1px solid color-mix(in srgb, var(--sim) 50%, transparent); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--sim) 14%, transparent) 0 5px, transparent 5px 10px); white-space: nowrap; }
 .sim-tag.edge { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, transparent); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ok) 12%, transparent) 0 5px, transparent 5px 10px); }
+.sim-tag.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 60%, transparent); background: color-mix(in srgb, var(--ok) 12%, transparent); }
 .sim-tag.down { color: var(--crit); border-color: color-mix(in srgb, var(--crit) 55%, transparent); background: color-mix(in srgb, var(--crit) 10%, transparent); animation: blink 1.2s steps(2, start) infinite; }
 .conn-banner { position: fixed; top: 84px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; background: var(--crit); color: #fff; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: calc(100vw - 32px); }
 .conn-banner span { opacity: .9; }
@@ -1002,3 +1003,17 @@ svg.plan text { font-family: var(--font-mono); }
   .ticks::before, .ticks::after { display: none !important; }
 }
 .si-wait { margin: 18px 0; color: var(--muted); font-size: 13px; }
+
+/* ═════════ Settings → Devices (commissioning) ═════════ */
+.devices { display: grid; gap: 16px; }
+.dev-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.dev-card { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid var(--hair); background: var(--fill); border-left: 3px solid var(--hair-2); }
+.dev-card.good { border-left-color: var(--ok); } .dev-card.bad { border-left-color: var(--crit); }
+.dev-state { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.dev-state.good { color: var(--ok); } .dev-state.bad { color: var(--crit); }
+.dev-val { display: inline-block; min-width: 44px; padding: 2px 6px; border-radius: 4px; font: 600 11px/1.4 var(--font-mono, monospace); letter-spacing: .06em; border: 1px solid var(--hair-2); color: var(--muted); }
+.dev-val.on { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 60%, transparent); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.devices tr.flash td { animation: devflash 1.5s ease-out; }
+.devices tr.problem td { color: var(--crit); }
+@keyframes devflash { from { background: color-mix(in srgb, var(--warn) 30%, transparent); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .devices tr.flash td { animation: none; background: color-mix(in srgb, var(--warn) 18%, transparent); } }
