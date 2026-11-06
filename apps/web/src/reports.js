@@ -7,13 +7,13 @@
    The table definitions are shared (@mg/reports).
    ════════════════════════════════════════════════════════════════════════ */
 import { MAX_RANGE_DAYS, buildReport, dateRange, datasetFromState, kpis, liveHas, reportFileName, reportSheets, selection } from '@mg/reports';
-import { NoAccess, PageHead, downloadText } from './admin.js';
+import { NoAccess, downloadText } from './admin.js';
 import { can, userName } from './auth.js';
 import { api } from './lib/api.js';
 import { go } from './lib/router.js';
 import { AREAS, M, POS, RT, fmtClock, fmtDur, html, useEffect, useReducer, useState } from './lib/runtime.js';
 import { REMOTE } from './lib/source.js';
-import { Icon } from './lib/ui-kit.js';
+import { Button, Cluster, DataTable, DateInput, Field, Grid, Meter, Notice, PageHeader, Panel, Select, Stack, Stat } from './ui/index.js';
 
 const REPORT_SECTIONS = [['prod', 'Production summary'], ['cycle', 'Station cycle times'], ['down', 'Downtime'], ['off', 'Offlined vehicles'], ['calls', 'Assist calls']];
 function shiftStarted(S, date, name) { const sh = M.shiftsFor(S, date).find((x) => x.name === name); return sh && M.dayOfDate(S, date) * 86400 + sh.start <= S.t; }
@@ -90,18 +90,18 @@ function LocalReports() {
   const d = reportData(S, date, shift, line), names = M.shiftsFor(S, date).map((s) => s.name);
   const meta = { date, shift: shift === 'all' ? 'All shifts' : shift, line: lineLabel(line), sources: d.sources.join('; ') || 'no data' };
   const doXlsx = async () => { setBusy('xlsx'); const k = await exportExcel(d, meta); setBusy(k === 'csv' ? 'csv' : null); };
-  return html`<div class="page-wrap reports" id="report-print">
-    <${PageHead} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. ${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
-      <button class="btn" aria-busy=${busy === 'xlsx' ? 'true' : 'false'} onClick=${doXlsx}><${Icon} n="download" />Excel</button><button class="btn" onClick=${() => window.print()}><${Icon} n="file" />PDF</button></${PageHead}>
-    ${busy === 'csv' ? html`<div class="result bad" style=${{ marginBottom: 12 }}>The Excel library could not load (offline?), so a CSV with every table was downloaded instead.</div>` : null}
-    <div class="rep-filters noprint" role="group" aria-label="Report filters">
-      <div class="field"><label for="rp-d">Day</label><select id="rp-d" value=${date} onChange=${(e) => setDate(e.target.value)}>${days.map((k, i) => html`<option key=${k} value=${k}>${wd(k)}${i === 0 ? ' · today' : ''}</option>`)}</select></div>
+  return html`<${Stack} gap=${4} class="page-wrap reports" id="report-print">
+    <${PageHeader} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. ${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
+      <${Button} icon="download" loading=${busy === 'xlsx'} onClick=${doXlsx}>Excel<//><${Button} icon="file" onClick=${() => window.print()}>PDF<//></${PageHeader}>
+    ${busy === 'csv' ? html`<${Notice} kind="warning">The Excel library could not load (offline?), so a CSV with every table was downloaded instead.<//>` : null}
+    <${Filters}>
+      <${Field} label="Day"><${Select} value=${date} onChange=${setDate} options=${days.map((k, i) => [k, `${wd(k)}${i === 0 ? ' · today' : ''}`])} /><//>
       <${ShiftLineFilters} names=${names} shift=${shift} setShift=${setShift} line=${line} setLine=${setLine} />
       <${Jump} />
-    </div>
+    </${Filters}>
     <${ReportBody} d=${d} line=${line} />
     <p class="note">Built in this browser from this session's records; earlier days are simulated history. On the line server, reports come from its database. See <button class="linkish" onClick=${() => go('how')}>How it works</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
-  </div>`;
+  </${Stack}>`;
 }
 
 /* line server: from the database */
@@ -124,40 +124,44 @@ function ServerReports() {
   const rangeText = from === to ? wd(from) : `${wd(from)} – ${wd(to)}`;
   const problem = !days ? (from > to ? 'The start date is after the end date.' : `Choose at most ${MAX_RANGE_DAYS} days.`) : null;
   const d = res && res.q === q ? res.report : null;
-  return html`<div class="page-wrap reports" id="report-print">
-    <${PageHead} k="Reports · URD req 28–29" title=${`${rangeText} · ${shift === 'all' ? 'All shifts' : shift} · ${lineLabel(line)}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. Source: <b>line server database</b>${d && live ? ' · updates every 10 s' : ''}.`}>
-      <a class=${'btn' + (days ? '' : ' disabled')} aria-disabled=${days ? 'false' : 'true'} href=${days ? `/api/reports/file.xlsx?${q}` : undefined} download><${Icon} n="download" />Excel</a><a class=${'btn' + (days ? '' : ' disabled')} aria-disabled=${days ? 'false' : 'true'} href=${days ? `/api/reports/file.pdf?${q}` : undefined} download><${Icon} n="file" />PDF</a></${PageHead}>
-    <div class="rep-filters noprint" role="group" aria-label="Report filters">
-      <div class="field"><label for="rp-f">From</label><input id="rp-f" type="date" max=${today} value=${from} onChange=${(e) => e.target.value && setFromDate(e.target.value)} /></div>
-      <div class="field"><label for="rp-t">To</label><input id="rp-t" type="date" min=${from} max=${today} value=${to} onChange=${(e) => e.target.value && setTo(e.target.value)} /></div>
+  return html`<${Stack} gap=${4} class="page-wrap reports" id="report-print">
+    <${PageHeader} k="Reports · URD req 28–29" title=${`${rangeText} · ${shift === 'all' ? 'All shifts' : shift} · ${lineLabel(line)}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. Source: <b>line server database</b>${d && live ? ' · updates every 10 s' : ''}.`}>
+      <${Button} icon="download" href=${`/api/reports/file.xlsx?${q}`} disabled=${!days} download>Excel<//><${Button} icon="file" href=${`/api/reports/file.pdf?${q}`} disabled=${!days} download>PDF<//></${PageHeader}>
+    <${Filters}>
+      <${Field} label="From"><${DateInput} max=${today} value=${from} onChange=${(v) => v && setFromDate(v)} /><//>
+      <${Field} label="To"><${DateInput} min=${from} max=${today} value=${to} onChange=${(v) => v && setTo(v)} /><//>
       <${ShiftLineFilters} names=${names} shift=${shift} setShift=${setShift} line=${line} setLine=${setLine} />
       <${Jump} byDay=${!!(d && d.byDay.length)} />
-    </div>
-    ${problem ? html`<div class="result bad">${problem}</div>` : err ? html`<div class="result bad">${err}</div>` : null}
-    ${d && res.empty.length ? html`<div class="result" style=${{ marginBottom: 4 }}>No data stored for ${res.empty.length === 1 ? 'this day' : 'these days'}: ${res.empty.map(wd).join(', ')}.</div>` : null}
+    </${Filters}>
+    ${problem ? html`<${Notice} kind="error">${problem}<//>` : err ? html`<${Notice} kind="error">${err}<//>` : null}
+    ${d && res.empty.length ? html`<${Notice} kind="info">No data stored for ${res.empty.length === 1 ? 'this day' : 'these days'}: ${res.empty.map(wd).join(', ')}.<//>` : null}
     ${!problem && !d && !err ? html`<div class="note" role="status">Loading the report from the line server…</div>` : null}
     ${d ? html`<${ReportBody} d=${d} line=${line} />` : null}
     <${SavedReports} saved=${saved} />
     <p class="note">Stored on the line server and kept for the retention period; see <button class="linkish" onClick=${() => go('how')}>How it works</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
-  </div>`;
+  </${Stack}>`;
 }
 
+const Filters = ({ children }) => html`<${Panel} class="rep-filters noprint" role="group" aria-label="Report filters"><${Cluster} gap=${3} align="flex-end">${children}</${Cluster}><//>`;
+
 function SavedReports({ saved }) {
-  return html`<section class="panel ticks rsec noprint" id="rs-saved"><h3>Saved shift reports</h3><div class="q">Made by the line server at the end of every shift, for all lines.</div>
-    <table class="data"><thead><tr><th>Date</th><th>Shift</th><th>Made at</th><th>Files</th></tr></thead><tbody>
-      ${!saved ? html`<tr><td colspan="4" class="c-muted">Loading…</td></tr>` : saved.length ? saved.map((r) => html`<tr key=${r.shiftKey}><td class="mono" style=${{ textAlign: 'left' }}>${r.date}</td><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${new Date(r.at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}</td>
-        <td>${r.xlsx ? html`<a class="linkish" href=${`/api/reports/saved/${r.xlsx}`} download>Excel</a>` : null}${r.xlsx && r.pdf ? ' · ' : ''}${r.pdf ? html`<a class="linkish" href=${`/api/reports/saved/${r.pdf}`} download>PDF</a>` : null}</td></tr>`) : html`<tr><td colspan="4" class="c-muted">No shift has ended on the line server yet.</td></tr>`}
-    </tbody></table></section>`;
+  const cols = [
+    { key: 'date', label: 'Date', type: 'code' }, { key: 'shift', label: 'Shift' },
+    { key: 'at', label: 'Made at', type: 'time', render: (r) => new Date(r.at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) },
+    { key: 'files', label: 'Files', type: 'action', render: (r) => html`<${Cluster} gap=${1} justify="flex-end" nowrap=${true}>${r.xlsx ? html`<${Button} size="sm" variant="ghost" icon="download" href=${`/api/reports/saved/${r.xlsx}`} download>Excel<//>` : null}${r.pdf ? html`<${Button} size="sm" variant="ghost" icon="file" href=${`/api/reports/saved/${r.pdf}`} download>PDF<//>` : null}</${Cluster}>` },
+  ];
+  return html`<${Panel} ticks=${true} class="rsec noprint" id="rs-saved" title="Saved shift reports" sub="Made by the line server at the end of every shift, for all lines.">
+    <${DataTable} columns=${cols} rows=${saved} rowKey=${(r) => r.shiftKey} empty="No shift has ended on the line server yet." /><//>`;
 }
 
 function ShiftLineFilters({ names, shift, setShift, line, setLine }) {
-  return html`<div class="field"><label for="rp-s">Shift</label><select id="rp-s" value=${shift} onChange=${(e) => setShift(e.target.value)}><option value="all">All shifts</option>${names.map((n) => html`<option key=${n} value=${n}>${n}</option>`)}</select></div>
-    <div class="field"><label for="rp-l">Line</label><select id="rp-l" value=${line} onChange=${(e) => setLine(e.target.value)}><option value="all">All lines</option>${M.AREA_IDS.map((a) => html`<option key=${a} value=${a}>${AREAS[a].name}</option>`)}</select></div>`;
+  return html`<${Field} label="Shift"><${Select} value=${shift} onChange=${setShift} options=${[['all', 'All shifts'], ...names.map((n) => [n, n])]} /><//>
+    <${Field} label="Line"><${Select} value=${line} onChange=${setLine} options=${[['all', 'All lines'], ...M.AREA_IDS.map((a) => [a, AREAS[a].name])]} /><//>`;
 }
 
 function Jump({ byDay }) {
   const sections = byDay ? [['day', 'By day'], ...REPORT_SECTIONS] : REPORT_SECTIONS;
-  return html`<nav class="rep-jump">${sections.map(([k, l]) => html`<a key=${k} href=${'#/reports'} onClick=${(e) => { e.preventDefault(); const el = document.getElementById('rs-' + k); el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>${l}</a>`)}</nav>`;
+  return html`<nav class="rep-jump" aria-label="Report sections">${sections.map(([k, l]) => html`<a key=${k} href=${'#/reports'} onClick=${(e) => { e.preventDefault(); const el = document.getElementById('rs-' + k); el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>${l}</a>`)}</nav>`;
 }
 
 /* the KPI row and the tables; the same for both sources */
@@ -165,40 +169,51 @@ function ReportBody({ d, line }) {
   const k = kpis(d, line), sum = (l, f) => l.reduce((x, r) => x + (r[f] || 0), 0);
   const maxDown = Math.max(1, ...d.down.map((r) => Math.max(r.down, r.caused)));
   const pct = (r) => (r.target ? Math.round((r.done / r.target) * 100) : 0);
-  return html`<div class="rep-kpis"><div><span class="micro">${line === 'all' ? 'Vehicles completed (Final)' : 'Completed'}</span><b class="num">${k.done}<small>/ ${k.target}</small></b></div>
-      <div><span class="micro">Offlined</span><b class="num">${k.offline}</b></div><div><span class="micro">Downtime (line total)</span><b class="num">${fmtDur(k.down)}</b></div>
-      <div><span class="micro">Assist calls</span><b class="num">${k.calls}</b></div><div><span class="micro">Avg response</span><b class="num">${k.avgResponse != null ? fmtDur(k.avgResponse) : '—'}</b></div><div><span class="micro">Avg time to clear</span><b class="num">${k.avgClear != null ? fmtDur(k.avgClear) : '—'}</b></div></div>
-
-    ${d.byDay.length ? html`<section class="panel ticks rsec" id="rs-day"><h3>By day</h3><div class="q">Totals of every shift on each day.</div>
-      <table class="data"><thead><tr><th>Date</th><th>Line</th><th>Target</th><th>Completed</th><th>Downtime</th><th>Attainment</th></tr></thead><tbody>
-        ${d.byDay.map((r, i) => html`<tr key=${i}><td class="mono" style=${{ textAlign: 'left' }}>${wd(r.date)}</td><td style=${{ textAlign: 'left' }}>${r.line}</td><td class="mono">${r.target}</td><td class="mono">${r.done}</td><td class="mono">${fmtDur(r.down)}</td><td><span class="attn"><i style=${{ width: `${Math.min(100, pct(r))}%` }}></i></span><span class="mono">${pct(r)}%</span></td></tr>`)}
-      </tbody></table></section>` : null}
-
-    <section class="panel ticks rsec" id="rs-prod"><h3>Production summary</h3><div class="q">Completed is counted when a unit leaves the last station of each line (TL6, CL4, FL7). Offlined units never count.</div>
-      <table class="data"><thead><tr><th>Shift</th><th>Line</th><th>Target</th><th>Completed</th><th>Remaining</th><th>Offlined</th><th>Downtime</th><th>Attainment</th></tr></thead><tbody>
-        ${d.prod.length ? d.prod.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td style=${{ textAlign: 'left' }}>${r.line}</td><td class="mono">${r.target}</td><td class="mono">${r.done}</td><td class="mono">${r.remaining}</td><td class="mono">${r.offline}</td><td class="mono">${fmtDur(r.down)}</td><td><span class="attn"><i style=${{ width: `${Math.min(100, pct(r))}%` }}></i></span><span class="mono">${pct(r)}%</span></td></tr>`) : html`<tr><td colspan="8" class="c-muted">No shift has run yet for this selection.</td></tr>`}
-      </tbody></table></section>
-
-    <section class="panel ticks rsec" id="rs-cycle"><h3>Station cycle times</h3><div class="q">Cycle time = time a vehicle spent at the station, breaks excluded. The marker is takt.</div>
-      <table class="data"><thead><tr><th>Shift</th><th>Station</th><th>Cycles</th><th>Average</th><th style=${{ minWidth: 160 }}></th><th>Longest</th><th>Takt</th><th>Over takt</th></tr></thead><tbody>
-        ${d.cycle.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${r.station}</td><td class="mono">${r.n}</td><td class="mono" style=${{ color: r.avg > r.takt ? 'var(--crit)' : null }}>${fmtDur(r.avg)}</td>
-          <td><span class="cbar2"><i style=${{ width: `${Math.min(100, (r.avg / (r.takt * 1.4)) * 100)}%`, background: r.avg > r.takt ? 'var(--crit)' : r.avg > r.takt * RT.S.cfg.warnPct ? 'var(--warn)' : 'var(--ok)' }}></i><b style=${{ left: `${(1 / 1.4) * 100}%` }}></b></span></td>
-          <td class="mono" style=${{ color: r.max > r.takt ? 'var(--crit)' : null }}>${fmtDur(r.max)}</td><td class="mono c-muted">${fmtDur(r.takt)}</td><td class="mono">${r.over}</td></tr>`)}
-      </tbody></table></section>
-
-    <section class="panel ticks rsec" id="rs-down"><h3>Downtime</h3><div class="q">At the station: time its unit was over takt. Caused: the same time, put down to the station that held the others up. Planned stops are excluded.</div>
-      <table class="data"><thead><tr><th>Shift</th><th>Station</th><th>At the station</th><th>Caused</th><th style=${{ minWidth: 200 }}></th></tr></thead><tbody>
-        ${d.down.filter((r) => r.down || r.caused).length ? d.down.filter((r) => r.down || r.caused).sort((a, b) => b.caused - a.caused).map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${r.station}</td><td class="mono">${fmtDur(r.down)}</td><td class="mono">${fmtDur(r.caused)}</td><td><span class="cbar2"><i style=${{ width: `${(r.caused / maxDown) * 100}%`, background: 'var(--crit)' }}></i></span></td></tr>`) : html`<tr><td colspan="5" class="c-muted">No downtime in this selection.</td></tr>`}
-      </tbody></table></section>
-
-    <section class="panel ticks rsec" id="rs-off"><h3>Offlined vehicles</h3>
-      <table class="data"><thead><tr><th>Shift</th><th>Time</th><th>VIN</th><th>Station</th><th>Reason</th><th>By</th><th>Returned</th></tr></thead><tbody>
-        ${d.off.length ? d.off.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${fmtClock(r.t, false)}</td><td class="mono">${r.vin}</td><td class="mono">${r.station}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason}</td><td style=${{ textAlign: 'left' }}>${r.by}</td><td class="mono">${r.returned || '—'}</td></tr>`) : html`<tr><td colspan="7" class="c-muted">No vehicles offlined in this selection.</td></tr>`}
-      </tbody></table></section>
-
-    <section class="panel ticks rsec" id="rs-calls"><h3>Assist calls</h3><div class="q">Response = call to help arriving. Time to clear = call to the responder clearing it.</div>
-      <div class="rep-kpis small">${['Supervisor', 'Maintenance'].map((t) => { const l = d.calls.filter((c) => c.type === t && c.response != null); return html`<div key=${t}><span class=${'micro c-' + (t === 'Supervisor' ? 'sup' : 'mnt')}>${t}</span><b class="num">${d.calls.filter((c) => c.type === t).length}</b><span class="note">avg response ${l.length ? fmtDur(sum(l, 'response') / l.length) : '—'} · longest ${l.length ? fmtDur(Math.max(...l.map((c) => c.response))) : '—'}</span></div>`; })}</div>
-      <table class="data"><thead><tr><th>Shift</th><th>Time</th><th>Station</th><th>Call</th><th>Response</th><th>To clear</th><th>Cleared by</th></tr></thead><tbody>
-        ${d.calls.length ? d.calls.map((r, i) => html`<tr key=${i}><td style=${{ textAlign: 'left' }}>${r.shift}</td><td class="mono">${fmtClock(r.t, false)}</td><td class="mono">${r.station}</td><td style=${{ textAlign: 'left' }} class=${r.type === 'Supervisor' ? 'c-sup' : 'c-mnt'}>${r.type}</td><td class="mono" style=${{ color: r.response > 180 ? 'var(--crit)' : null }}>${r.response != null ? fmtDur(r.response) : 'open'}</td><td class="mono">${r.total != null ? fmtDur(r.total) : 'open'}</td><td style=${{ textAlign: 'left' }}>${r.by || '—'}</td></tr>`) : html`<tr><td colspan="7" class="c-muted">No calls in this selection.</td></tr>`}
-      </tbody></table></section>`;
+  const attain = (r) => html`<${Cluster} gap=${2} justify="flex-end" nowrap=${true}><${Meter} size="sm" value=${pct(r) / 100} label="Attainment" valueText=${`${pct(r)}%`} style=${{ width: 80 }} class="ds-meter--inline" /><span>${pct(r)}%</span></${Cluster}>`;
+  const over = (v, t) => (v > t ? 'var(--ds-status-critical)' : null);
+  const byDay = [
+    { key: 'date', label: 'Date', type: 'code', render: (r) => wd(r.date) }, { key: 'line', label: 'Line' },
+    { key: 'target', label: 'Target', type: 'number' }, { key: 'done', label: 'Completed', type: 'number' },
+    { key: 'down', label: 'Downtime', type: 'duration' }, { key: 'att', label: 'Attainment', type: 'number', render: attain },
+  ];
+  const prod = [
+    { key: 'shift', label: 'Shift' }, { key: 'line', label: 'Line' }, { key: 'target', label: 'Target', type: 'number' }, { key: 'done', label: 'Completed', type: 'number' },
+    { key: 'remaining', label: 'Remaining', type: 'number' }, { key: 'offline', label: 'Offlined', type: 'number' }, { key: 'down', label: 'Downtime', type: 'duration' },
+    { key: 'att', label: 'Attainment', type: 'number', render: attain },
+  ];
+  const cycle = [
+    { key: 'shift', label: 'Shift' }, { key: 'station', label: 'Station', type: 'code' }, { key: 'n', label: 'Cycles', type: 'number' },
+    { key: 'avg', label: 'Average', type: 'duration', render: (r) => html`<span style=${{ color: over(r.avg, r.takt) }}>${fmtDur(r.avg)}</span>` },
+    { key: 'bar', label: '', width: 160, render: (r) => html`<${Meter} size="sm" value=${r.avg / (r.takt * 1.4)} marker=${1 / 1.4} tone=${r.avg > r.takt ? 'critical' : r.avg > r.takt * RT.S.cfg.warnPct ? 'warning' : null} label=${`${r.station} average against takt`} valueText=${`${fmtDur(r.avg)} of ${fmtDur(r.takt)}`} />` },
+    { key: 'max', label: 'Longest', type: 'duration', render: (r) => html`<span style=${{ color: over(r.max, r.takt) }}>${fmtDur(r.max)}</span>` },
+    { key: 'takt', label: 'Takt', type: 'duration' }, { key: 'over', label: 'Over takt', type: 'number' },
+  ];
+  const down = [
+    { key: 'shift', label: 'Shift' }, { key: 'station', label: 'Station', type: 'code' }, { key: 'down', label: 'At the station', type: 'duration' }, { key: 'caused', label: 'Caused', type: 'duration' },
+    { key: 'bar', label: '', width: 200, render: (r) => html`<${Meter} size="sm" value=${r.caused / maxDown} label=${`${r.station} downtime caused`} />` },
+  ];
+  const off = [
+    { key: 'shift', label: 'Shift' }, { key: 't', label: 'Time', type: 'time', render: (r) => fmtClock(r.t, false) }, { key: 'vin', label: 'VIN', type: 'vin' },
+    { key: 'station', label: 'Station', type: 'code' }, { key: 'reason', label: 'Reason', wrap: true }, { key: 'by', label: 'By' }, { key: 'returned', label: 'Returned', type: 'time', render: (r) => r.returned || '—' },
+  ];
+  const calls = [
+    { key: 'shift', label: 'Shift' }, { key: 't', label: 'Time', type: 'time', render: (r) => fmtClock(r.t, false) }, { key: 'station', label: 'Station', type: 'code' },
+    { key: 'type', label: 'Call', render: (r) => html`<span class=${r.type === 'Supervisor' ? 'c-sup' : 'c-mnt'}>${r.type}</span>` },
+    { key: 'response', label: 'Response', type: 'duration', render: (r) => (r.response != null ? html`<span style=${{ color: r.response > 180 ? 'var(--ds-status-critical)' : null }}>${fmtDur(r.response)}</span>` : 'open') },
+    { key: 'total', label: 'To clear', type: 'duration', render: (r) => (r.total != null ? fmtDur(r.total) : 'open') }, { key: 'by', label: 'Cleared by', render: (r) => r.by || '—' },
+  ];
+  const downRows = d.down.filter((r) => r.down || r.caused).sort((a, b) => b.caused - a.caused);
+  return html`<${Grid} min=${170} class="rep-kpis">
+      <${Panel}><${Stat} label=${line === 'all' ? 'Vehicles completed (Final)' : 'Completed'} value=${k.done} target=${k.target} size="lg" /><//>
+      <${Panel}><${Stat} label="Offlined" value=${k.offline} size="lg" /><//><${Panel}><${Stat} label="Downtime (line total)" value=${fmtDur(k.down)} size="lg" /><//>
+      <${Panel}><${Stat} label="Assist calls" value=${k.calls} size="lg" /><//><${Panel}><${Stat} label="Avg response" value=${k.avgResponse != null ? fmtDur(k.avgResponse) : '—'} size="lg" /><//>
+      <${Panel}><${Stat} label="Avg time to clear" value=${k.avgClear != null ? fmtDur(k.avgClear) : '—'} size="lg" /><//></${Grid}>
+    ${d.byDay.length ? html`<${Panel} ticks=${true} class="rsec" id="rs-day" title="By day" sub="Totals of every shift on each day."><${DataTable} columns=${byDay} rows=${d.byDay} /><//>` : null}
+    <${Panel} ticks=${true} class="rsec" id="rs-prod" title="Production summary" sub="Completed is counted when a unit leaves the last station of each line (TL6, CL4, FL7). Offlined units never count."><${DataTable} columns=${prod} rows=${d.prod} empty="No shift has run yet for this selection." /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-cycle" title="Station cycle times" sub="Cycle time = time a vehicle spent at the station, breaks excluded. The marker is takt."><${DataTable} columns=${cycle} rows=${d.cycle} /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-down" title="Downtime" sub="At the station: time its unit was over takt. Caused: the same time, put down to the station that held the others up. Planned stops are excluded."><${DataTable} columns=${down} rows=${downRows} empty="No downtime in this selection." /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-off" title="Offlined vehicles"><${DataTable} columns=${off} rows=${d.off} empty="No vehicles offlined in this selection." /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-calls" title="Assist calls" sub="Response = call to help arriving. Time to clear = call to the responder clearing it.">
+      <${Cluster} gap=${7}>${['Supervisor', 'Maintenance'].map((t) => { const l = d.calls.filter((c) => c.type === t && c.response != null); return html`<${Stat} key=${t} label=${html`<span class=${'c-' + (t === 'Supervisor' ? 'sup' : 'mnt')}>${t}</span>`} value=${d.calls.filter((c) => c.type === t).length} delta=${`avg response ${l.length ? fmtDur(sum(l, 'response') / l.length) : '—'} · longest ${l.length ? fmtDur(Math.max(...l.map((c) => c.response))) : '—'}`} />`; })}</${Cluster}>
+      <${DataTable} columns=${calls} rows=${d.calls} empty="No calls in this selection." /><//>`;
 }

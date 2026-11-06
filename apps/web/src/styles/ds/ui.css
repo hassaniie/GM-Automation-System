@@ -14,7 +14,7 @@
   .ds-stack { display: grid; gap: var(--gap); align-content: start; min-width: 0; }
   .ds-cluster { display: flex; flex-wrap: wrap; gap: var(--gap); min-width: 0; }
   .ds-cluster--nowrap { flex-wrap: nowrap; }
-  .ds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(var(--min), 100%), 1fr)); gap: var(--gap); }
+  .ds-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(var(--min), 100%), 1fr)); gap: var(--gap); }
   .ds-label { font-size: var(--ds-size-11); font-weight: 600; letter-spacing: var(--ds-tracking-label); text-transform: uppercase; color: var(--ds-text-muted); }
   .ds-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -117,7 +117,7 @@
 
   /* ── stat ── */
   .ds-stat { display: grid; gap: var(--ds-space-1); min-width: 0; align-content: start; }
-  .ds-stat__label { font-size: var(--ds-size-11); font-weight: 600; letter-spacing: var(--ds-tracking-label); text-transform: uppercase; color: var(--ds-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ds-stat__label { font-size: var(--ds-size-11); font-weight: 600; letter-spacing: var(--ds-tracking-label); text-transform: uppercase; color: var(--ds-text-muted); line-height: 1.3; }
   .ds-stat__value { font-family: var(--ds-font-ui); font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; display: flex; align-items: baseline; gap: 6px; }
   .ds-stat__value small { font-family: var(--ds-font-ui); font-size: var(--ds-size-12); font-weight: 500; color: var(--ds-text-muted); }
   .ds-stat__delta { font-size: var(--ds-size-12); color: var(--ds-text-muted); }

@@ -40,9 +40,9 @@ export function Stat({ label, value, unit, target, delta, deltaTone, tone, size 
  * Progress against a whole, with an optional marker (plan / takt). value and marker are 0..1 of the track.
  * @param {{ value: number, marker?: number, tone?: string|null, label: string, size?: 'sm'|'md', valueText?: string }} p
  */
-export function Meter({ value, marker, tone, label, size = 'md', valueText, class: cls }) {
+export function Meter({ value, marker, tone, label, size = 'md', valueText, class: cls, style }) {
   const v = Math.max(0, Math.min(1, value || 0));
-  return html`<span class=${cx('ds-meter', `ds-meter--${size}`, cls)} role="meter" aria-label=${label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(v * 100)} aria-valuetext=${valueText}>
+  return html`<span class=${cx('ds-meter', `ds-meter--${size}`, cls)} style=${style} role="meter" aria-label=${label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(v * 100)} aria-valuetext=${valueText}>
     <i style=${{ width: `${v * 100}%`, background: tone ? TONE[tone] || tone : null }}></i>${marker != null ? html`<b style=${{ left: `${Math.max(0, Math.min(1, marker)) * 100}%` }}></b>` : null}</span>`;
 }
 
