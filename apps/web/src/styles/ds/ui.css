@@ -147,6 +147,7 @@
   .ds-table__msg--error { color: var(--ds-status-critical); }
   .ds-row-status td:first-child { box-shadow: inset var(--ds-border-3) 0 0 var(--edge); }
   .ds-row-link { cursor: pointer; } .ds-row-link:hover td { background: var(--ds-layer-1); }
+  .ds-row-muted td { opacity: .55; }
 
   /* ── tag ── */
   .ds-tag { --tone: var(--ds-text-secondary); display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 var(--ds-space-2); border-radius: var(--ds-radius-sm); font-size: var(--ds-size-10); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; color: var(--tone); }

@@ -1,7 +1,8 @@
 /* ════════════════════════════════════════════════════════════════════════
    Settings for authorised users: takt (req 10), targets and shift plans
    scheduled in advance (req 13–15), buzzers (req 18), position correction
-   (req 7), users (req 30) and the audit log. Saved on this device.
+   (req 7), users (req 30) and the audit log. Built from the design-system
+   components (./ui).
    ════════════════════════════════════════════════════════════════════════ */
 import { Act } from './lib/act.js';
 import { api } from './lib/api.js';
@@ -9,8 +10,9 @@ import { REMOTE } from './lib/source.js';
 import { Auth, ROLES, can, hashPw, initials, jget, jset, userName } from './auth.js';
 import { go } from './lib/router.js';
 import { AREAS, M, POS, RT, fmtClock, fmtDur, html, setUI, useEffect, useReducer, useState } from './lib/runtime.js';
-import { Horn, Icon } from './lib/ui-kit.js';
+import { Horn } from './lib/ui-kit.js';
 import { DeviceAdmin } from './devices.js';
+import { Button, Cluster, DataTable, Dialog, EmptyState, Field, Grid, Notice, NumberInput, PageHeader, Panel, SegmentedControl, Select, Stack, Switch, Tabs, Tag, TextInput, TimeInput } from './ui/index.js';
 
 const CFG_KEYS = ['takt', 'targets', 'shifts', 'calendar', 'buzzer', 'warnPct', 'trimAndon'];
 export function savedCfg() { const c = jget('mg-andon-config', {}); return Object.fromEntries(Object.entries(c).filter(([k]) => CFG_KEYS.includes(k))); }
@@ -37,16 +39,24 @@ export function AdminPage() {
   if (!tabs.length) return html`<${NoAccess} what="Settings" />`;
   const cur = tabs.find((t) => t[0] === RT.route.sub) || tabs[0];
   return html`<div class="page-wrap admin">
-    <aside class="adm-nav" aria-label="Settings sections"><div class="micro" style=${{ padding: '0 10px 8px' }}>Settings</div>
-      ${tabs.map(([k, l, ic]) => html`<button key=${k} class="adm-tab" aria-current=${cur[0] === k ? 'page' : null} onClick=${() => go('admin', k)}><${Icon} n=${ic} />${l}</button>`)}
-      <p class="note" style=${{ padding: '12px 10px' }}>${REMOTE ? 'Changes apply at once on every screen, are stored on the line server and are written to the audit log with your name.' : 'Changes apply at once, are saved on this device and are written to the audit log with your name.'}</p></aside>
-    <section class="adm-body"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
+    <aside class="adm-nav" aria-label="Settings sections"><div class="ds-label" style=${{ padding: '0 var(--ds-space-2) var(--ds-space-2)' }}>Settings</div>
+      <${Tabs} vertical=${true} label="Settings sections" value=${cur[0]} onChange=${(k) => go('admin', k)} items=${tabs.map(([k, l, ic]) => ({ value: k, label: l, icon: ic }))} />
+      <p class="note" style=${{ padding: 'var(--ds-space-3) var(--ds-space-2)' }}>${REMOTE ? 'Changes apply at once on every screen, are stored on the line server and are written to the audit log with your name.' : 'Changes apply at once, are saved on this device and are written to the audit log with your name.'}</p></aside>
+    <section class="adm-body" role="tabpanel"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
   </div>`;
 }
-export const PageHead = ({ k, title, sub, children }) => html`<div class="pg-head"><div><div class="micro">${k}</div><h2>${title}</h2>${sub ? html`<p class="pg-sub">${sub}</p>` : null}</div>${children ? html`<div class="actions">${children}</div>` : null}</div>`;
-function Saved({ msg }) { return msg ? html`<div class=${'result ' + (msg.ok ? 'ok' : 'bad')} role="status" style=${{ marginTop: 10 }}>${msg.text}</div>` : null; }
+/** @deprecated use PageHeader from ./ui (kept so older imports keep working) */
+export const PageHead = PageHeader;
+function Saved({ msg }) { return msg ? html`<${Notice} kind=${msg.ok ? 'success' : 'error'}>${msg.text}<//>` : null; }
 const auditFor = (pred) => jget('mg-andon-audit', []).filter(pred).slice(-8).reverse();
-const AuditMini = ({ rows }) => rows.length ? html`<table class="data" style=${{ marginTop: 10 }}><thead><tr><th>When</th><th>Change</th><th>Before → after</th><th>By</th><th>Reason</th></tr></thead><tbody>${rows.map((r, i) => html`<tr key=${i}><td class="mono">${r.date} ${fmtClock(r.t, false)}</td><td style=${{ textAlign: 'left' }}>${r.action} · ${r.target}</td><td class="mono" style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.before} → ${r.after}</td><td style=${{ textAlign: 'left' }}>${(r.by || '').split(' · ')[0]}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason || '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">No changes recorded yet.</p>`;
+const AUDIT_COLS = [
+  { key: 'when', label: 'When', type: 'time', render: (r) => `${r.date} ${fmtClock(r.t, false)}` },
+  { key: 'what', label: 'Change', render: (r) => `${r.action} · ${r.target}` },
+  { key: 'ba', label: 'Before → after', type: 'code', wrap: true, render: (r) => `${r.before} → ${r.after}` },
+  { key: 'by', label: 'By', render: (r) => (r.by || '').split(' · ')[0] },
+  { key: 'reason', label: 'Reason', wrap: true, render: (r) => r.reason || '—' },
+];
+const AuditMini = ({ title, rows }) => html`<${Panel} title=${title}><${DataTable} columns=${AUDIT_COLS} rows=${rows} empty="No changes recorded yet." /><//>`;
 
 /* Takt per line (req 10) */
 function TaktAdmin() {
@@ -57,20 +67,21 @@ function TaktAdmin() {
     Promise.all(jobs).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg(n ? { ok: true, text: `Saved ${n} change${n > 1 ? 's' : ''}. Stations use the new takt immediately.` } : { ok: false, text: 'Nothing changed.' }); setWhy(''); }, (e) => setMsg({ ok: false, text: e.message }));
   };
   const setPart = (a, m, s) => setDraft({ ...draft, [a]: M.clamp(m * 60 + s, 60, 3600) });
-  return html`<div>
-    <${PageHead} k="Takt time · URD req 10" title="Takt time per line" sub="The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime." />
-    <div class="adm-cards">${M.AREA_IDS.map((a) => { const m = Math.floor(draft[a] / 60), s = draft[a] % 60, ch = draft[a] !== S.cfg.takt[a];
-      return html`<div key=${a} class=${'adm-card' + (ch ? ' changed' : '')}><div class="micro">${AREAS[a].station} · ${AREAS[a].name}${a === 'TRIM' ? ' · preview' : ''}</div>
-        <div class="takt-in"><input type="number" min="1" max="60" value=${m} aria-label=${`${AREAS[a].name} takt minutes`} onInput=${(e) => setPart(a, +e.target.value || 0, s)} /><span>:</span><input type="number" min="0" max="59" value=${String(s).padStart(2, '0')} aria-label=${`${AREAS[a].name} takt seconds`} onInput=${(e) => setPart(a, m, M.clamp(+e.target.value || 0, 0, 59))} /><span class="c-muted">min : s</span></div>
-        <div class="note">Now ${fmtDur(S.cfg.takt[a])} · close to limit at ${fmtDur(draft[a] * warn / 100)}</div>
-        <div class="actions" style=${{ gap: 6 }}>${[-60, -30, 30, 60].map((d) => html`<button key=${d} class="btn sm ghost" onClick=${() => setDraft({ ...draft, [a]: M.clamp(draft[a] + d, 60, 3600) })}>${d > 0 ? '+' : '−'}${Math.abs(d) >= 60 ? '1:00' : '0:30'}</button>`)}</div></div>`; })}</div>
-    <div class="adm-row"><div class="field" style=${{ maxWidth: 260 }}><label for="tk-warn">Close to limit at (% of takt)</label><input id="tk-warn" type="number" min="50" max="99" value=${warn} onInput=${(e) => setWarn(+e.target.value || 95)} /></div>
-      <div class="field" style=${{ flex: 1 }}><label for="tk-why">Reason for the change (kept in the audit log)</label><input id="tk-why" value=${why} onInput=${(e) => setWhy(e.target.value)} placeholder="e.g. New line balance after adding CL3" /></div>
-      <button class="btn primary" style=${{ alignSelf: 'end' }} onClick=${save}><${Icon} n="check" />Save takt</button></div>
+  return html`<${Stack} gap=${5}>
+    <${PageHeader} k="Takt time · URD req 10" title="Takt time per line" sub="The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime." />
+    <${Grid} min=${240}>${M.AREA_IDS.map((a) => { const m = Math.floor(draft[a] / 60), s = draft[a] % 60, ch = draft[a] !== S.cfg.takt[a];
+      return html`<${Panel} key=${a} edge=${ch ? 'var(--ds-text-primary)' : null} title=${`${AREAS[a].station} · ${AREAS[a].name}${a === 'TRIM' ? ' · preview' : ''}`} sub=${`Now ${fmtDur(S.cfg.takt[a])} · close to limit at ${fmtDur(draft[a] * warn / 100)}`}>
+        <div class="takt-in"><${NumberInput} min="1" max="60" value=${m} aria-label=${`${AREAS[a].name} takt minutes`} onChange=${(v) => setPart(a, +v || 0, s)} /><span>:</span><${NumberInput} min="0" max="59" value=${String(s).padStart(2, '0')} aria-label=${`${AREAS[a].name} takt seconds`} onChange=${(v) => setPart(a, m, M.clamp(+v || 0, 0, 59))} /><span class="c-muted">min : s</span></div>
+        <${Cluster} gap=${1}>${[-60, -30, 30, 60].map((d) => html`<${Button} key=${d} size="sm" variant="ghost" onClick=${() => setDraft({ ...draft, [a]: M.clamp(draft[a] + d, 60, 3600) })}>${d > 0 ? '+' : '−'}${Math.abs(d) >= 60 ? '1:00' : '0:30'}<//>`)}</${Cluster}><//>`; })}</${Grid}>
+    <${Cluster} gap=${3} align="flex-end">
+      <${Field} label="Close to limit at (% of takt)" style=${{ width: 260 }}><${NumberInput} min="50" max="99" value=${warn} onChange=${(v) => setWarn(+v || 95)} /><//>
+      <${Field} label="Reason for the change (kept in the audit log)" style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. New line balance after adding CL3" /><//>
+      <${Button} variant="primary" icon="check" onClick=${save}>Save takt<//>
+    </${Cluster}>
     <${Saved} msg=${msg} />
-    <p class="note" style=${{ marginTop: 10 }}>To change takt from a future date, schedule it under <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
-    <div class="micro" style=${{ marginTop: 22 }}>Recent takt changes</div><${AuditMini} rows=${auditFor((r) => /takt|limit/i.test(r.action))} />
-  </div>`;
+    <p class="note">To change takt from a future date, schedule it under <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
+    <${AuditMini} title="Recent takt changes" rows=${auditFor((r) => /takt|limit/i.test(r.action))} />
+  </${Stack}>`;
 }
 
 /* Targets and the production plan, scheduled by date (req 13–15) */
@@ -94,31 +105,32 @@ function PlanAdmin() {
   };
   const reset = () => Act.setPlan(sel, { shifts: null, targets: null, takt: null, note: null }, userName(), 'Back to default plan').then(() => { persistConfig(); setDraft(null); setMsg({ ok: true, text: `${wd(sel)} uses the default plan again.` }); }, (e) => setMsg({ ok: false, text: e.message }));
   const [defT, setDefT] = useState(() => ({ ...S.cfg.targets }));
-  return html`<div>
-    <${PageHead} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
-    <div class="adm-card" style=${{ marginBottom: 18 }}><div class="micro">Default target per shift</div>
-      <div class="adm-row" style=${{ marginTop: 8 }}>${M.AREA_IDS.map((a) => html`<div key=${a} class="field" style=${{ maxWidth: 170 }}><label for=${'dt-' + a}>${AREAS[a].name}</label><input id=${'dt-' + a} type="number" min="0" max="999" value=${defT[a]} onInput=${(e) => setDefT({ ...defT, [a]: +e.target.value || 0 })} /></div>`)}
-        <button class="btn" style=${{ alignSelf: 'end' }} onClick=${() => Promise.all(M.AREA_IDS.map((a) => Act.setDefaultTarget(a, defT[a], userName()))).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }, (e) => setMsg({ ok: false, text: e.message }))}><${Icon} n="check" />Save defaults</button></div></div>
+  const off = (s) => !d.runs[s.name];
+  const shiftCols = [
+    { key: 'name', label: 'Shift' },
+    { key: 'runs', label: 'Runs', render: (s) => html`<${Switch} checked=${!!d.runs[s.name]} label=${html`<span class="ds-vh">${s.name} runs</span>`} onChange=${(v) => upd({ runs: { ...d.runs, [s.name]: v } })} />` },
+    { key: 'start', label: 'Start', render: (s) => html`<${TimeInput} size="sm" aria-label=${`${s.name} start`} value=${toHM(d.times[s.name][0])} disabled=${off(s)} onChange=${(v) => upd({ times: { ...d.times, [s.name]: [fromHM(v), d.times[s.name][1]] } })} />` },
+    { key: 'end', label: 'End', render: (s) => html`<${TimeInput} size="sm" aria-label=${`${s.name} end`} value=${toHM(d.times[s.name][1])} disabled=${off(s)} onChange=${(v) => upd({ times: { ...d.times, [s.name]: [d.times[s.name][0], fromHM(v)] } })} />` },
+    ...M.AREA_IDS.map((a) => ({ key: a, label: `${AREAS[a].short} target`, type: 'number', render: (s) => html`<${NumberInput} size="sm" style=${{ width: 76 }} aria-label=${`${s.name} ${AREAS[a].short} target`} min="0" max="999" value=${d.targets[s.name][a]} disabled=${off(s)} onChange=${(v) => upd({ targets: { ...d.targets, [s.name]: { ...d.targets[s.name], [a]: +v || 0 } } })} />` })),
+  ];
+  return html`<${Stack} gap=${5}>
+    <${PageHeader} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
+    <${Panel} title="Default target per shift">
+      <${Cluster} gap=${3} align="flex-end">${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${AREAS[a].name} style=${{ width: 170 }}><${NumberInput} min="0" max="999" value=${defT[a]} onChange=${(v) => setDefT({ ...defT, [a]: +v || 0 })} /><//>`)}
+        <${Button} icon="check" onClick=${() => Promise.all(M.AREA_IDS.map((a) => Act.setDefaultTarget(a, defT[a], userName()))).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }, (e) => setMsg({ ok: false, text: e.message }))}>Save defaults<//></${Cluster}><//>
     <div class="plan-grid">
-      <div class="plan-days" role="listbox" aria-label="Dates">${days.map((k) => { const p = S.cfg.calendar[k], off = p && p.shifts && !p.shifts.length; return html`<button key=${k} role="option" aria-selected=${sel === k} class="plan-day" onClick=${() => { setSel(k); setDraft(null); setMsg(null); }}>
-        <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><span class=${'chip ' + (off ? 'c-muted' : p ? 'c-hold' : 'c-muted')}>${off ? 'No production' : p ? 'Scheduled' : 'Default'}</span></button>`; })}</div>
-      <div class="adm-card">
-        <div class="micro">${wd(sel)} · ${sel}</div>
-        <table class="data plan-tbl" style=${{ marginTop: 10 }}><thead><tr><th>Shift</th><th>Runs</th><th>Start</th><th>End</th>${M.AREA_IDS.map((a) => html`<th key=${a}>${AREAS[a].short} target</th>`)}</tr></thead><tbody>
-          ${base.map((s) => html`<tr key=${s.name}><td style=${{ textAlign: 'left' }}>${s.name}</td>
-            <td><button class="toggle" role="switch" aria-checked=${!!d.runs[s.name]} aria-label=${`${s.name} runs`} onClick=${() => upd({ runs: { ...d.runs, [s.name]: !d.runs[s.name] } })}></button></td>
-            <td><input type="time" value=${toHM(d.times[s.name][0])} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ times: { ...d.times, [s.name]: [fromHM(e.target.value), d.times[s.name][1]] } })} /></td>
-            <td><input type="time" value=${toHM(d.times[s.name][1])} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ times: { ...d.times, [s.name]: [d.times[s.name][0], fromHM(e.target.value)] } })} /></td>
-            ${M.AREA_IDS.map((a) => html`<td key=${a}><input type="number" min="0" max="999" style=${{ width: 70 }} value=${d.targets[s.name][a]} disabled=${!d.runs[s.name]} onInput=${(e) => upd({ targets: { ...d.targets, [s.name]: { ...d.targets[s.name], [a]: +e.target.value || 0 } } })} /></td>`)}</tr>`)}
-        </tbody></table>
-        <div class="adm-row" style=${{ marginTop: 12 }}>${M.AREA_IDS.map((a) => html`<div key=${a} class="field" style=${{ maxWidth: 170 }}><label>${AREAS[a].short} takt from this date</label><select value=${d.takt[a] || ''} onChange=${(e) => upd({ takt: { ...d.takt, [a]: +e.target.value || undefined } })}><option value="">Keep current (${fmtDur(S.cfg.takt[a])})</option>${[480, 510, 540, 570, 600, 630, 660, 720, 780, 840, 900].map((x) => html`<option key=${x} value=${x}>${fmtDur(x)}</option>`)}</select></div>`)}</div>
-        <div class="field" style=${{ marginTop: 10 }}><label for="pl-note">Note</label><input id="pl-note" value=${d.note} onInput=${(e) => upd({ note: e.target.value })} placeholder="e.g. Reduced plan: parts shortage on ZS rear bumpers" /></div>
-        <div class="actions" style=${{ marginTop: 12 }}><button class="btn primary" onClick=${() => save(d.note || 'Plan scheduled')}><${Icon} n="calendar" />Save plan for ${wd(sel)}</button>${S.cfg.calendar[sel] ? html`<button class="btn ghost" onClick=${reset}>Use default plan</button>` : null}</div>
+      <div class="plan-days" role="listbox" aria-label="Dates">${days.map((k) => { const p = S.cfg.calendar[k], none = p && p.shifts && !p.shifts.length; return html`<button key=${k} role="option" aria-selected=${sel === k} class="plan-day" onClick=${() => { setSel(k); setDraft(null); setMsg(null); }}>
+        <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><${Tag} tone=${p && !none ? 'held' : null} icon=${null}>${none ? 'No production' : p ? 'Scheduled' : 'Default'}<//></button>`; })}</div>
+      <${Panel} title=${`${wd(sel)} · ${sel}`}>
+        <${DataTable} columns=${shiftCols} rows=${base} rowKey=${(s) => s.name} />
+        <${Cluster} gap=${3}>${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${`${AREAS[a].short} takt from this date`} style=${{ width: 200 }}><${Select} value=${d.takt[a] || ''} onChange=${(v) => upd({ takt: { ...d.takt, [a]: +v || undefined } })} options=${[['', `Keep current (${fmtDur(S.cfg.takt[a])})`], ...[480, 510, 540, 570, 600, 630, 660, 720, 780, 840, 900].map((x) => [x, fmtDur(x)])]} /><//>`)}</${Cluster}>
+        <${Field} label="Note"><${TextInput} value=${d.note} onChange=${(v) => upd({ note: v })} placeholder="e.g. Reduced plan: parts shortage on ZS rear bumpers" /><//>
+        <${Cluster}><${Button} variant="primary" icon="calendar" onClick=${() => save(d.note || 'Plan scheduled')}>Save plan for ${wd(sel)}<//>${S.cfg.calendar[sel] ? html`<${Button} variant="ghost" onClick=${reset}>Use default plan<//>` : null}</${Cluster}>
         <${Saved} msg=${msg} />
-        <p class="note" style=${{ marginTop: 10 }}>Breaks follow the shift pattern under <button class="linkish" onClick=${() => go('admin', 'shifts')}>Shifts & breaks</button>. A scheduled takt applies from that date's first shift.</p>
-      </div>
+        <p class="note">Breaks follow the shift pattern under <button class="linkish" onClick=${() => go('admin', 'shifts')}>Shifts & breaks</button>. A scheduled takt applies from that date's first shift.</p>
+      <//>
     </div>
-  </div>`;
+  </${Stack}>`;
 }
 
 /* Default shift pattern with breaks (req 11, 15) */
@@ -128,54 +140,63 @@ function ShiftAdmin() {
   const setB = (i, j, patch) => { const b = draft[i].breaks.slice(); b[j] = { ...b[j], ...patch }; set(i, { breaks: b }); };
   const net = (s) => (s.end - s.start - s.breaks.reduce((a, b) => a + Math.max(0, b.end - b.start), 0)) / 3600;
   const valid = draft.every((s) => s.name.trim() && s.end > s.start && s.breaks.every((b) => b.start >= s.start && b.end <= s.end && b.end > b.start));
-  return html`<div>
-    <${PageHead} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The default pattern for every day. Breaks and the time between shifts are planned stops: the line stops, and they are excluded from cycle time and downtime." />
-    ${draft.map((s, i) => html`<div key=${i} class="adm-card" style=${{ marginBottom: 12 }}>
-      <div class="adm-row"><div class="field" style=${{ maxWidth: 200 }}><label>Shift name</label><input value=${s.name} onInput=${(e) => set(i, { name: e.target.value })} /></div>
-        <div class="field" style=${{ maxWidth: 140 }}><label>Starts</label><input type="time" value=${toHM(s.start)} onInput=${(e) => set(i, { start: fromHM(e.target.value) })} /></div>
-        <div class="field" style=${{ maxWidth: 140 }}><label>Ends</label><input type="time" value=${toHM(s.end)} onInput=${(e) => set(i, { end: fromHM(e.target.value) })} /></div>
-        <div style=${{ alignSelf: 'end', paddingBottom: 8 }} class="note">${net(s).toFixed(2)} h productive</div>
-        ${draft.length > 1 ? html`<button class="btn sm ghost" style=${{ alignSelf: 'end' }} onClick=${() => setDraft(draft.filter((_, k) => k !== i))}><${Icon} n="trash" />Remove shift</button>` : null}</div>
-      <div class="micro" style=${{ margin: '10px 0 6px' }}>Breaks and planned stops</div>
-      ${s.breaks.map((b, j) => html`<div key=${j} class="adm-row" style=${{ marginBottom: 6 }}><input style=${{ maxWidth: 220 }} aria-label="Break name" value=${b.label} onInput=${(e) => setB(i, j, { label: e.target.value })} /><input type="time" aria-label="Break start" value=${toHM(b.start)} onInput=${(e) => setB(i, j, { start: fromHM(e.target.value) })} /><span class="c-muted">to</span><input type="time" aria-label="Break end" value=${toHM(b.end)} onInput=${(e) => setB(i, j, { end: fromHM(e.target.value) })} /><span class="note">${fmtDur(b.end - b.start)}</span><button class="btn sm ghost icon" aria-label="Remove break" onClick=${() => set(i, { breaks: s.breaks.filter((_, k) => k !== j) })}><${Icon} n="x" /></button></div>`)}
-      <button class="btn sm ghost" onClick=${() => set(i, { breaks: [...s.breaks, { label: 'Planned stop', start: s.start + 3600, end: s.start + 3600 + 600 }] })}><${Icon} n="plus" />Add break or planned stop</button></div>`)}
-    <div class="actions"><button class="btn ghost" onClick=${() => { const l = draft[draft.length - 1]; setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: l.end, end: Math.min(24 * 3600 - 60, l.end + 8 * 3600), breaks: [] }]); }}><${Icon} n="plus" />Add shift</button></div>
-    <div class="adm-row" style=${{ marginTop: 16 }}><div class="field" style=${{ flex: 1 }}><label for="sh-why">Reason (kept in the audit log)</label><input id="sh-why" value=${why} onInput=${(e) => setWhy(e.target.value)} placeholder="e.g. Ramadan timings" /></div>
-      <button class="btn primary" style=${{ alignSelf: 'end' }} disabled=${!valid} onClick=${() => Act.setShiftPattern(draft, userName(), why).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message }))}><${Icon} n="check" />Save shift pattern</button></div>
-    ${!valid ? html`<div class="result bad" style=${{ marginTop: 10 }}>Each shift needs a name and must end after it starts; breaks must sit inside their shift.</div>` : null}
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The default pattern for every day. Breaks and the time between shifts are planned stops: the line stops, and they are excluded from cycle time and downtime." />
+    ${draft.map((s, i) => html`<${Panel} key=${i}>
+      <${Cluster} gap=${3} align="flex-end">
+        <${Field} label="Shift name" style=${{ width: 200 }}><${TextInput} value=${s.name} onChange=${(v) => set(i, { name: v })} /><//>
+        <${Field} label="Starts" style=${{ width: 140 }}><${TimeInput} value=${toHM(s.start)} onChange=${(v) => set(i, { start: fromHM(v) })} /><//>
+        <${Field} label="Ends" style=${{ width: 140 }}><${TimeInput} value=${toHM(s.end)} onChange=${(v) => set(i, { end: fromHM(v) })} /><//>
+        <span class="note" style=${{ paddingBottom: 'var(--ds-space-2)' }}>${net(s).toFixed(2)} h productive</span>
+        ${draft.length > 1 ? html`<${Button} size="sm" variant="ghost" icon="trash" onClick=${() => setDraft(draft.filter((_, k) => k !== i))}>Remove shift<//>` : null}
+      </${Cluster}>
+      <div class="ds-label">Breaks and planned stops</div>
+      ${s.breaks.map((b, j) => html`<${Cluster} key=${j} gap=${2}><${TextInput} size="sm" style=${{ maxWidth: 220 }} aria-label="Break name" value=${b.label} onChange=${(v) => setB(i, j, { label: v })} /><${TimeInput} size="sm" style=${{ width: 120 }} aria-label="Break start" value=${toHM(b.start)} onChange=${(v) => setB(i, j, { start: fromHM(v) })} /><span class="c-muted">to</span><${TimeInput} size="sm" style=${{ width: 120 }} aria-label="Break end" value=${toHM(b.end)} onChange=${(v) => setB(i, j, { end: fromHM(v) })} /><span class="note">${fmtDur(b.end - b.start)}</span><${Button} size="sm" variant="ghost" icon="x" aria-label="Remove break" onClick=${() => set(i, { breaks: s.breaks.filter((_, k) => k !== j) })} /></${Cluster}>`)}
+      <div><${Button} size="sm" variant="ghost" icon="plus" onClick=${() => set(i, { breaks: [...s.breaks, { label: 'Planned stop', start: s.start + 3600, end: s.start + 3600 + 600 }] })}>Add break or planned stop<//></div><//>`)}
+    <div><${Button} variant="ghost" icon="plus" onClick=${() => { const l = draft[draft.length - 1]; setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: l.end, end: Math.min(24 * 3600 - 60, l.end + 8 * 3600), breaks: [] }]); }}>Add shift<//></div>
+    <${Cluster} gap=${3} align="flex-end">
+      <${Field} label="Reason (kept in the audit log)" style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. Ramadan timings" /><//>
+      <${Button} variant="primary" icon="check" disabled=${!valid} onClick=${() => Act.setShiftPattern(draft, userName(), why).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message }))}>Save shift pattern<//>
+    </${Cluster}>
+    ${!valid ? html`<${Notice} kind="error">Each shift needs a name and must end after it starts; breaks must sit inside their shift.<//>` : null}
     <${Saved} msg=${msg} />
-    <p class="note" style=${{ marginTop: 10 }}>To change times for one day only, use <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
-  </div>`;
+    <p class="note">To change times for one day only, use <button class="linkish" onClick=${() => go('admin', 'plan')}>Targets & plan</button>.</p>
+  </${Stack}>`;
 }
 
 /* Buzzers per station (req 16–18) */
 function BuzzerAdmin() {
   const S = RT.S, ids = M.WORK_POS.filter((id) => M.ANDON_AREAS.includes(POS[id].area) || S.cfg.trimAndon);
-  return html`<div>
-    <${PageHead} k="Station buzzers · URD req 16–18" title="Buzzers" sub="Each Chassis and Final station has its own buzzer. It rings when the unit passes takt and stops when the unit leaves. Switch a station off here, for example during maintenance work." />
-    <table class="data"><thead><tr><th>Station</th><th>Line</th><th>State now</th><th>Cycle / takt</th><th>Switch</th><th>Test</th></tr></thead><tbody>
-      ${ids.map((id) => { const en = M.buzzerEnabled(S, id), on = S.buzzing[id] != null, an = M.andonState(S, id);
-        return html`<tr key=${id}><td class="mono">${id}</td><td style=${{ textAlign: 'left' }}>${AREAS[POS[id].area].name}${POS[id].area === 'TRIM' ? ' · preview' : ''}</td>
-          <td><span class=${on ? 'c-crit' : 'c-muted'}>${!en ? 'Switched off' : on ? `Ringing ${fmtDur(S.t - S.buzzing[id])}` : 'Quiet'}</span></td>
-          <td class="mono" style=${{ color: an.state === 'over' ? 'var(--crit)' : null }}>${an.state === 'idle' ? '—' : `${fmtDur(an.cycle)} / ${fmtDur(an.takt)}`}</td>
-          <td><button class="toggle" role="switch" aria-checked=${en} aria-label=${`Buzzer at ${id}`} onClick=${() => Act.setBuzzer(id, !en, userName()).then(() => persistConfig())}></button></td>
-          <td><button class="btn sm ghost" onClick=${() => { Horn.ensure(); Horn.buzz([id]); }}><${Icon} n="vol" />Test</button></td></tr>`; })}
-    </tbody></table>
-    <p class="note" style=${{ marginTop: 10 }}>In the shop each buzzer is a local sounder at its station, about 85 dB at 1 m, directed at the work area so the next station is not disturbed. In this browser one speaker stands in for them: only the line in view sounds.</p>
-  </div>`;
+  const cols = [
+    { key: 'id', label: 'Station', type: 'code', render: (r) => r.id },
+    { key: 'line', label: 'Line', render: (r) => `${AREAS[POS[r.id].area].name}${POS[r.id].area === 'TRIM' ? ' · preview' : ''}` },
+    { key: 'state', label: 'State now', render: (r) => (!r.en ? 'Switched off' : r.on ? html`<${Tag} tone="critical" variant="plain">Ringing ${fmtDur(S.t - S.buzzing[r.id])}<//>` : html`<span class="c-muted">Quiet</span>`) },
+    { key: 'cycle', label: 'Cycle / takt', type: 'time', render: (r) => (r.an.state === 'idle' ? '—' : html`<span style=${{ color: r.an.state === 'over' ? 'var(--ds-status-critical)' : null }}>${fmtDur(r.an.cycle)} / ${fmtDur(r.an.takt)}</span>`) },
+    { key: 'sw', label: 'Switch', render: (r) => html`<${Switch} checked=${r.en} label=${html`<span class="ds-vh">Buzzer at ${r.id}</span>`} onChange=${() => Act.setBuzzer(r.id, !r.en, userName()).then(() => persistConfig())} />` },
+    { key: 'test', label: 'Test', type: 'action', render: (r) => html`<${Button} size="sm" variant="ghost" icon="vol" onClick=${() => { Horn.ensure(); Horn.buzz([r.id]); }}>Test<//>` },
+  ];
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Station buzzers · URD req 16–18" title="Buzzers" sub="Each Chassis and Final station has its own buzzer. It rings when the unit passes takt and stops when the unit leaves. Switch a station off here, for example during maintenance work." />
+    <${DataTable} columns=${cols} rows=${ids.map((id) => ({ id, en: M.buzzerEnabled(S, id), on: S.buzzing[id] != null, an: M.andonState(S, id) }))} rowKey=${(r) => r.id} status=${(r) => (r.on ? 'critical' : null)} />
+    <p class="note">In the shop each buzzer is a local sounder at its station, about 85 dB at 1 m, directed at the work area so the next station is not disturbed. In this browser one speaker stands in for them: only the line in view sounds.</p>
+  </${Stack}>`;
 }
 
 /* Position correction (req 7) */
 function CorrectAdmin() {
-  const S = RT.S, rows = M.WORK_POS.map((id) => ({ id, occ: S.pos[id].occ })).filter((r) => r.occ && r.occ.vehicleId);
-  return html`<div>
-    <${PageHead} k="Tracking · URD req 7" title="Position correction" sub="If tracking gets out of step with the line, move a VIN to the station it is really at. If another unit is recorded there, the two are swapped. Every correction needs a reason and is audited." />
-    <table class="data"><thead><tr><th>Station</th><th>Recorded VIN</th><th>Model</th><th>Cycle</th><th></th></tr></thead><tbody>
-      ${rows.map(({ id, occ }) => { const v = S.vehicles[occ.vehicleId]; return html`<tr key=${id}><td class="mono">${id}</td><td class="mono">${v.vin}</td><td style=${{ textAlign: 'left' }}>${v.variant.name}</td><td class="mono">${fmtDur(M.occCycle(S, occ))}</td>
-        <td><button class="btn sm" onClick=${() => setUI({ dialog: { type: 'correct', pos: id, vin: v.vin } })}><${Icon} n="swap" />Correct…</button></td></tr>`; })}
-    </tbody></table>
-    <div class="micro" style=${{ marginTop: 22 }}>Recent corrections</div><${AuditMini} rows=${auditFor((r) => /corrected|removed from station/i.test(r.action))} />
-  </div>`;
+  const S = RT.S, rows = M.WORK_POS.map((id) => ({ id, occ: S.pos[id].occ })).filter((r) => r.occ && r.occ.vehicleId).map((r) => ({ ...r, v: S.vehicles[r.occ.vehicleId] }));
+  const cols = [
+    { key: 'id', label: 'Station', type: 'code', render: (r) => r.id },
+    { key: 'vin', label: 'Recorded VIN', type: 'vin', render: (r) => r.v.vin },
+    { key: 'model', label: 'Model', render: (r) => r.v.variant.name },
+    { key: 'cycle', label: 'Cycle', type: 'duration', render: (r) => fmtDur(M.occCycle(S, r.occ)) },
+    { key: 'act', label: '', type: 'action', render: (r) => html`<${Button} size="sm" icon="swap" onClick=${() => setUI({ dialog: { type: 'correct', pos: r.id, vin: r.v.vin } })}>Correct…<//>` },
+  ];
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Tracking · URD req 7" title="Position correction" sub="If tracking gets out of step with the line, move a VIN to the station it is really at. If another unit is recorded there, the two are swapped. Every correction needs a reason and is audited." />
+    <${DataTable} columns=${cols} rows=${rows} rowKey=${(r) => r.id} empty="No vehicles on the work stations." />
+    <${AuditMini} title="Recent corrections" rows=${auditFor((r) => /corrected|removed from station/i.test(r.action))} />
+  </${Stack}>`;
 }
 
 /* Users (req 30): admin only */
@@ -204,28 +225,29 @@ function UserAdmin() {
     if (u.id === Auth.user.id) return;
     if (REMOTE) { const r = await api(`/api/users/${u.id}`, { method: 'PATCH', body: { active: !u.active } }); if (!r.ok) setMsg({ ok: false, text: r.error }); await Auth.loadUsers(); tick(); return; }
     u.active = !u.active; Auth.saveUsers(); Auth.record(u.active ? 'User enabled' : 'User disabled', Auth.user.name, u.name); tick(); };
-  return html`<div>
-    <${PageHead} k="Users · URD req 30" title="Users and roles" sub="Everyone signs in individually. Roles decide what each person can do.">
-      <button class="btn primary" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}><${Icon} n="plus" />Add user</button></${PageHead}>
-    <div class="adm-cards" style=${{ marginBottom: 16 }}>${Object.entries(ROLES).map(([k, r]) => html`<div key=${k} class="adm-card"><span class=${'av sm r-' + k}>${r.short[0]}</span> <b>${r.label}</b><p class="note">${r.desc}</p></div>`)}</div>
-    <table class="data"><thead><tr><th>Name</th><th>Employee ID</th><th>Role</th><th>Status</th><th>Last sign-in</th><th></th></tr></thead><tbody>
-      ${Auth.users.map((u) => html`<tr key=${u.id} style=${{ opacity: u.active ? 1 : 0.55 }}><td style=${{ textAlign: 'left' }}><span class=${'av sm r-' + u.role}>${initials(u.name)}</span> ${u.name}${u.id === Auth.user.id ? html` <span class="c-muted">(you)</span>` : null}</td><td class="mono">${u.empId}</td><td style=${{ textAlign: 'left' }}>${ROLES[u.role].label}</td><td>${u.active ? 'Active' : 'Disabled'}</td><td class="mono">${u.lastIn ? new Date(u.lastIn).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
-        <td><span class="actions" style=${{ gap: 6, justifyContent: 'flex-end' }}><button class="btn sm ghost" onClick=${() => { setEdit({ ...u, newPw: '' }); setMsg(null); }}><${Icon} n="edit" />Edit</button><button class="btn sm ghost" disabled=${u.id === Auth.user.id} onClick=${() => toggle(u)}>${u.active ? 'Disable' : 'Enable'}</button></span></td></tr>`)}
-    </tbody></table>
+  const cols = [
+    { key: 'name', label: 'Name', render: (u) => html`<span class=${'av sm r-' + u.role}>${initials(u.name)}</span> ${u.name}${u.id === Auth.user.id ? html` <span class="c-muted">(you)</span>` : null}` },
+    { key: 'empId', label: 'Employee ID', type: 'code' },
+    { key: 'role', label: 'Role', render: (u) => ROLES[u.role].label },
+    { key: 'active', label: 'Status', render: (u) => (u.active ? 'Active' : html`<${Tag} tone="paused" icon=${null}>Disabled<//>`) },
+    { key: 'lastIn', label: 'Last sign-in', type: 'time', render: (u) => (u.lastIn ? new Date(u.lastIn).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—') },
+    { key: 'act', label: '', type: 'action', render: (u) => html`<${Cluster} gap=${1} justify="flex-end" nowrap=${true}><${Button} size="sm" variant="ghost" icon="edit" onClick=${() => { setEdit({ ...u, newPw: '' }); setMsg(null); }}>Edit<//><${Button} size="sm" variant="ghost" disabled=${u.id === Auth.user.id} onClick=${() => toggle(u)}>${u.active ? 'Disable' : 'Enable'}<//></${Cluster}>` },
+  ];
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Users · URD req 30" title="Users and roles" sub="Everyone signs in individually. Roles decide what each person can do.">
+      <${Button} variant="primary" icon="plus" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}>Add user<//></${PageHeader}>
+    <${Grid} min=${240}>${Object.entries(ROLES).map(([k, r]) => html`<${Panel} key=${k} title=${html`<span class=${'av sm r-' + k}>${r.short[0]}</span> ${r.label}`} sub=${r.desc} />`)}</${Grid}>
+    <${DataTable} columns=${cols} rows=${Auth.users} rowKey=${(u) => u.id} rowClass=${(u) => (u.active ? null : 'ds-row-muted')} />
     <${Saved} msg=${msg} />
-    ${edit ? html`<div class="scrim" onClick=${(e) => e.target === e.currentTarget && setEdit(null)}><div class="glass dialog ticks" role="dialog" aria-modal="true" aria-labelledby="ue-h">
-      <div class="dialog-head"><div style=${{ flex: 1 }}><div class="micro">Users</div><h3 id="ue-h">${edit.id ? `Edit ${edit.name}` : 'Add a user'}</h3></div><button class="btn sm ghost icon" aria-label="Close" onClick=${() => setEdit(null)}><${Icon} n="x" /></button></div>
-      <div class="dialog-body">
-        <div class="field"><label for="ue-n">Full name</label><input id="ue-n" value=${edit.name} onInput=${(e) => setEdit({ ...edit, name: e.target.value })} /></div>
-        <div class="adm-row"><div class="field" style=${{ flex: 1 }}><label for="ue-i">Employee ID</label><input id="ue-i" value=${edit.empId} onInput=${(e) => setEdit({ ...edit, empId: e.target.value.toUpperCase() })} placeholder="MG-1234" /></div>
-          <div class="field" style=${{ flex: 1.4 }}><label for="ue-e">Work email</label><input id="ue-e" value=${edit.email} onInput=${(e) => setEdit({ ...edit, email: e.target.value })} /></div></div>
-        <div class="field"><label for="ue-r">Role</label><select id="ue-r" value=${edit.role} disabled=${edit.id === Auth.user.id} onChange=${(e) => setEdit({ ...edit, role: e.target.value })}>${Object.entries(ROLES).map(([k, r]) => html`<option key=${k} value=${k}>${r.label}</option>`)}</select><div class="note">${ROLES[edit.role].desc}</div></div>
-        <div class="field"><label for="ue-p">${edit.id ? 'Reset password (leave blank to keep)' : 'Temporary password'}</label><input id="ue-p" type="text" autoComplete="off" value=${edit.newPw} onInput=${(e) => setEdit({ ...edit, newPw: e.target.value })} placeholder="At least 8 characters" /></div>
+    ${edit ? html`<${Dialog} k="Users" title=${edit.id ? `Edit ${edit.name}` : 'Add a user'} onClose=${() => setEdit(null)} footer=${html`<${Button} onClick=${() => setEdit(null)}>Cancel<//><${Button} variant="primary" icon="check" onClick=${() => saveUser({ ...edit })}>${edit.id ? 'Save' : 'Add user'}<//>`}>
+        <${Field} label="Full name"><${TextInput} value=${edit.name} onChange=${(v) => setEdit({ ...edit, name: v })} /><//>
+        <${Grid} min=${200}><${Field} label="Employee ID"><${TextInput} value=${edit.empId} onChange=${(v) => setEdit({ ...edit, empId: v.toUpperCase() })} placeholder="MG-1234" /><//>
+          <${Field} label="Work email"><${TextInput} type="email" value=${edit.email} onChange=${(v) => setEdit({ ...edit, email: v })} /><//></${Grid}>
+        <${Field} label="Role" hint=${ROLES[edit.role].desc}><${Select} value=${edit.role} disabled=${edit.id === Auth.user.id} onChange=${(v) => setEdit({ ...edit, role: v })} options=${Object.entries(ROLES).map(([k, r]) => [k, r.label])} /><//>
+        <${Field} label=${edit.id ? 'Reset password' : 'Temporary password'} hint=${edit.id ? 'Leave blank to keep the current one' : 'At least 8 characters'}><${TextInput} autoComplete="off" value=${edit.newPw} onChange=${(v) => setEdit({ ...edit, newPw: v })} /><//>
         <${Saved} msg=${msg && !msg.ok ? msg : null} />
-      </div>
-      <div class="dialog-foot"><button class="btn" onClick=${() => setEdit(null)}>Cancel</button><button class="btn primary" onClick=${() => saveUser({ ...edit })}><${Icon} n="check" />${edit.id ? 'Save' : 'Add user'}</button></div>
-    </div></div>` : null}
-  </div>`;
+      </${Dialog}>` : null}
+  </${Stack}>`;
 }
 
 /* Audit log: configuration changes, corrections, sign-ins */
@@ -239,16 +261,19 @@ function AuditAdmin() {
   const auth = (REMOTE ? (remote ? remote.access.map((a) => ({ at: Date.parse(a.at), action: a.action, detail: a.detail, who: a.who })) : []) : Auth.log).map((r) => ({ when: whenOf(r.at), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
   const rows = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort).slice(0, 300);
   const csv = () => downloadText('andon-audit-log.csv', 'text/csv', [['When', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...rows.map((r) => [r.when, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n'));
-  return html`<div>
-    <${PageHead} k="Traceability" title="Audit log" sub="Every change to takt, targets, shifts and buzzers, every position correction and every sign-in, with who and when.">
-      <button class="btn" onClick=${csv}><${Icon} n="download" />Export CSV</button></${PageHead}>
-    <div class="actions" style=${{ marginBottom: 10 }}>${[['all', 'All'], ['change', 'Changes & corrections'], ['access', 'Sign-ins']].map(([k, l]) => html`<button key=${k} class=${'btn sm ' + (f === k ? '' : 'ghost')} onClick=${() => setF(k)}>${l}</button>`)}</div>
-    <table class="data"><thead><tr><th>When</th><th>What</th><th>Detail</th><th>By</th><th>Reason</th></tr></thead><tbody>
-      ${rows.length ? rows.map((r, i) => html`<tr key=${i}><td class="mono">${r.when}</td><td style=${{ textAlign: 'left' }}>${r.what}</td><td class="mono" style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.detail || '—'}</td><td style=${{ textAlign: 'left' }}>${(r.by || '').split(' · ')[0]}</td><td style=${{ textAlign: 'left', whiteSpace: 'normal' }}>${r.reason || '—'}</td></tr>`) : html`<tr><td colspan="5" class="c-muted">Nothing recorded yet.</td></tr>`}
-    </tbody></table>
-  </div>`;
+  const cols = [
+    { key: 'when', label: 'When', type: 'time' }, { key: 'what', label: 'What' },
+    { key: 'detail', label: 'Detail', type: 'code', wrap: true, render: (r) => r.detail || '—' },
+    { key: 'by', label: 'By', render: (r) => (r.by || '').split(' · ')[0] }, { key: 'reason', label: 'Reason', wrap: true, render: (r) => r.reason || '—' },
+  ];
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Traceability" title="Audit log" sub="Every change to takt, targets, shifts and buzzers, every position correction and every sign-in, with who and when.">
+      <${Button} icon="download" onClick=${csv}>Export CSV<//></${PageHeader}>
+    <${SegmentedControl} label="Show" value=${f} onChange=${setF} options=${[{ value: 'all', label: 'All' }, { value: 'change', label: 'Changes & corrections' }, { value: 'access', label: 'Sign-ins' }]} />
+    <${DataTable} columns=${cols} rows=${REMOTE && !remote ? null : rows} error=${remote && remote.error} empty="Nothing recorded yet." />
+  </${Stack}>`;
 }
-export function NoAccess({ what }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="lock" size=${28} /><h2>${what} needs a different role</h2><p class="note">You are signed in as ${userName()}. Ask an administrator if you need access.</p></div></div>`; }
+export function NoAccess({ what }) { return html`<div class="page-wrap"><${EmptyState} icon="lock" title=${`${what} needs a different role`}>You are signed in as ${userName()}. Ask an administrator if you need access.<//></div>`; }
 export function downloadText(name, type, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
 /* Line display links (live screens): each TV opens its link once and stays connected, read-only, until revoked. */
@@ -264,19 +289,22 @@ function DisplayAdmin() {
   const revoke = async (d) => { const r = await api(`/api/displays/${d.id}`, { method: 'DELETE' }); setMsg(r.ok ? { ok: true, text: `${d.name} disconnected. Its link no longer works.` } : { ok: false, text: r.error }); load(); };
   const copy = () => { try { navigator.clipboard.writeText(made.url); setMsg({ ok: true, text: 'Link copied.' }); } catch (e) { setMsg({ ok: false, text: 'Copy the link by hand.' }); } };
   const when = (t) => (t ? new Date(t).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—');
-  return html`<div>
-    <${PageHead} k="Line displays · URD req 23" title="Display links" sub="Create one link per TV. Open it once on the TV: it then shows its line, read-only, with no sign-in. Revoke a link to disconnect that TV." />
-    <div class="adm-row" style=${{ alignItems: 'end' }}>
-      <div class="field" style=${{ flex: 1 }}><label for="dp-n">Display name</label><input id="dp-n" value=${name} onInput=${(e) => setName(e.target.value)} placeholder="e.g. Chassis line TV" /></div>
-      <div class="field"><label for="dp-l">Line</label><select id="dp-l" value=${line} onChange=${(e) => setLine(e.target.value)}><option value="trim">Trim</option><option value="chassis">Chassis</option><option value="final">Final</option></select></div>
-      <button class="btn primary" disabled=${name.trim().length < 2} onClick=${create}><${Icon} n="plus" />Create link</button>
-    </div>
-    ${made ? html`<div class="result good" style=${{ marginTop: 12 }}><b>Link for ${made.name}</b> · shown once; open it on the TV.<div class="mono" style=${{ wordBreak: 'break-all', margin: '6px 0' }}>${made.url}</div><button class="btn sm" onClick=${copy}><${Icon} n="copy" />Copy link</button></div>` : null}
+  const cols = [
+    { key: 'name', label: 'Display' }, { key: 'line', label: 'Line' },
+    { key: 'created', label: 'Created', type: 'time', render: (d) => `${when(d.created_at)} · ${d.created_by}` },
+    { key: 'seen', label: 'Last seen', type: 'time', render: (d) => when(d.last_seen) },
+    { key: 'status', label: 'Status', render: (d) => (d.revoked_at ? html`<${Tag} tone="paused" icon=${null}>Revoked<//>` : 'Active') },
+    { key: 'act', label: '', type: 'action', render: (d) => (d.revoked_at ? null : html`<${Button} size="sm" variant="ghost" onClick=${() => revoke(d)}>Revoke<//>`) },
+  ];
+  return html`<${Stack} gap=${4}>
+    <${PageHeader} k="Line displays · URD req 23" title="Display links" sub="Create one link per TV. Open it once on the TV: it then shows its line, read-only, with no sign-in. Revoke a link to disconnect that TV." />
+    <${Cluster} gap=${3} align="flex-end">
+      <${Field} label="Display name" style=${{ flex: 1, minWidth: 240 }}><${TextInput} value=${name} onChange=${setName} placeholder="e.g. Chassis line TV" /><//>
+      <${Field} label="Line" style=${{ width: 160 }}><${Select} value=${line} onChange=${setLine} options=${[['trim', 'Trim'], ['chassis', 'Chassis'], ['final', 'Final']]} /><//>
+      <${Button} variant="primary" icon="plus" disabled=${name.trim().length < 2} onClick=${create}>Create link<//>
+    </${Cluster}>
+    ${made ? html`<${Notice} kind="success" title=${`Link for ${made.name}`} actions=${html`<${Button} size="sm" icon="copy" onClick=${copy}>Copy link<//>`}>Shown once; open it on the TV.<div class="mono" style=${{ wordBreak: 'break-all', marginTop: 'var(--ds-space-1)' }}>${made.url}</div><//>` : null}
     <${Saved} msg=${msg} />
-    <table class="data" style=${{ marginTop: 16 }}><thead><tr><th>Display</th><th>Line</th><th>Created</th><th>Last seen</th><th>Status</th><th></th></tr></thead><tbody>
-      ${list == null ? html`<tr><td colspan="6">Loading…</td></tr>` : !list.length ? html`<tr><td colspan="6" class="c-muted">No display links yet.</td></tr>` : list.map((d) => html`<tr key=${d.id} style=${{ opacity: d.revoked_at ? 0.55 : 1 }}>
-        <td style=${{ textAlign: 'left' }}>${d.name}</td><td>${d.line}</td><td class="mono">${when(d.created_at)} · ${d.created_by}</td><td class="mono">${when(d.last_seen)}</td>
-        <td>${d.revoked_at ? 'Revoked' : 'Active'}</td><td>${d.revoked_at ? null : html`<button class="btn sm ghost" onClick=${() => revoke(d)}>Revoke</button>`}</td></tr>`)}
-    </tbody></table>
-  </div>`;
+    <${DataTable} columns=${cols} rows=${list} rowKey=${(d) => d.id} rowClass=${(d) => (d.revoked_at ? 'ds-row-muted' : null)} empty="No display links yet." />
+  </${Stack}>`;
 }
