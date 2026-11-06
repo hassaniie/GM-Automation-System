@@ -295,12 +295,13 @@ All components are in one package, `packages/ui` (React + htm, typed). Each defi
   - It shows every token and every component in every variant and state, in both themes.
   - It doubles as the review surface.
   - Storybook can come later if a second app appears.
-- **Guardrails in CI:**
-  - **Stylelint:** no raw hex or px outside the token files; only named z-index layers; only radius tokens.
-  - **ESLint:** inline `style` only for genuinely changing values, such as the position of a moving car.
-  - **Visual regression:** Playwright screenshots of the catalogue and of 8 key screens at 4 widths × 2 themes, compared on every PR.
-  - **Overflow test:** fails if any shell region scrolls or overflows at the named breakpoints. This would have caught both of today's bugs.
-  - **Accessibility:** axe checks on the catalogue; contrast checked for the token pairs.
+- **Guardrails in CI** (all in place after step C):
+  - **Stylelint:** radius and z-index only from tokens; no raw colours outside the token files; in `styles/ds/` spacing only from the 4-px scale (1–3 px optical nudges allowed). The legacy `app.css` gets warnings, not errors, until it is migrated.
+  - **ESLint:** in screen files, the old `.btn` / `.panel` / `.field` / `.tabs` / `.toggle` / `.result` classes, raw `<input>` / `<select>` / `<textarea>` and `table.data` are errors (the bespoke sign-in fields are the one documented exception).
+  - **Visual regression:** Playwright screenshots of every Storybook story (both themes) and of six key screens (floor chrome, dashboard, line display, reports, settings, How it works) at 1440 and 1920 px, both themes, compared with baselines in `apps/web/e2e/__screenshots__`. Fonts are served from the repository and the clock is fixed, so local and CI runs match; the 3D floor is hidden in these shots because GPUs draw it differently.
+  - **Overflow test:** the top bar and the station strip never overflow or scroll, 1024–2560 px, both themes.
+  - **Accessibility:** axe (WCAG 2.2 AA rules) on every story and the key screens, both themes; any serious or critical finding fails.
+  - **Device sizes:** controls measure 36 px with a mouse, ≥ 44 px on touch and ≥ 56 px with Large touch targets; the line display keeps its layout at 3840 × 2160 with every text doubled.
 - **Docs:** each component has a short page covering when to use it, variants, states, do's and don'ts, and accessibility.
 - **Ownership:** a component review checklist in the PR template. Breaking token or component changes get a version note and a migration path.
 
@@ -331,7 +332,7 @@ The research (§8) runs alongside B–E: the 5-second and task tests are done be
 2. **Glass:** only for panels floating over the 3D floor; flat bordered panels everywhere else.
 3. **Colour:** normal is neutral (ISA-101). Downtime is neutral until it passes 5 % of the productive shift time so far (amber) or 10 % (red), or while a station is over takt (amber). Plan delta: neutral on or ahead of plan, amber behind, red more than 2 behind. The 5 % starting point is to be agreed with MG JW (`DOWNTIME_WARN_PCT` in `apps/web/src/lib/tone.js`).
 4. **Catalogue:** Storybook.
-5. **Target screens** (TV sizes, touch, gloves): still open; it affects the control sizes chosen in step C.
+5. **Target screens:** 1080p and 4K wall TVs, touch tablets on the floor, desktop PCs. So controls have three sizes (mouse, touch, Large touch targets for gloves) and the line display scales with the screen.
 
 ## 12. Release 1 (done)
 
@@ -349,5 +350,33 @@ The research (§8) runs alongside B–E: the 5-second and task tests are done be
   - the Playwright layout test (top bar and strip at 1024–2560 px, both themes);
   - the Storybook build.
 - **Not yet:**
-  - stored visual-regression baselines (from step C, when components are rebuilt);
+  - stored visual-regression baselines (done in step C);
   - the page navigation menu below 1024 px (the icons still fit at the widths we support).
+
+## 13. Step C: core components (done)
+
+- **Components** in `apps/web/src/ui/` (exported from `ui/index.js`, styled in `styles/ds/ui.css`, shown in Storybook under *Components / Core*):
+  - layout: `Stack`, `Cluster`, `Grid`;
+  - controls: `Button`, `IconButton`, `SegmentedControl`, `Switch`, `Checkbox`;
+  - forms: `Field`, `TextInput`, `NumberInput`, `DateInput`, `TimeInput`, `Textarea`, `Select` (their `onChange` gets the value, not the event);
+  - containers and data: `Panel`, `Stat`, `Meter`, `DataTable`, `Tag`, `Notice`, `PageHeader`, `EmptyState`, `Skeleton`;
+  - overlays and navigation: `Tabs`, `Menu`, `Dialog`, `Drawer` (focus trap, Esc, focus returns).
+- **When to use which:**
+  - `Button variant="primary"` for the one main action of a view; `secondary` by default; `ghost` for low emphasis; `danger` for destructive actions. `tone` colours a button by meaning (warning, critical, supervisor, maintenance, simulation), never for decoration.
+  - `Switch` for a setting that applies at once; `Checkbox` for a choice that takes effect on submit, `boxed` to confirm a consequence.
+  - `SegmentedControl` for 2–5 options seen together; `Select` for more.
+  - `Panel variant="glass"` only over the 3D floor; `ticks` only for primary objects.
+  - `Notice` for results and banners (`critical` uses `role="alert"`); `EmptyState` when a list has nothing yet.
+- **Sizes:** controls read `--ds-h-sm/md/lg`: 36 px with a mouse, 44 px on touch screens (`pointer: coarse`), 56 px with **Large touch targets** (user menu, saved per device).
+- **Screens moved:** settings, devices, reports, floor dialogs, drawer, inspector and simulator console, dashboard, line display, How it works, sign-in and the user menu.
+- **Colour:** the light theme's muted text and status colours were darkened to reach 4.5 : 1 (axe found them at 3.2–4.4 : 1); the dark theme is unchanged.
+- **Measures:**
+  - legacy `.btn` / `.panel` / `table.data` / raw-input patterns in screen files: from 83 / 17 / 19 / 46 to 0 (enforced by ESLint);
+  - legacy CSS: 164 rules removed, `app.css` from 986 to 827 lines;
+  - inline `style=` in screens: 223 to 138 (target was about half: not reached; most left are values that change, but some layout ones remain);
+  - Stylelint warnings (legacy only): 103 to 101.
+- **Left for later:**
+  - the sign-in fields stay bespoke (icon inside, show-password button, Caps Lock warning); to be folded into `TextInput` in step D;
+  - Andon domain pieces (line card, line display cells, strip cells, alarm and call rows) are step D;
+  - the TV display scales with viewport units rather than a separate `--ds-tv-scale` token; the 4K test proves every text doubles, so a token was not needed;
+  - the remaining inline layout styles move into `Stack` / `Cluster` / `Grid` as each screen is rebuilt in step E.

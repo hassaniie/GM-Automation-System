@@ -117,3 +117,25 @@ export const Overlays = {
     </${Page}>`;
   },
 };
+
+const USAGE = [
+  ['Button', 'primary for the one main action of a view; secondary by default; ghost for low emphasis; danger for destructive actions.', 'Don’t use tone to decorate: it means warning, critical, supervisor, maintenance or simulation.'],
+  ['Switch or Checkbox', 'Switch for a setting that applies at once. Checkbox for a choice that takes effect on submit; boxed to confirm a consequence.', 'Don’t use a Switch inside a form that has a Save button.'],
+  ['SegmentedControl or Select', 'SegmentedControl for 2–5 options seen together (speed, view). Select for more, or when space is short.', 'Don’t use Tabs to pick a value: Tabs switch what is shown.'],
+  ['Field', 'Every input sits in a Field: label always visible, hint under it, error replaces the hint.', 'Don’t use placeholder text as the label.'],
+  ['Panel', 'plain for content on a page; glass only for panels over the 3D floor; ticks only for primary objects.', 'Don’t nest a Panel in a Panel: use a heading or a divider.'],
+  ['Stat and Meter', 'Stat for one number with its label, unit and target; Meter for a value against a target with a marker.', 'Don’t colour a normal value: colour means a problem (ISA-101).'],
+  ['DataTable', 'Set each column’s type so numbers, times and VINs align and use tabular figures. Rows null while loading.', 'Don’t hide errors in an empty table: pass error.'],
+  ['Notice', 'Results and banners. critical is announced at once (role="alert").', 'Don’t stack notices: show the most important one.'],
+  ['Dialog or Drawer', 'Dialog for one decision that blocks the work; Drawer for a list beside the work (alarms, calls).', 'Don’t open a dialog from a dialog.'],
+];
+export const Usage = {
+  name: 'When to use which',
+  render: () => html`<${Page} title="When to use which" intro="Pick the component by what the person is doing. Sizes follow the device: 36 px with a mouse, 44 px on touch, 56 px with Large touch targets.">
+    <${DataTable} density="comfortable" rowKey=${(r) => r[0]} rows=${USAGE} columns=${[
+      { key: 'c', label: 'Component', render: (r) => html`<b>${r[0]}</b>`, width: 200 },
+      { key: 'do', label: 'Use it for', render: (r) => r[1], wrap: true },
+      { key: 'dont', label: 'Avoid', render: (r) => r[2], wrap: true },
+    ]} />
+  </${Page}>`,
+};

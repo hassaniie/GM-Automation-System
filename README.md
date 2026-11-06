@@ -128,13 +128,16 @@ Line displays need no sign-in: open `#/display/trim`, `#/display/chassis` or `#/
 
 The Andon DS sits under every screen; the plan and its decisions are in `docs/design-system-plan.md`.
 - **Tokens** in `apps/web/src/styles/tokens/` (Carbon-style primitive → semantic): colour, status, type, spacing, 4 px / 3 px corners, motion, named z-index layers.
-- **Layout and components:** new rules go in `apps/web/src/styles/ds/`, in later cascade layers than the legacy `app.css`, so they replace it without `!important`.
-- **Colour follows ISA-101:** normal is neutral; colour means a problem; status is never shown by colour alone.
+- **Components** in `apps/web/src/ui/` (Button, Field and inputs, Panel, Stat, Meter, DataTable, Tabs, Menu, Dialog, Drawer, Notice …). Screens use these, not raw classes or inputs; ESLint enforces it. When to use which: `docs/design-system-plan.md` §13 and Storybook.
+- **Layout and styles:** new rules go in `apps/web/src/styles/ds/`, in later cascade layers than the legacy `app.css`, so they replace it without `!important`.
+- **Colour follows ISA-101:** normal is neutral; colour means a problem; status is never shown by colour alone. Text meets WCAG AA (4.5 : 1) in both themes.
+- **Sizes:** 36 px controls with a mouse, 44 px on touch screens, 56 px with Large touch targets (user menu); the line display scales to 4K TVs.
 
 ```sh
 pnpm --filter @mg/web storybook        # the catalogue on http://localhost:6006 (light and dark)
-pnpm --filter @mg/web test:layout      # top bar and station strip fit at 1024–2560 px
-pnpm lint:css                          # radius / z-index / colour token rules
+pnpm --filter @mg/web test:ui          # builds, then layout, visual, accessibility and device-size checks
+pnpm --filter @mg/web test:visual --update-snapshots   # accept an intended visual change (commit the new images)
+pnpm lint:css                          # radius / z-index / colour / spacing token rules
 ```
 
 ## Source layout
@@ -155,7 +158,9 @@ A pnpm workspace:
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |
-| `apps/web/src/styles/app.css` | All CSS: themes, design system, Andon, sign-in, dashboard, line display, reports, print |
+| `apps/web/src/ui/` | Design-system components (layout, controls, forms, data, overlays) |
+| `apps/web/src/styles/` | `tokens/` (design tokens), `ds/` (design-system layout and components), `app.css` (legacy styles being migrated: Andon, sign-in, dashboard, line display, reports, print) |
+| `apps/web/e2e/` | Playwright checks: layout, visual baselines (`__screenshots__`), accessibility, device sizes |
 | `apps/web/src/lib/` | `runtime.js` (engine handle, UI state, theme), `source.js` (in-browser or edge server), `act.js` (every action that changes the plant), `router.js` (hash routes), `ui-kit.js` (icons, chips, tones, sound), `misc.js` |
 | `apps/web/src/floor/` | Floor HMI: top-bar islands and line strip, station and vehicle inspectors, dialogs (scan, offline, return, correction, VIN search), alarm drawer, simulator console, 2D plan, scenarios |
 | `apps/web/src/app.js` | App shell: navigation, root component, `boot()` |
