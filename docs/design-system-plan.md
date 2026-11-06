@@ -93,8 +93,9 @@
 5. **The 3D floor is the background, not the interface.**
    - Panels sit in fixed zones around a safe area. The camera frames the line inside that area.
    - Tags in the 3D view follow the same component rules as the 2D screens.
-6. **Square corners, honest structure.**
-   - 0 px corners for structural boxes, 2 px for small controls, round only for status dots and avatars.
+6. **Slightly softened corners, honest structure** (decided 6 Nov 2026).
+   - 4 px corners for boxes and controls, 3 px for small items, round only for status dots and avatars.
+   - Corner ticks follow the same curve.
    - Borders, not shadows, show structure. Shadows and glass are only for panels floating over the 3D floor.
 7. **One component per idea.** If two things mean the same, they share a component. If they look different, they must mean something different.
 
@@ -116,7 +117,7 @@ Existing variables (`--text`, `--hair`, `--ok`, …) are kept as **aliases** of 
 | **Type** | Barlow for UI text, JetBrains Mono for numbers, VINs and codes. Nine-step scale (12/13/14/16/20/24/32/48/72) in named roles: `label-01`, `body-01`, `body-02`, `heading-01..04`, `kpi-sm/md/lg`, `display` (TV). Uppercase micro-labels keep their letter spacing, as one token. |
 | **Spacing** | 4-px base (Carbon's 2-px grid without the 2): `--ds-space-1..10` = 4, 8, 12, 16, 20, 24, 32, 40, 48, 64. Every padding and gap uses a token; the 65 combinations become about 10. |
 | **Size** | Control heights `sm 28`, `md 36`, `lg 44` (touch), `xl 56` (floor tablets and gloves). Icons 12/16/20/24. |
-| **Radius** | `--ds-radius-0: 0` (panels, cards, cells, tables), `-1: 2px` (buttons, inputs, chips), `-round: 999px` (dots, avatars). This replaces the 10 values and `--r: 14px`. |
+| **Radius** | `--ds-radius-md: 4px` (panels, cards, dialogs, drawers, the top bar and strip, buttons, inputs), `--ds-radius-sm: 3px` (strip cells, chips, tags, swatches), `--ds-radius-round` (dots, avatars). This replaces the 10 hand-typed values. Corner ticks are a frame with the same curve, masked to the corners. |
 | **Border** | `1px` hairline, `2px` emphasis (selection, status edge), `3px` status bar on tiles and cells. |
 | **Elevation** | Four layers:<br>• **0:** the page;<br>• **1:** panels (border, no shadow);<br>• **2:** glass over 3D (blur + rim + shadow);<br>• **3:** overlays (dialog, drawer, menu).<br>The glass recipe is kept, but only layer 2 uses it. |
 | **Motion** | `fast 120ms`, `base 200ms`, `slow 320ms`. Two easings (standard, emphasised). Alarm flash 1 Hz. All motion is turned off for people who choose reduced motion, except alarm flashing, which falls back to a static marker. |
@@ -290,7 +291,7 @@ All components are in one package, `packages/ui` (React + htm, typed). Each defi
 
 ## 9. Making it stick (governance)
 
-- **Living catalogue:** a `#/design-system` page in the app (no extra tooling).
+- **Living catalogue:** Storybook (`pnpm --filter @mg/web storybook`), decided 6 Nov 2026.
   - It shows every token and every component in every variant and state, in both themes.
   - It doubles as the review surface.
   - Storybook can come later if a second app appears.
@@ -324,10 +325,29 @@ The research (§8) runs alongside B–E: the 5-second and task tests are done be
 
 ---
 
-## 11. Decisions needed from you
+## 11. Decisions (6 Nov 2026)
 
-1. **Corners:** strictly 0 px for structure and 2 px for controls everywhere, including the floating glass panels (recommended)? Or keep a small radius on floating panels only?
-2. **Glass:** keep it for panels floating over the 3D floor only (recommended), or remove it entirely for a flatter, faster UI?
-3. **Colour discipline:** apply the ISA-101 rule that normal is grey, including the dashboard's downtime figures (which would no longer always be red)?
-4. **Target screens:** the TV sizes and resolution, whether the floor HMI is a touch tablet (affects the 44/56 px control sizes), and whether gloves are worn.
-5. **Catalogue:** the in-app `#/design-system` page (recommended) or Storybook?
+1. **Corners:** 4 px for boxes and controls, 3 px for small items; the corner ticks follow the same curve (reference: the agreed button with curved corner accents).
+2. **Glass:** only for panels floating over the 3D floor; flat bordered panels everywhere else.
+3. **Colour:** normal is neutral (ISA-101). Downtime is neutral until it passes 5 % of the productive shift time so far (amber) or 10 % (red), or while a station is over takt (amber). Plan delta: neutral on or ahead of plan, amber behind, red more than 2 behind. The 5 % starting point is to be agreed with MG JW (`DOWNTIME_WARN_PCT` in `apps/web/src/lib/tone.js`).
+4. **Catalogue:** Storybook.
+5. **Target screens** (TV sizes, touch, gloves): still open; it affects the control sizes chosen in step C.
+
+## 12. Release 1 (done)
+
+- **Tokens:** `apps/web/src/styles/tokens/` (primitives and semantic, light and dark). The old variable names are aliases.
+- **Stylesheet layers:** `reset`, `tokens`, `legacy` (`app.css`, being migrated), `layout`, `components`, `overrides`. New design-system rules live in `styles/ds/`.
+- **Corners and curved ticks.**
+- **Colour discipline:** for downtime and plan figures; the 3D MG floor badge is a grey watermark.
+- **Top bar:** fixed regions; the status row folds by priority into More; tools fold into a menu.
+- **Station strip:** fixed height, never scrolls, cells adapt to their width, status shown as an edge plus an icon, lane tabs below 1024 px.
+- **Camera:** frames the line inside the UI safe area.
+- **Storybook:** foundations (colour with contrast checks, status, type, spacing, corners, elevation, motion, layers) and today's components.
+  - Its light-theme contrast check found the green and amber status colours below 3 : 1, so they were darkened.
+- **CI guardrails:**
+  - Stylelint (radius and z-index from tokens; no raw colours outside the token files; warnings only in the legacy stylesheet);
+  - the Playwright layout test (top bar and strip at 1024–2560 px, both themes);
+  - the Storybook build.
+- **Not yet:**
+  - stored visual-regression baselines (from step C, when components are rebuilt);
+  - the page navigation menu below 1024 px (the icons still fit at the widths we support).

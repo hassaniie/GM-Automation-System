@@ -124,6 +124,19 @@ Line displays need no sign-in: open `#/display/trim`, `#/display/chassis` or `#/
 | Settings | `#/admin/<tab>` | admin, authorised | Takt, targets and 14-day plan, shifts and breaks, buzzers, position correction, users (admin), audit log |
 | How it works | `#/how` | everyone | Architecture, answers to the URD's §6 points, and the coverage of all 36 requirements with "Show me" links |
 
+## Design system
+
+The Andon DS sits under every screen; the plan and its decisions are in `docs/design-system-plan.md`.
+- **Tokens** in `apps/web/src/styles/tokens/` (Carbon-style primitive → semantic): colour, status, type, spacing, 4 px / 3 px corners, motion, named z-index layers.
+- **Layout and components:** new rules go in `apps/web/src/styles/ds/`, in later cascade layers than the legacy `app.css`, so they replace it without `!important`.
+- **Colour follows ISA-101:** normal is neutral; colour means a problem; status is never shown by colour alone.
+
+```sh
+pnpm --filter @mg/web storybook        # the catalogue on http://localhost:6006 (light and dark)
+pnpm --filter @mg/web test:layout      # top bar and station strip fit at 1024–2560 px
+pnpm lint:css                          # radius / z-index / colour token rules
+```
+
 ## Source layout
 
 A pnpm workspace:

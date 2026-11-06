@@ -14,7 +14,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -44,6 +44,16 @@ jobs:
       - run: pnpm build
       - run: pnpm build:demo
       - run: pnpm --filter @mg/web build:edge
+      # design-system guardrail: the top bar and the station strip fit at every supported width, both themes
+      - run: pnpm --filter @mg/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @mg/web exec playwright test --trace off
+      - run: pnpm --filter @mg/web build-storybook
+      - name: Upload Storybook (design system catalogue)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mg-andon-storybook
+          path: apps/web/storybook-static
+          retention-days: 14
       - name: Upload single-file demo
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
