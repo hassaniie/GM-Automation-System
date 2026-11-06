@@ -1,3 +1,33 @@
-/* Andon DS · components. */
+/* ════════════════════════════════════════════════════════════════════════
+   Andon DS · components (release 1: corners and corner ticks).
+   Corners: 4 px for boxes and controls, 3 px for small items, round only
+   for dots and avatars. Corner ticks follow the same curve.
+   ════════════════════════════════════════════════════════════════════════ */
 @layer components {
+  /* ── corners ── */
+  :is(.glass, .panel, .hud, .strip, .simcon, .inspector, .drawer, .report, .dialog, .umenu-pop, .charttip,
+      .btn, .ibtn, .calls-pill, .alarm-pill, .tabs, .views, .speeds, .vsearch, .vresult, .scn, .callrow, .callout, .result,
+      .adm-card, .adm-tab, .cfg, .dev-card, .rep-filters, .rep-kpis > div, .plan-day, .timeline, .stimeline, .elog, .confirm-row,
+      .lineoff, .lcd-banner, .lcd-none, .scanwin, .signin, .si-acct, .si-demo, .si-err, .si-input, .si-live, .si-soon,
+      input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) { border-radius: var(--ds-radius-md); }
+  :is(.cell, .lc-cell, .chip, .tag, .sim-tag, .hchip, .dev-val, .paint, .lcd-pill, .toggle, .lane-h .xp, .cell .hg) { border-radius: var(--ds-radius-sm); }
+
+  /* ── corner ticks: a frame with the box's own curve, masked so only the corners show ── */
+  .ticks::after,
+  :is(.btn, .ibtn, .alarm-pill, .views button, .tabs button, .cell, .scn, .arow)::after {
+    background: none;
+    border: var(--ds-tick-w, 1.5px) solid var(--tick-c);
+    border-radius: calc(var(--box-r, var(--ds-radius-md)) - var(--tick-inset));
+    inset: var(--tick-inset);
+    --m: linear-gradient(black 0 0);
+    -webkit-mask: var(--m) left top / var(--tick-len) var(--tick-len) no-repeat, var(--m) right top / var(--tick-len) var(--tick-len) no-repeat,
+                  var(--m) left bottom / var(--tick-len) var(--tick-len) no-repeat, var(--m) right bottom / var(--tick-len) var(--tick-len) no-repeat;
+    mask: var(--m) left top / var(--tick-len) var(--tick-len) no-repeat, var(--m) right top / var(--tick-len) var(--tick-len) no-repeat,
+          var(--m) left bottom / var(--tick-len) var(--tick-len) no-repeat, var(--m) right bottom / var(--tick-len) var(--tick-len) no-repeat;
+  }
+  /* panels: 12 px ticks on the border */
+  .ticks::after { --tick-c: var(--tick, var(--ds-tick)); --tick-len: 12px; --tick-inset: -1px; }
+  /* controls: 7 px brackets outside the control on hover / focus / selection */
+  :is(.btn, .ibtn, .alarm-pill, .views button, .tabs button, .cell, .scn, .arow)::after { --tick-c: var(--bk, var(--ds-text-primary)); --tick-len: 7px; --tick-inset: var(--bk-in, -5px); }
+  :is(.cell, .lc-cell)::after { --box-r: var(--ds-radius-sm); }
 }
