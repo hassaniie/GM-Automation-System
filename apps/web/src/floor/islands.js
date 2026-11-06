@@ -1,4 +1,5 @@
 /* ═════════ islands ═════════ */
+import { downtimeTone, planTone } from '../lib/tone.js';
 import { Scene3D } from '@mg/scene';
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { UserMenu } from '../auth.js';
@@ -30,9 +31,9 @@ export function StateIsland() {
   return html`<section class="state-island" role="status" aria-live="polite">
     <div class="metric"><span class="micro">Line</span>
       <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button></div>
-    <div class="metric" title="Final line: vehicles completed this shift against the shift target"><span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: p.delta < 0 ? 'var(--warn)' : 'var(--ok)' }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
+    <div class="metric" title="Final line: vehicles completed this shift against the shift target"><span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
     <div class="metric opt"><span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span></div>
-    <div class="metric opt" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v">${fmtDur(p.down)}<small>Final</small></span></div>
+    <div class="metric opt" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span></div>
     <div class="metric opt"><span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span></div>
     <div class="metric opt"><span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span></div>
   </section>`;
@@ -84,7 +85,7 @@ export function Strip() {
 /* lane header numbers: completed / shift target and downtime for that line */
 function LaneStat({ area }) {
   const p = M.linePace(RT.S, area);
-  return html`<span class="lstat" title=${`${AREAS[area].name}: ${p.done} completed of ${p.target} this shift · downtime ${fmtDur(p.down)}`}>${p.done}/${p.target}${area !== 'TRIM' || RT.S.cfg.trimAndon ? html` · <span style=${{ color: p.down > 0 ? 'var(--crit)' : null }}>↓${fmtDur(p.down)}</span>` : null}</span>`;
+  return html`<span class="lstat" title=${`${AREAS[area].name}: ${p.done} completed of ${p.target} this shift · downtime ${fmtDur(p.down)}`}>${p.done}/${p.target}${area !== 'TRIM' || RT.S.cfg.trimAndon ? html` · <span style=${{ color: downtimeTone(p.down, area) }}>↓${fmtDur(p.down)}</span>` : null}</span>`;
 }
 function Cell({ id, sel }) {
   const S = RT.S, st = M.stationStatus(S, id), P = POS[id], sv = M.stationVehicle(S, id), occ = sv && S.pos[sv.posId].occ;

@@ -2,6 +2,7 @@
    Main dashboard (URD req 25–27) and line displays (req 23–24), plus the
    resilience demos: head-office link loss (req 33) and power cut (req 32).
    ════════════════════════════════════════════════════════════════════════ */
+import { downtimeTone } from './lib/tone.js';
 import { REMOTE, onConnChange, send } from './lib/source.js';
 import { Auth, ROLES } from './auth.js';
 import { CallRow } from './floor/inspector.js';
@@ -97,9 +98,9 @@ function LineCard({ l }) {
     <div class="lc-head"><button class="lc-title" onClick=${() => go('display', l.a.toLowerCase())} title="Open the line display"><span class="micro">${AREAS[l.a].station}</span><span>${AREAS[l.a].name}</span><${Icon} n="tv" /></button>
       <span class=${'andon-state c-' + STATE_TONE[l.state]}>${STATE_LABEL[l.state]}</span></div>
     <div class="lc-kpis">
-      <div><span class="micro">Completed</span><b class="num">${l.done}<small>/ ${l.target}</small></b><span class=${l.delta < 0 ? 'c-warn' : 'c-ok'}>${l.delta === 0 ? 'on plan' : l.delta > 0 ? `+${l.delta} ahead` : `${-l.delta} behind`}</span></div>
+      <div><span class="micro">Completed</span><b class="num">${l.done}<small>/ ${l.target}</small></b><span class=${l.delta < -2 ? 'c-crit' : l.delta < 0 ? 'c-warn' : 'c-muted'}>${l.delta === 0 ? 'on plan' : l.delta > 0 ? `+${l.delta} ahead` : `${-l.delta} behind`}</span></div>
       <div><span class="micro">Remaining</span><b class="num">${l.remaining}</b></div>
-      <div><span class="micro">Downtime</span><b class="num" style=${{ color: l.down ? 'var(--crit)' : null }}>${fmtDur(l.down)}</b></div>
+      <div><span class="micro">Downtime</span><b class="num" style=${{ color: downtimeTone(l.down, l.a) }}>${fmtDur(l.down)}</b></div>
       <div><span class="micro">Takt</span><b class="num">${fmtDur(l.takt)}</b></div>
       <div><span class="micro">In line</span><b class="num">${l.wip}</b></div>
       <div><span class="micro">Calls</span><b class="num" style=${{ color: l.calls ? 'var(--call-sup)' : null }}>${l.calls}</b></div>

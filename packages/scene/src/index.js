@@ -146,9 +146,15 @@ export const Scene3D = (function () {
   }
 
   /* MG branding painted on the open floor north of the Final line (x 33–53, z −22…−2):
-     the official badge, unchanged, faded like real floor paint. Fades further on zoom-in. */
+     the official badge as a neutral watermark, faded like real floor paint. Fades further on zoom-in. */
   function buildFloorBadge() {
-    const tex = new THREE.TextureLoader().load(MG_FLOOR_LOGO); tex.anisotropy = 8;
+    // painted as a neutral watermark (design system: red on the floor means an alarm, never decoration)
+    const tex = new THREE.TextureLoader().load(MG_FLOOR_LOGO, (t) => {
+      const img = t.image, cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+      const cx = cv.getContext('2d'); cx.filter = 'grayscale(1) brightness(1.15)'; cx.drawImage(img, 0, 0);
+      t.image = cv; t.needsUpdate = true;
+    });
+    tex.anisotropy = 8;
     floorBadge = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: T.badge, depthWrite: false }));
     floorBadge.rotation.x = -Math.PI / 2; floorBadge.position.set(43, 0.013, -12); floorBadge.renderOrder = 1; scene.add(floorBadge);
     floorText('MG MOTORS · GENERAL ASSEMBLY', 33, -0.6, 20, { size: 46, weight: 600, colorKey: 'textDim', letter: 14, w: 1280 });
