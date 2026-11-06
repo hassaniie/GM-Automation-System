@@ -54,8 +54,8 @@ const COVERAGE = [
     [27, 'Updates within a few seconds', 'Events push to screens in under 2 s; the dashboard shows the time of the last update.', 'demo', () => go('dash')],
   ]],
   ['Data, reports, users', [
-    [28, 'Stores production, cycle, downtime, scans and calls; state retention', 'Line server database (historian). Proposed: 3 years online, then archive; about 2 GB a year.', 'proposal', () => go('reports')],
-    [29, 'Reports by day, shift and line; Excel and PDF', 'Production, cycle times, downtime, offlined vehicles and call response; Excel and PDF export.', 'demo', () => go('reports')],
+    [28, 'Stores production, cycle, downtime, scans and calls; state retention', 'PostgreSQL on the line server: production, cycle times, downtime, offline records, calls, scans, audit and every plant event, saved every 2 s. Retention to be agreed (2 years set; 3 years proposed).', 'demo', () => go('reports')],
+    [29, 'Reports by day, shift and line; Excel and PDF', 'From the line server database: a day or a range up to 31 days, by shift and line. Production, cycle times, downtime, offlined vehicles and call response; Excel and PDF files, and a saved report at the end of every shift.', 'demo', () => go('reports')],
     [30, 'User levels and individual sign-in', 'Administrator, authorised person, supervisor, maintenance, view-only; personal accounts; directory sign-in at deployment.', 'demo', () => go('admin', 'users')],
   ]],
   ['General', [

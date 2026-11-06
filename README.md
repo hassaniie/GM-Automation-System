@@ -40,6 +40,8 @@ For development, `pnpm dev:all` runs the server with reload and Vite with `/api`
 
 **Data (URD req 28, 32).** Every 2 s the server writes new history in one transaction: production per line, cycle times per station, offline records, calls with response and clear times, shift summaries and downtime, vehicles, settings, the audit log, and every plant event and command. Writes are idempotent, so repeats are harmless. If the database is unreachable the line keeps running and the history is caught up when it returns (`/api/health` shows `db: down` meanwhile). A checkpoint of the whole plant state is saved every 30 s, at every shift change and on shutdown; a restart or power cut continues from it. History older than the previous production day leaves memory once stored; VIN search finds older units in the database. History is kept for `RETENTION_DAYS` (730 by default; to be confirmed with MG JW).
 
+**Reports (URD req 28–29).** On the line server, Reports come from the database: a single day or a range of up to 31 days, by shift and line, with a By day table for ranges. Days with nothing stored say so; nothing is invented (the offline demo still fills earlier days with labelled simulated history). Excel (exceljs) and PDF (pdfmake) are built on the server from the same tables as the page (`packages/reports`), and every export is written to the access log. At the end of every shift the server saves that shift's Excel and PDF for all lines; they are listed under Reports → Saved shift reports and kept for the retention period.
+
 **Sign-in (URD req 30).**
 - People sign in with their employee ID or email and a password (scrypt). Sessions are an httpOnly cookie; 5 wrong passwords lock that account from that address for 30 s. Every sign-in, failure and account change is logged.
 - Each command is checked against the person's role on the server (see `COMMAND_PERMISSION` in `packages/contracts`), and the name recorded in the audit log and on calls comes from the session, not from the screen.
@@ -56,6 +58,7 @@ For development, `pnpm dev:all` runs the server with reload and Vite with `/api`
 | `POST /api/commands` | One command, same schema as over the WebSocket (for integrations) |
 | `/api/auth/*` | Sign-in, sign-out, me, unlock, config, demo switch, display link exchange, single sign-on |
 | `/api/users`, `/api/displays` | Accounts and TV links (administrators) |
+| `GET /api/reports?from&to&shift&line` | Report tables and figures (JSON); `/api/reports/file.xlsx` and `/file.pdf` take the same query. `GET /api/reports/saved`, `/saved/:id`: end-of-shift reports |
 | `GET /api/audit`, `GET /api/vehicles/:vin`, `GET /api/snapshot` | Audit log, vehicle record, full state |
 
 State-changing REST calls need the `X-MG-Client: web` header; responses carry a Content Security Policy and the usual security headers.
@@ -98,7 +101,8 @@ A pnpm workspace:
 | `packages/sim` | The line simulator: carrier movement, transfers, paint-shop feed, simulated teams and responders. It reports to the rules only through plant events |
 | `packages/engine` | Facade: the `MGE` object the screens and scene use, assembled from `core` and `sim`. Its tests are the 42 URD checks |
 | `packages/sync` | Snapshot and patch format between the edge server and the screens |
-| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, sign-in and permissions (`src/auth`), PostgreSQL storage, migrations and checkpoints (`src/db`, `src/persist.ts`), serves the screens |
+| `packages/reports` | Report definitions shared by the browser and the server: the tables from the live state or from the database, figures, export sheets |
+| `apps/edge` | Edge server (Fastify): runs the engine, live WebSocket, commands, sign-in and permissions (`src/auth`), PostgreSQL storage, migrations and checkpoints (`src/db`, `src/persist.ts`), reports, Excel and PDF (`src/reports`), serves the screens |
 | `packages/scene` | three.js digital twin (`Scene3D`): floor, conveyors, hanger loop, cars, stack lights, buzzer rings, scanners and photo-eye; `brand.js` holds the Bolt & Volt marks |
 | `apps/web/index.html` | Page shell and fonts |
 | `apps/web/src/main.js` | Entry: styles, then `boot()` |
@@ -109,7 +113,7 @@ A pnpm workspace:
 | `apps/web/src/auth.js` | Sign-in, roles and permissions, user menu, idle lock |
 | `apps/web/src/admin.js` | Settings screens and on-device persistence |
 | `apps/web/src/screens.js` | Dashboard, line displays, link-loss and power-cut demos |
-| `apps/web/src/reports.js` | Reports and Excel/PDF export |
+| `apps/web/src/reports.js` | Reports page: from the line server, or built in the browser in the offline demo |
 | `apps/web/src/how.js` | How it works / URD coverage |
 | `docs/` | Plant GA layout drawing the floor plan was traced from; URD clarification questions |
 
