@@ -22,6 +22,8 @@ import { COOKIE, Sessions, type Session } from './auth/sessions.ts';
 import { createDb, migrate, type Db } from './db/index.ts';
 import { Persistence, type PersistOptions } from './persist.ts';
 import { registerReports, saveShiftReport } from './reports/routes.ts';
+import { DeviceManager, loadSignalMap } from './devices/manager.ts';
+import { need } from './auth/routes.ts';
 
 export const VERSION = '0.3.0';
 const MAX_BUFFERED = 8 * 1024 * 1024; // a client this far behind is dropped; it reconnects and resyncs
@@ -34,9 +36,13 @@ export interface ServerOptions extends HostOptions {
   demo?: boolean; admin?: { empId?: string; password?: string };
   /** Single sign-on; off when not given. */
   sso?: OidcSettings | null;
+  /** simulation (default), live (devices drive the plant) or shadow (devices logged, simulator runs the screens). */
+  plantMode?: 'simulation' | 'live' | 'shadow';
+  /** The signal map (config/devices.json); required for live and shadow. */
+  devicesFile?: string;
 }
 
-export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost; db: Db | null; persistence: Persistence | null }> {
+export async function buildServer(opts: ServerOptions = {}): Promise<{ app: FastifyInstance; host: EngineHost; db: Db | null; persistence: Persistence | null; devices: DeviceManager | null }> {
   const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 256 * 1024 });
   let db: Db | null = null, persistence: Persistence | null = null, restored = false;
   if (opts.databaseUrl) {
@@ -46,7 +52,11 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
     const state = await Persistence.latest(db);
     if (state) { opts = { ...opts, state }; restored = true; }
   }
-  const host = new EngineHost(opts);
+  const plantMode = opts.plantMode ?? 'simulation';
+  // check the device map before anything starts, so a mistake stops start-up with a clear message
+  const signalMap = plantMode === 'simulation' ? null : loadSignalMap(opts.devicesFile ?? 'config/devices.json');
+  const host = new EngineHost({ ...opts, mode: plantMode });
+  const devices = signalMap ? new DeviceManager(signalMap, host, plantMode, app.log) : null;
   if (db) {
     persistence = new Persistence(db, host, { log: app.log, ...opts.persist });
     if (restored) app.log.info(`restarted from checkpoint at plant time ${host.S.t}`);
@@ -85,7 +95,8 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
   const actorFor = (session: Session | null): Actor => (session ? actorOf(session) : SYSTEM);
 
   app.get('/api/health', async () => ({
-    ok: true, version: VERSION, clock: host.clock, t: host.S.t, rev: host.rev, clients: host.listenerCount,
+    ok: true, version: VERSION, clock: host.clock, plantMode,
+    devices: devices ? devices.view().devices.map((d) => ({ id: d.id, state: d.state })) : [], t: host.S.t, rev: host.rev, clients: host.listenerCount,
     db: db ? (persistence!.dbUp ? 'up' : 'down') : 'none', lastSaved: persistence?.lastFlushAt ?? null, lastCheckpoint: persistence?.lastCheckpointAt ?? null,
   }));
   /** Vehicle record by VIN (URD req 5): in memory first, then the stored history. */
@@ -101,6 +112,16 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
   app.post('/api/commands', async (req, reply) => {
     try { return { ok: true, value: await runCommand(host, req.body, actorFor(req.session)) }; }
     catch (e) { const err = e as Error; reply.code(e instanceof CommandError ? e.status : 500); return { ok: false, error: err.message }; }
+  });
+
+  /** Commissioning: devices, live signal values and the signal log (administrators). */
+  app.get('/api/devices', { preHandler: db ? need('users') : [] }, async () => ({ ok: true, ...(devices ? devices.view() : { mode: plantMode, devices: [], tags: [], log: [], silentAfterSec: null }) }));
+  app.post('/api/devices/test', { preHandler: db ? need('users') : [] }, async (req, reply) => {
+    const b = (req.body || {}) as { device?: string; address?: string; value?: boolean | string };
+    if (!devices) return reply.code(409).send({ ok: false, error: 'No devices: the server runs in simulation mode.' });
+    if (typeof b.device !== 'string' || (typeof b.value !== 'boolean' && typeof b.value !== 'string')) return reply.code(400).send({ ok: false, error: 'device, address and value are needed' });
+    try { devices.inject(b.device, String(b.address || ''), b.value); return { ok: true }; }
+    catch (e) { return reply.code(409).send({ ok: false, error: (e as Error).message }); }
   });
 
   app.get('/api/live', {
@@ -144,11 +165,13 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
 
   app.addHook('onClose', async () => {
     host.stop();
+    if (devices) await devices.stop();
     if (persistence) await persistence.stop();
     if (db) await db.close();
   });
   if (opts.autostart !== false) {
     host.start();
+    devices?.start();
     if (persistence) {
       persistence.start();
       const purge = () => persistence!.purge(opts.retentionDays ?? 730).catch((e) => app.log.error(`purge failed: ${(e as Error).message}`));
@@ -156,5 +179,5 @@ export async function buildServer(opts: ServerOptions = {}): Promise<{ app: Fast
       app.addHook('onClose', async () => clearInterval(daily));
     }
   }
-  return { app, host, db, persistence };
+  return { app, host, db, persistence, devices };
 }

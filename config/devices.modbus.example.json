@@ -1,0 +1,695 @@
+{
+  "devices": [
+    {
+      "id": "plc",
+      "kind": "modbus",
+      "host": "192.168.10.20",
+      "port": 502,
+      "unitId": 1,
+      "pollMs": 100
+    },
+    {
+      "id": "scanner-tl1",
+      "kind": "scanner-tcp",
+      "host": "192.168.10.31",
+      "port": 2001,
+      "pos": "TL1"
+    }
+  ],
+  "signals": [
+    {
+      "device": "plc",
+      "address": "coil:0",
+      "means": "presence",
+      "pos": "TL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:1",
+      "means": "presence",
+      "pos": "TL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:2",
+      "means": "presence",
+      "pos": "TL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:3",
+      "means": "presence",
+      "pos": "TL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:4",
+      "means": "presence",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:5",
+      "means": "presence",
+      "pos": "TL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:6",
+      "means": "presence",
+      "pos": "CL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:7",
+      "means": "presence",
+      "pos": "CL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:8",
+      "means": "presence",
+      "pos": "CL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:9",
+      "means": "presence",
+      "pos": "BUF",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at BUF"
+    },
+    {
+      "device": "plc",
+      "address": "coil:10",
+      "means": "presence",
+      "pos": "CL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:11",
+      "means": "presence",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:12",
+      "means": "presence",
+      "pos": "FL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:13",
+      "means": "presence",
+      "pos": "FL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:14",
+      "means": "presence",
+      "pos": "FL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:15",
+      "means": "presence",
+      "pos": "FL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:16",
+      "means": "presence",
+      "pos": "FL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:17",
+      "means": "presence",
+      "pos": "FL7",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "coil:18",
+      "means": "transfer-done",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Body transfer done TL5 → TL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:19",
+      "means": "transfer-done",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Body transfer done FL1 → FL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:20",
+      "means": "photo-eye",
+      "pos": "FL7",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "End-of-line photo-eye at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "coil:21",
+      "means": "work-done",
+      "pos": "TL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:22",
+      "means": "call-button",
+      "pos": "TL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:23",
+      "means": "call-button",
+      "pos": "TL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:24",
+      "means": "work-done",
+      "pos": "TL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:25",
+      "means": "call-button",
+      "pos": "TL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:26",
+      "means": "call-button",
+      "pos": "TL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:27",
+      "means": "work-done",
+      "pos": "TL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:28",
+      "means": "call-button",
+      "pos": "TL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:29",
+      "means": "call-button",
+      "pos": "TL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:30",
+      "means": "work-done",
+      "pos": "TL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:31",
+      "means": "call-button",
+      "pos": "TL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:32",
+      "means": "call-button",
+      "pos": "TL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:33",
+      "means": "work-done",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:34",
+      "means": "call-button",
+      "pos": "TL5",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:35",
+      "means": "call-button",
+      "pos": "TL5",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:36",
+      "means": "work-done",
+      "pos": "TL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:37",
+      "means": "call-button",
+      "pos": "TL6",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:38",
+      "means": "call-button",
+      "pos": "TL6",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:39",
+      "means": "work-done",
+      "pos": "CL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:40",
+      "means": "call-button",
+      "pos": "CL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:41",
+      "means": "call-button",
+      "pos": "CL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:42",
+      "means": "work-done",
+      "pos": "CL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:43",
+      "means": "call-button",
+      "pos": "CL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:44",
+      "means": "call-button",
+      "pos": "CL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:45",
+      "means": "work-done",
+      "pos": "CL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:46",
+      "means": "call-button",
+      "pos": "CL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:47",
+      "means": "call-button",
+      "pos": "CL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:48",
+      "means": "work-done",
+      "pos": "CL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:49",
+      "means": "call-button",
+      "pos": "CL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:50",
+      "means": "call-button",
+      "pos": "CL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:51",
+      "means": "work-done",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:52",
+      "means": "call-button",
+      "pos": "FL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:53",
+      "means": "call-button",
+      "pos": "FL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "coil:54",
+      "means": "work-done",
+      "pos": "FL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:55",
+      "means": "call-button",
+      "pos": "FL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:56",
+      "means": "call-button",
+      "pos": "FL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "coil:57",
+      "means": "work-done",
+      "pos": "FL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:58",
+      "means": "call-button",
+      "pos": "FL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:59",
+      "means": "call-button",
+      "pos": "FL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "coil:60",
+      "means": "work-done",
+      "pos": "FL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:61",
+      "means": "call-button",
+      "pos": "FL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:62",
+      "means": "call-button",
+      "pos": "FL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "coil:63",
+      "means": "work-done",
+      "pos": "FL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:64",
+      "means": "call-button",
+      "pos": "FL5",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:65",
+      "means": "call-button",
+      "pos": "FL5",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "coil:66",
+      "means": "work-done",
+      "pos": "FL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:67",
+      "means": "call-button",
+      "pos": "FL6",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:68",
+      "means": "call-button",
+      "pos": "FL6",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "coil:69",
+      "means": "call-button",
+      "pos": "FL7",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "coil:70",
+      "means": "call-button",
+      "pos": "FL7",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL7"
+    }
+  ],
+  "silentAfterSec": 600
+}

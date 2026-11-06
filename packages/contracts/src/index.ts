@@ -139,7 +139,7 @@ export const COMMAND_PERMISSION: Record<CommandType, Permission | 'respond'> = {
 };
 
 /* ── live connection (WS /api/live) ── */
-export interface Clock { speed: number; running: boolean; mode: 'simulation' | 'live' }
+export interface Clock { speed: number; running: boolean; mode: 'simulation' | 'live' | 'shadow' }
 export type ServerMessage =
   | { type: 'hello'; server: string; version: string; clock: Clock }
   | { type: 'snapshot'; rev: number; clock: Clock; state: unknown; hints?: Record<string, unknown> }
@@ -204,3 +204,4 @@ export interface EngineState {
 }
 /** What a screen receives: the state, read-only. From phase 3 it is sent by the edge server. */
 export type Snapshot = Readonly<EngineState>;
+export * from './devices.ts';

@@ -19,7 +19,8 @@
     "dev:edge": "pnpm --filter @mg/edge dev",
     "start:edge": "pnpm --filter @mg/web build:edge && pnpm --filter @mg/edge start",
     "dev:all": "pnpm --parallel --filter @mg/edge --filter @mg/web run dev:remote",
-    "db:dev": "docker compose up -d --wait db"
+    "db:dev": "docker compose up -d --wait db",
+    "emulate:plant": "pnpm --filter @mg/emulator start"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

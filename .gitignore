@@ -7,3 +7,7 @@ coverage/
 .vercel
 dist-edge/
 .env
+
+# device maps for a site or the local emulator (examples are committed)
+config/devices.json
+config/devices.emulator.json

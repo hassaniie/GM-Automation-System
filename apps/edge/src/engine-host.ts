@@ -1,13 +1,15 @@
 /* Owns the one engine state on the server and keeps it moving.
    Every TICK_MS it advances the simulation by speed × elapsed seconds, then publishes one patch.
    Listeners get a snapshot when they join and every patch after that. */
-import type { Clock, EngineState } from '@mg/contracts';
+import type { Clock, EngineState, PlantEvent } from '@mg/contracts';
+import { createLiveState, liveStep } from '@mg/core';
+import { plantNow, plantT } from './devices/clock.ts';
 import { buildScenario, injectDemoDelay, DEMO_AFTER } from '@mg/sim';
 import { MGE } from '@mg/engine';
 import { diff, toWire, type Op } from '@mg/sync';
 import { freeze, thaw } from './checkpoint.ts';
 
-export interface HostOptions { seed?: number; speed?: number; scenario?: number; tickMs?: number; mode?: Clock['mode']; /** start from a restored state instead of a scenario */ state?: EngineState }
+export interface HostOptions { seed?: number; speed?: number; scenario?: number; tickMs?: number; mode?: Clock['mode']; /** start from a restored state instead of a scenario */ state?: EngineState; /** plant time zone for live running */ tz?: string }
 export type HostListener = { snapshot(rev: number, clock: Clock, state: unknown, hints?: Record<string, unknown>): void; patch(rev: number, clock: Clock, ops: Op[]): void };
 
 export class EngineHost {
@@ -22,6 +24,9 @@ export class EngineHost {
   private timer: NodeJS.Timeout | null = null;
   private listeners = new Set<HostListener>();
   readonly seed: number;
+  readonly tz: string;
+  /** Device events waiting for the next plant second (live). */
+  private queue: { t: number; e: PlantEvent }[] = [];
   /** Called after every command (allowed or refused); the persistence layer logs it. */
   onCommand?: (actor: import('./commands.ts').Actor, command: unknown, ok: boolean, error?: string) => void;
   readonly tickMs: number;
@@ -34,7 +39,13 @@ export class EngineHost {
     this.seed = opts.seed ?? 11;
     this.tickMs = opts.tickMs ?? 250;
     this.clock = { speed: opts.speed ?? 15, running: true, mode: opts.mode ?? 'simulation' };
-    if (opts.state) this.adopt(opts.state);
+    this.tz = opts.tz ?? 'Asia/Karachi';
+    const restoredLive = opts.state && (opts.state as { plantMode?: string }).plantMode === 'live';
+    if (this.clock.mode === 'live') {
+      // live: carry on from a live checkpoint, otherwise start a fresh line on today's plant clock
+      if (restoredLive) this.adopt(opts.state!);
+      else { const now = plantNow(this.tz); this.adopt(createLiveState(this.seed, now.date, now.sec) as EngineState); }
+    } else if (opts.state && !restoredLive) this.adopt(opts.state);
     else this.loadScenario(opts.scenario ?? 1);
   }
 
@@ -76,7 +87,17 @@ export class EngineHost {
   /** Advance the plant and publish what changed. Also called after each command. */
   tick() {
     const now = Date.now(), dt = (now - this.last) / 1000; this.last = now;
-    if (this.clock.running && this.clock.mode === 'simulation') {
+    if (this.clock.mode === 'live') {
+      // live: plant time follows the plant clock; device events are applied in the second they happened
+      const target = plantT(this.tz, (this.S.cfg as { baseDate: string }).baseDate);
+      let n = 0;
+      while (this.S.t < target && n < 2 * 86400) {
+        const t = this.S.t + 1, due = this.queue.filter((q) => q.t <= t).map((q) => q.e);
+        if (due.length) this.queue = this.queue.filter((q) => q.t > t);
+        liveStep(this.S, 1, due); n++;
+      }
+      if (n) this.onAdvance?.(this.S);
+    } else if (this.clock.running && (this.clock.mode === 'simulation' || this.clock.mode === 'shadow')) {
       this.acc += dt * this.clock.speed;
       let n = 0;
       while (this.acc >= 1 && n < 3600) { MGE.step(this.S, 1); this.acc -= 1; n++; }
@@ -84,6 +105,11 @@ export class EngineHost {
       if (n) this.onAdvance?.(this.S);
     }
     this.publish();
+  }
+
+  /** A device event (live): applied in the plant second it happened. */
+  enqueue(e: PlantEvent, at = Date.now()) {
+    this.queue.push({ t: Math.max(this.S.t + 1, plantT(this.tz, (this.S.cfg as { baseDate: string }).baseDate, at)), e });
   }
 
   publish() {

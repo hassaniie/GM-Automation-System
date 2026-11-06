@@ -1,0 +1,20 @@
+{
+  "name": "@mg/emulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Plant emulator: the simulator served as the real devices would be (OPC UA PLC, Modbus TCP PLC, network VIN scanner), for testing without hardware. Not deployed to the plant.",
+  "scripts": {
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@mg/contracts": "workspace:*",
+    "@mg/core": "workspace:*",
+    "@mg/sim": "workspace:*",
+    "modbus-serial": "8.0.25",
+    "node-opcua": "2.187.10"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}

@@ -1,0 +1,695 @@
+{
+  "devices": [
+    {
+      "id": "plc",
+      "kind": "opcua",
+      "endpoint": "opc.tcp://192.168.10.20:4840/UA/MGPlant",
+      "securityMode": "None",
+      "securityPolicy": "None",
+      "samplingMs": 100
+    },
+    {
+      "id": "scanner-tl1",
+      "kind": "scanner-tcp",
+      "host": "192.168.10.31",
+      "port": 2001,
+      "pos": "TL1"
+    }
+  ],
+  "signals": [
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL1.Presence",
+      "means": "presence",
+      "pos": "TL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL2.Presence",
+      "means": "presence",
+      "pos": "TL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL3.Presence",
+      "means": "presence",
+      "pos": "TL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL4.Presence",
+      "means": "presence",
+      "pos": "TL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL5.Presence",
+      "means": "presence",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL6.Presence",
+      "means": "presence",
+      "pos": "TL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL1.Presence",
+      "means": "presence",
+      "pos": "CL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL2.Presence",
+      "means": "presence",
+      "pos": "CL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL3.Presence",
+      "means": "presence",
+      "pos": "CL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.BUF.Presence",
+      "means": "presence",
+      "pos": "BUF",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at BUF"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL4.Presence",
+      "means": "presence",
+      "pos": "CL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL1.Presence",
+      "means": "presence",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL2.Presence",
+      "means": "presence",
+      "pos": "FL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL3.Presence",
+      "means": "presence",
+      "pos": "FL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL4.Presence",
+      "means": "presence",
+      "pos": "FL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL5.Presence",
+      "means": "presence",
+      "pos": "FL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL6.Presence",
+      "means": "presence",
+      "pos": "FL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL7.Presence",
+      "means": "presence",
+      "pos": "FL7",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Carrier present at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL5.TransferDone",
+      "means": "transfer-done",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Body transfer done TL5 → TL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL1.TransferDone",
+      "means": "transfer-done",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Body transfer done FL1 → FL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL7.PhotoEye",
+      "means": "photo-eye",
+      "pos": "FL7",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "End-of-line photo-eye at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL1.WorkDone",
+      "means": "work-done",
+      "pos": "TL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL1.CallSUP",
+      "means": "call-button",
+      "pos": "TL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL1.CallMNT",
+      "means": "call-button",
+      "pos": "TL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL2.WorkDone",
+      "means": "work-done",
+      "pos": "TL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL2.CallSUP",
+      "means": "call-button",
+      "pos": "TL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL2.CallMNT",
+      "means": "call-button",
+      "pos": "TL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL3.WorkDone",
+      "means": "work-done",
+      "pos": "TL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL3.CallSUP",
+      "means": "call-button",
+      "pos": "TL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL3.CallMNT",
+      "means": "call-button",
+      "pos": "TL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL4.WorkDone",
+      "means": "work-done",
+      "pos": "TL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL4.CallSUP",
+      "means": "call-button",
+      "pos": "TL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL4.CallMNT",
+      "means": "call-button",
+      "pos": "TL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL5.WorkDone",
+      "means": "work-done",
+      "pos": "TL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL5.CallSUP",
+      "means": "call-button",
+      "pos": "TL5",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL5.CallMNT",
+      "means": "call-button",
+      "pos": "TL5",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL6.WorkDone",
+      "means": "work-done",
+      "pos": "TL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL6.CallSUP",
+      "means": "call-button",
+      "pos": "TL6",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.TL6.CallMNT",
+      "means": "call-button",
+      "pos": "TL6",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at TL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL1.WorkDone",
+      "means": "work-done",
+      "pos": "CL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL1.CallSUP",
+      "means": "call-button",
+      "pos": "CL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL1.CallMNT",
+      "means": "call-button",
+      "pos": "CL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL2.WorkDone",
+      "means": "work-done",
+      "pos": "CL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL2.CallSUP",
+      "means": "call-button",
+      "pos": "CL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL2.CallMNT",
+      "means": "call-button",
+      "pos": "CL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL3.WorkDone",
+      "means": "work-done",
+      "pos": "CL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL3.CallSUP",
+      "means": "call-button",
+      "pos": "CL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL3.CallMNT",
+      "means": "call-button",
+      "pos": "CL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL4.WorkDone",
+      "means": "work-done",
+      "pos": "CL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL4.CallSUP",
+      "means": "call-button",
+      "pos": "CL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.CL4.CallMNT",
+      "means": "call-button",
+      "pos": "CL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at CL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL1.WorkDone",
+      "means": "work-done",
+      "pos": "FL1",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL1.CallSUP",
+      "means": "call-button",
+      "pos": "FL1",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL1.CallMNT",
+      "means": "call-button",
+      "pos": "FL1",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL1"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL2.WorkDone",
+      "means": "work-done",
+      "pos": "FL2",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL2.CallSUP",
+      "means": "call-button",
+      "pos": "FL2",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL2.CallMNT",
+      "means": "call-button",
+      "pos": "FL2",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL2"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL3.WorkDone",
+      "means": "work-done",
+      "pos": "FL3",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL3.CallSUP",
+      "means": "call-button",
+      "pos": "FL3",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL3.CallMNT",
+      "means": "call-button",
+      "pos": "FL3",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL3"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL4.WorkDone",
+      "means": "work-done",
+      "pos": "FL4",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL4.CallSUP",
+      "means": "call-button",
+      "pos": "FL4",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL4.CallMNT",
+      "means": "call-button",
+      "pos": "FL4",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL4"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL5.WorkDone",
+      "means": "work-done",
+      "pos": "FL5",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL5.CallSUP",
+      "means": "call-button",
+      "pos": "FL5",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL5.CallMNT",
+      "means": "call-button",
+      "pos": "FL5",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL5"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL6.WorkDone",
+      "means": "work-done",
+      "pos": "FL6",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Work done button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL6.CallSUP",
+      "means": "call-button",
+      "pos": "FL6",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL6.CallMNT",
+      "means": "call-button",
+      "pos": "FL6",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL6"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL7.CallSUP",
+      "means": "call-button",
+      "pos": "FL7",
+      "callType": "SUP",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Supervisor call button at FL7"
+    },
+    {
+      "device": "plc",
+      "address": "ns=1;s=GA.FL7.CallMNT",
+      "means": "call-button",
+      "pos": "FL7",
+      "callType": "MNT",
+      "invert": false,
+      "debounceMs": 50,
+      "label": "Maintenance call button at FL7"
+    }
+  ],
+  "silentAfterSec": 600
+}

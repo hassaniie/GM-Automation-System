@@ -35,7 +35,7 @@ export function authorize(host: EngineHost, actor: Actor, c: Cmd) {
 
 export async function runCommand(host: EngineHost, input: unknown, actor: Actor): Promise<unknown> {
   const c = parseCommand(input);
-  if (isSimCommand(c) && host.clock.mode !== 'simulation') throw new CommandError('Simulator controls are only available in simulation mode', 403);
+  if (isSimCommand(c) && host.clock.mode === 'live') throw new CommandError('Simulator controls are not available while the plant runs live', 403);
   try { authorize(host, actor, c); } catch (e) { host.onCommand?.(actor, c, false, (e as Error).message); throw e; }
   const result = await exec(host, host.S, c, actorLabel(actor));
   host.onCommand?.(actor, c, true);
