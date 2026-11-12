@@ -549,6 +549,11 @@ svg.plan text { font-family: var(--font-mono); }
 .mix li > span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mix-tot { display: flex; gap: 28px; margin: 12px 0; }
 .mix-tot > div { display: grid; gap: 4px; }
+/* dashboard · downtime by cause: station on the left, bar across the middle, time on the right */
+.dash-causes { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 2px; }
+.dash-causes li { display: grid; grid-template-columns: 48px minmax(0, 1fr) 56px; gap: 12px; align-items: center; min-height: 28px; }
+.dash-causes li > button { justify-self: start; font-size: 12px; }
+.dash-causes li > .mono:last-child { justify-self: end; font-size: 13px; font-variant-numeric: tabular-nums; }
 .mix { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; }
 .mix li { display: grid; grid-template-columns: 140px 1fr 24px; gap: 10px; align-items: center; }
 .mix li .mono { text-align: right; }

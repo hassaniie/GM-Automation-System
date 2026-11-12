@@ -188,3 +188,31 @@ test('page screens show the MG badge behind the content; menus are solid', async
   await page.evaluate(() => { location.hash = '#/floor'; });
   await expect(page.locator('canvas.page-badge')).toHaveCount(0);
 });
+
+test('the 3D floor renders at the screen\'s full pixel ratio even when the browser reports few CPU cores', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2 });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 4 }));
+  await signIn(page, 'dark');
+  await page.evaluate(() => { location.hash = '#/floor'; });
+  const canvas = page.locator('#scene canvas');
+  await canvas.waitFor();
+  const r = await canvas.evaluate((c) => (c as HTMLCanvasElement).width / c.clientWidth);
+  expect(r).toBeGreaterThanOrEqual(1.5);
+  await ctx.close();
+});
+
+test('dashboard: downtime by cause lines up (station left, time right, nothing spills)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page, 'dark');
+  await page.evaluate(() => { location.hash = '#/dash'; });
+  await page.locator('.dash-causes li').first().waitFor();
+  const bad = await page.evaluate(() => [...document.querySelectorAll('.dash-causes li')].flatMap((li) => {
+    const R = li.getBoundingClientRect(), id = li.firstElementChild!.getBoundingClientRect(), t = li.lastElementChild!;
+    const tr = t.getBoundingClientRect(), out: string[] = [];
+    if (Math.abs(id.left - R.left) > 1) out.push(`${li.textContent}: station is not at the left edge`);
+    if (tr.right > R.right + 1 || t.scrollWidth > (t as HTMLElement).clientWidth + 1) out.push(`${li.textContent}: time spills`);
+    return out;
+  }));
+  expect(bad).toEqual([]);
+});
