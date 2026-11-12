@@ -2,17 +2,20 @@
    all in this test. Proves: known email → session; unknown email and tampered state → refused. */
 import { createHash, randomBytes } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
-import { afterAll, beforeAll, expect, test } from 'vitest';
+import { afterAll, beforeAll, beforeEach, expect, test } from 'vitest';
 import { exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { buildServer } from '../src/server.ts';
-import { freshDatabase } from './helpers/db.ts';
+import { dbAvailable, freshDatabase } from './helpers/db.ts';
 
 const CLIENT_ID = 'andon', CLIENT_SECRET = 'secret';
 let idp: Server, issuer = '';
 const codes = new Map<string, { nonce: string; challenge: string; email: string }>();
 let T: Awaited<ReturnType<typeof freshDatabase>>, srv: Awaited<ReturnType<typeof buildServer>>, base = '';
 
+const NO_DB = !(await dbAvailable());
+beforeEach((c) => { if (NO_DB) c.skip(); });
 beforeAll(async () => {
+  if (NO_DB) return;
   const { publicKey, privateKey } = await generateKeyPair('RS256');
   const jwk = { ...(await exportJWK(publicKey)), kid: 'k1', alg: 'RS256', use: 'sig' };
   idp = createServer(async (req, res) => {
@@ -44,7 +47,7 @@ beforeAll(async () => {
   await srv.app.listen({ port: 0, host: '127.0.0.1' });
   base = `http://127.0.0.1:${(srv.app.server.address() as { port: number }).port}`;
 });
-afterAll(async () => { await srv.app.close(); await T.drop(); idp.close(); });
+afterAll(async () => { await srv?.app.close(); await T?.drop(); idp?.close(); });
 
 /** Starts sign-in, plays the provider's part for `email`, and returns the callback response. */
 async function ssoAs(email: string, tamperState = false) {

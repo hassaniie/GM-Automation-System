@@ -29,6 +29,8 @@
 }
 /* dark values: one block, applied by the system preference or the explicit toggle */
 @layer tokens {
+  /* screen only: printing (Reports → PDF) always uses the light values */
+  @media screen {
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
     color-scheme: dark;
     --ds-bg: var(--ds-n-900);
@@ -65,4 +67,5 @@
     --ds-chart-1: var(--ds-chart-1-d); --ds-chart-2: var(--ds-chart-2-d);
     --ds-mg-band: var(--ds-red-mg-d); --ds-mg-ring: var(--ds-n-50); --ds-mg-field: var(--ds-n-800); --ds-mg-letter: var(--ds-n-50);
   }
+}
 }

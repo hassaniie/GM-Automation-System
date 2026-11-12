@@ -95,6 +95,35 @@ describe('edge server', () => {
     a.close();
   });
 
+  test('shift pattern with breaks saves; overlaps and bad plans are refused and nothing is stored (audit B2–B4)', async () => {
+    const a = new Screen(wsUrl); await a.ready;
+    const H = 3600;
+    const shifts = [
+      { name: 'Shift A', start: 6 * H, end: 14.5 * H, breaks: [{ label: 'Tea break', start: 8.5 * H, end: 8.5 * H + 600 }] },
+      { name: 'Shift B', start: 14.5 * H, end: 23 * H, breaks: [{ label: 'Dinner', start: 19.5 * H, end: 20 * H }] },
+    ];
+    const ok = await a.send({ type: 'SET_SHIFTS', shifts, reason: 'test' });
+    expect(ok.ok, ok.error).toBe(true);
+    expect(srv.host.S.cfg.shifts[0].breaks[0].label).toBe('Tea break');
+
+    const overlap = await a.send({ type: 'SET_SHIFTS', shifts: [shifts[0], { ...shifts[1], start: 10 * H }], reason: 'test' });
+    expect(overlap.ok).toBe(false);
+    expect(overlap.error).toMatch(/overlap/);
+    expect(srv.host.S.cfg.shifts[1].start).toBe(14.5 * H);
+
+    const garbage = await a.send({ type: 'SET_PLAN', date: '2026-11-20', patch: { shifts: 'garbage' }, reason: 'test' });
+    expect(garbage.ok).toBe(false);
+    const night = await a.send({ type: 'SET_PLAN', date: '2026-11-20', patch: { shifts: [{ name: 'Night', start: 22 * H, end: 6 * H, breaks: [] }] }, reason: 'test' });
+    expect(night.ok).toBe(false);
+    expect(night.error).toMatch(/cross midnight/);
+    expect(srv.host.S.cfg.calendar['2026-11-20']).toBeUndefined();
+
+    const plan = await a.send({ type: 'SET_PLAN', date: '2026-11-20', patch: { targets: { 'Shift A': { FINAL: 20 } }, note: 'Reduced plan' }, reason: 'test' });
+    expect(plan.ok, plan.error).toBe(true);
+    expect(srv.host.S.cfg.calendar['2026-11-20'].targets['Shift A'].FINAL).toBe(20);
+    a.close();
+  });
+
   test('simulator controls: speed, scenario reload sends a fresh snapshot; refused outside simulation', async () => {
     const a = new Screen(wsUrl); await a.ready;
     const before = a.rev;

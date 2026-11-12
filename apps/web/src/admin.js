@@ -139,7 +139,9 @@ function ShiftAdmin() {
   const set = (i, patch) => { const n = draft.slice(); n[i] = { ...n[i], ...patch }; setDraft(n); setMsg(null); };
   const setB = (i, j, patch) => { const b = draft[i].breaks.slice(); b[j] = { ...b[j], ...patch }; set(i, { breaks: b }); };
   const net = (s) => (s.end - s.start - s.breaks.reduce((a, b) => a + Math.max(0, b.end - b.start), 0)) / 3600;
-  const valid = draft.every((s) => s.name.trim() && s.end > s.start && s.breaks.every((b) => b.start >= s.start && b.end <= s.end && b.end > b.start));
+  // the same rules the engine and the line server apply: same-day shifts, no overlaps, unique names (audit B4, B5)
+  const problem = M.checkShifts(draft), valid = !problem;
+  const last = draft[draft.length - 1], roomForShift = draft.length < 4 && last.end <= 23 * 3600;
   return html`<${Stack} gap=${4}>
     <${PageHeader} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The default pattern for every day. Breaks and the time between shifts are planned stops: the line stops, and they are excluded from cycle time and downtime." />
     ${draft.map((s, i) => html`<${Panel} key=${i}>
@@ -153,7 +155,8 @@ function ShiftAdmin() {
       <div class="ds-label">Breaks and planned stops</div>
       ${s.breaks.map((b, j) => html`<${Cluster} key=${j} gap=${2}><${TextInput} size="sm" style=${{ maxWidth: 220 }} aria-label="Break name" value=${b.label} onChange=${(v) => setB(i, j, { label: v })} /><${TimeInput} size="sm" style=${{ width: 120 }} aria-label="Break start" value=${toHM(b.start)} onChange=${(v) => setB(i, j, { start: fromHM(v) })} /><span class="c-muted">to</span><${TimeInput} size="sm" style=${{ width: 120 }} aria-label="Break end" value=${toHM(b.end)} onChange=${(v) => setB(i, j, { end: fromHM(v) })} /><span class="note">${fmtDur(b.end - b.start)}</span><${Button} size="sm" variant="ghost" icon="x" aria-label="Remove break" onClick=${() => set(i, { breaks: s.breaks.filter((_, k) => k !== j) })} /></${Cluster}>`)}
       <div><${Button} size="sm" variant="ghost" icon="plus" onClick=${() => set(i, { breaks: [...s.breaks, { label: 'Planned stop', start: s.start + 3600, end: s.start + 3600 + 600 }] })}>Add break or planned stop<//></div><//>`)}
-    <div><${Button} variant="ghost" icon="plus" onClick=${() => { const l = draft[draft.length - 1]; setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: l.end, end: Math.min(24 * 3600 - 60, l.end + 8 * 3600), breaks: [] }]); }}>Add shift<//></div>
+    <div><${Button} variant="ghost" icon="plus" disabled=${!roomForShift} title=${roomForShift ? null : 'No room for another shift: shifts end by midnight and the last one ends after 23:00'} onClick=${() => setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: last.end, end: Math.min(24 * 3600 - 60, last.end + 8 * 3600), breaks: [] }])}>Add shift<//>${roomForShift ? null : html` <span class="note">Shifts cannot cross midnight, and the last shift ends after 23:00.</span>`}</div>
+    ${problem ? html`<p class="ds-field__error" role="alert">${problem}</p>` : null}
     <${Cluster} gap=${3} align="flex-end">
       <${Field} label="Reason (kept in the audit log)" style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. Ramadan timings" /><//>
       <${Button} variant="primary" icon="check" disabled=${!valid} onClick=${() => Act.setShiftPattern(draft, userName(), why).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message }))}>Save shift pattern<//>

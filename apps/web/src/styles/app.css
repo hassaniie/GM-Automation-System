@@ -794,10 +794,14 @@ svg.plan text { font-family: var(--font-mono); }
 /* ═════════ print (PDF export of reports) ═════════ */
 @media print {
   @page { size: A4 landscape; margin: 12mm; }
-  :root { color-scheme: light; --bg: #fff; --text: #111; --text-2: #333; --muted: #666; --hair: #ccc; --hair-2: #999; --fill: #f5f5f5; }
-  html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
-  .stage, .page-shell, .page-scroll { position: static !important; overflow: visible !important; height: auto !important; }
-  .hud, #scene, .simcon, .strip, .noprint, .drawer, .anchors, .lineoff, .umenu-pop { display: none !important; }
+  /* the dark theme tokens apply on screen only (tokens/semantic.css), so print always gets the light ones */
+  :root { color-scheme: light; --bg: var(--ds-n-0); }
+  html, body { height: auto !important; overflow: visible !important; background: var(--ds-n-0) !important; }
+  #app, .stage, .page-shell, .page-scroll { position: static !important; inset: auto !important; overflow: visible !important; height: auto !important; }
+  .hud, #scene, .simcon, .strip, .noprint, .drawer, .anchors, .lineoff, .umenu-pop, .ds-rail, .tools-pop, .fit-pop, .toast, .toasts { display: none !important; }
+  .stage.has-rail > .page-shell > .page-scroll { padding: 0 !important; }
+  .page-scroll .ds-btn { display: none !important; }
+  .page-shell .glass, .page-shell .ds-panel { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--ds-n-0) !important; }
   .page-wrap { padding: 0 !important; max-width: none !important; }
   .ds-panel, .rsec { break-inside: avoid; box-shadow: none !important; }
   .ticks::before, .ticks::after { display: none !important; }

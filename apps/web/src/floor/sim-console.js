@@ -1,5 +1,6 @@
 /* ── simulation console ── */
 import { SCENARIOS, loadScenario } from './scenarios.js';
+import { can, userName } from '../auth.js';
 import { Act } from '../lib/act.js';
 import { AREAS, M, RT, bump, fmtClock, html, setUI } from '../lib/runtime.js';
 import { Icon } from '../lib/ui-kit.js';
@@ -8,6 +9,7 @@ import { powerCut, setLink } from '../screens.js';
 
 export function SimConsole() {
   if (RT.conn.mode === 'live') return null; // the real plant: no simulator controls
+  if (!can('sim')) return null; // only roles allowed to drive the simulator see it (audit B6)
   const S = RT.S, C = S.cfg, open = RT.ui.simOpen;
   const setC = (k, v) => Act.simConfig(k, v);
   return html`<section class="glass simcon ticks in" aria-label="Simulation control">
@@ -16,7 +18,7 @@ export function SimConsole() {
       <${Button} size="sm" variant="ghost" iconRight=${RT.running ? 'pause' : 'play'} aria-label=${RT.running ? 'Pause simulation' : 'Run simulation'} onClick=${() => Act.setRunning(!RT.running)}><//>
       <span class="micro" style=${{ whiteSpace: 'nowrap' }}>Scenario ${RT.scenario}</span>
       <${SegmentedControl} size="sm" class="speeds-ds" label="Simulation speed" value=${RT.speed} onChange=${(v) => Act.setSpeed(v)} options=${[1, 5, 15, 60].map((x) => ({ value: x, label: `${x}×` }))} />
-      <${Button} size="sm" variant="ghost" iconRight=${open ? 'down' : 'up'} aria-label=${open ? 'Collapse simulation control' : 'Expand simulation control'} aria-expanded=${open} onClick=${() => setUI({ simOpen: !open })}><//>
+      <${Button} size="sm" variant="ghost" iconRight=${open ? 'down' : 'up'} aria-label=${open ? 'Collapse simulation control' : 'Expand simulation control'} aria-expanded=${open} onClick=${() => setUI({ simOpen: !open, legend: false })}><//>
     </div>
     ${open ? html`<div class="simcon-body">
       <div><div class="micro" style=${{ marginBottom: 6 }}>Scenarios · each restarts the shift at 09:38</div>
@@ -24,7 +26,7 @@ export function SimConsole() {
       <div class="cfg-ds">
         ${[['autoFeed', 'Paint-shop body feed'], ['autoEntryScan', 'Auto scan at Scanner 1 (line-in)'], ['autoExitScan', 'End-of-line photo-eye at FL7'], ['autoComplete', 'Teams finish (sensor detects)'], ['autoRespond', 'Simulated responders clear calls'], ['trimAndon', 'Trim Andon preview (req 34)'], ['useSchedule', 'Breaks and shift times stop the line'], ['engineCheck', 'CL2 engine pairing scan (option)']].map(([k, label]) => html`<${Switch} key=${k} checked=${!!C[k]} onChange=${(v) => setC(k, v)} label=${label} />`)}
         <${Field} inline=${true} label="Simulated calls (% of units)"><${NumberInput} size="sm" min="0" max="40" value=${Math.round(C.callRate * 100)} onChange=${(v) => setC('callRate', M.clamp(+v || 0, 0, 40) / 100)} /><//>
-        <${Field} inline=${true} label="Close to limit at % of takt"><${NumberInput} size="sm" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(v) => setC('warnPct', M.clamp(+v || 85, 50, 99) / 100)} /><//>
+        <${Field} inline=${true} label="Close to limit at % of takt"><${NumberInput} size="sm" min="50" max="99" value=${Math.round(C.warnPct * 100)} onChange=${(v) => { const n = Math.round(+v); if (n >= 50 && n <= 99) Act.setWarnPct(n / 100, userName(), 'Changed in the simulation console'); }} /><//>
         <${Field} inline=${true} label="Escalate overdue after (min)"><${NumberInput} size="sm" min="0.5" max="30" step="0.5" value=${C.escalateAfter / 60} onChange=${(v) => setC('escalateAfter', Math.round(M.clamp(+v || 3, 0.5, 30) * 60))} /><//>
         <${Field} inline=${true} label="Blocked alarm after (min)"><${NumberInput} size="sm" min="0.5" max="30" step="0.5" value=${C.blockedAlarmAfter / 60} onChange=${(v) => setC('blockedAlarmAfter', Math.round(M.clamp(+v || 1.5, 0.5, 30) * 60))} /><//>
         <${Field} inline=${true} label="Random team delay rate (%)"><${NumberInput} size="sm" min="0" max="30" value=${Math.round(C.delayRate * 100)} onChange=${(v) => setC('delayRate', M.clamp(+v || 0, 0, 30) / 100)} /><//>

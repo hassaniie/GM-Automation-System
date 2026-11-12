@@ -52,6 +52,12 @@ export class EngineHost {
 
   /** Takes over a state (restored from a checkpoint) and sends everyone a fresh snapshot. */
   adopt(S: EngineState) {
+    // a checkpoint saved before plans were validated may hold one the rules engine cannot read: drop it, with a note
+    const cal = (S.cfg as { calendar?: Record<string, unknown> }).calendar || {};
+    for (const [date, plan] of Object.entries(cal)) {
+      const bad = MGE.checkPlanPatch(plan);
+      if (bad) { delete cal[date]; MGE.logEvent(S, 'exception', `SYSTEM · the saved plan for ${date} was not valid and was removed (${bad})`); }
+    }
     this.S = S; this.hints = {}; this.demo = null; this.acc = 0;
     this.resync();
   }
@@ -85,8 +91,22 @@ export class EngineHost {
   }
   stop() { if (this.timer) clearInterval(this.timer); this.timer = null; }
 
-  /** Advance the plant and publish what changed. Also called after each command. */
+  /** Advance the plant and publish what changed. A failure is logged and shown as an event instead of stopping the
+      server's timer (audit B3); the same error is reported once until a tick succeeds again. */
   tick() {
+    try { this.advance(); this.tickError = null; }
+    catch (e) {
+      const msg = (e as Error).message || String(e);
+      if (msg !== this.tickError) {
+        this.tickError = msg;
+        console.error('[engine] tick failed:', e);
+        try { MGE.logEvent(this.S, 'exception', `SYSTEM · the rules engine stopped advancing: ${msg}`); this.publish(); } catch { /* keep the timer alive */ }
+      }
+    }
+  }
+  private tickError: string | null = null;
+
+  private advance() {
     const now = Date.now(), dt = (now - this.last) / 1000; this.last = now;
     if (this.clock.mode === 'live' && (this.S as { plantMode?: string }).plantMode === 'live') {
       // live: plant time follows the plant clock; device events are applied in the second they happened

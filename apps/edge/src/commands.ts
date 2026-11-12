@@ -57,8 +57,8 @@ async function exec(host: EngineHost, S: EngineHost['S'], c: Cmd, by: string): P
     case 'SET_TAKT': return M.setTakt(S, c.area, c.sec, by, c.reason);
     case 'SET_WARN_PCT': return M.setWarnPct(S, c.pct, by, c.reason);
     case 'SET_DEFAULT_TARGET': return M.setDefaultTarget(S, c.area, c.n, by, c.reason);
-    case 'SET_PLAN': return M.setPlan(S, c.date, c.patch, by, c.reason);
-    case 'SET_SHIFTS': return M.setShiftPattern(S, c.shifts, by, c.reason);
+    case 'SET_PLAN': { const bad = M.checkPlanPatch(c.patch); if (bad) throw new CommandError(bad); return M.setPlan(S, c.date, c.patch, by, c.reason); }
+    case 'SET_SHIFTS': { const bad = M.checkShifts(c.shifts); if (bad) throw new CommandError(bad); return M.setShiftPattern(S, c.shifts, by, c.reason); }
     case 'SET_BUZZER': return M.setBuzzer(S, c.pos, c.on, by, c.reason);
     case 'MANUAL_COMPLETE': return M.manualComplete(S, c.pos);
     case 'RESCAN_ENGINE': return M.rescanEngine(S, c.pos);

@@ -1,21 +1,24 @@
 /* Sign-in and permissions on the server (URD req 30): sessions, lockout, roles on every command,
    names from the session, display links, revoking access, and the live connection's checks. */
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import WebSocket from 'ws';
 import type { ServerMessage } from '@mg/contracts';
 import { buildServer } from '../src/server.ts';
-import { freshDatabase } from './helpers/db.ts';
+import { dbAvailable, freshDatabase } from './helpers/db.ts';
 
 let T: Awaited<ReturnType<typeof freshDatabase>>;
 let srv: Awaited<ReturnType<typeof buildServer>>;
 let base = '', host = '';
+const NO_DB = !(await dbAvailable());
+beforeEach((c) => { if (NO_DB) c.skip(); });
 beforeAll(async () => {
+  if (NO_DB) return;
   T = await freshDatabase();
   srv = await buildServer({ seed: 11, speed: 15, tickMs: 50, webDir: null, databaseUrl: T.url, demo: true, persist: { flushMs: 200 } });
   await srv.app.listen({ port: 0, host: '127.0.0.1' });
   host = `127.0.0.1:${(srv.app.server.address() as { port: number }).port}`; base = `http://${host}`;
 });
-afterAll(async () => { await srv.app.close(); await T.drop(); });
+afterAll(async () => { await srv?.app.close(); await T?.drop(); });
 
 async function call(path: string, body?: unknown, cookie?: string, method = body === undefined ? 'GET' : 'POST') {
   const headers: Record<string, string> = { 'x-mg-client': 'web', ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...(cookie ? { cookie } : {}) };

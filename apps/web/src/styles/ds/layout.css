@@ -137,6 +137,12 @@
   .ds-rail__item[aria-current="page"]::before { content: ""; position: absolute; left: -4px; top: var(--ds-space-3); bottom: var(--ds-space-3); width: 2px; border-radius: var(--ds-radius-sm); background: var(--ds-text-primary); }
   .ds-rail__item--end { margin-top: var(--ds-space-1); }
   .ds-rail__item--end::after { content: ""; position: absolute; top: calc(-1 * var(--ds-space-1)); left: var(--ds-space-2); right: var(--ds-space-2); height: 1px; background: var(--ds-border-subtle); }
+  /* floor panels docked bottom-left (simulation console, Key) start right of the rail, so neither runs under it when
+     it grows upward (audit U1) */
+  @media (min-width: 768px) {
+    .stage.has-rail .simcon, .stage.has-rail .legend-pop { left: calc(var(--gl) + var(--ds-rail-space)); }
+    .stage.has-rail .simcon { width: min(420px, calc(100vw - var(--gl) - var(--ds-rail-space) - var(--gr))); }
+  }
   /* page screens: the content starts right of the rail */
   .stage.has-rail > .page-shell > .page-scroll { padding-left: var(--ds-rail-space); }
 }

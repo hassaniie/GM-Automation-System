@@ -1,7 +1,7 @@
 /* Reports from the database (URD req 28–29): the same rows as from memory, before and after memory is
    trimmed; ranges and empty days; Excel and PDF files; permissions and the access log; the report saved
    at the end of each shift. The plant is driven by hand (no timers) for determinism. */
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import ExcelJS from 'exceljs';
 import { MGE } from '@mg/engine';
 import { dateKeyOf, shiftKey, trimHistory } from '@mg/core';
@@ -9,7 +9,7 @@ import { buildReport, datasetFromState } from '@mg/reports';
 import { buildServer } from '../src/server.ts';
 import { runCommand, type Actor } from '../src/commands.ts';
 import { datasetFromDb } from '../src/reports/data.ts';
-import { freshDatabase } from './helpers/db.ts';
+import { dbAvailable, freshDatabase } from './helpers/db.ts';
 
 let T: Awaited<ReturnType<typeof freshDatabase>>;
 let srv: Awaited<ReturnType<typeof buildServer>>;
@@ -28,7 +28,10 @@ async function drive(until: number, every = 600) {
 }
 const waitFor = async (f: () => Promise<boolean>, ms = 30_000) => { const end = Date.now() + ms; while (Date.now() < end) { if (await f()) return; await new Promise((r) => setTimeout(r, 100)); } throw new Error('timed out'); };
 
+const NO_DB = !(await dbAvailable());
+beforeEach((c) => { if (NO_DB) c.skip(); });
 beforeAll(async () => {
+  if (NO_DB) return;
   T = await freshDatabase();
   srv = await buildServer({ seed: 11, webDir: null, databaseUrl: T.url, demo: true, autostart: false });
   await srv.app.listen({ port: 0, host: '127.0.0.1' });
@@ -47,7 +50,7 @@ beforeAll(async () => {
   await runCommand(srv.host, { type: 'RETURN_TO_LINE', vehicleId: vid }, sup);
   await drive(20 * 3600); // Shift A over, Shift B running
 }, 240_000);
-afterAll(async () => { await srv.app.close(); await T.drop(); });
+afterAll(async () => { await srv?.app.close(); await T?.drop(); });
 
 async function signIn(id: string, password: string) {
   const r = await fetch(`${base}/api/auth/sign-in`, { method: 'POST', headers: { 'x-mg-client': 'web', 'content-type': 'application/json' }, body: JSON.stringify({ id, password }) });

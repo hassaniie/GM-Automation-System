@@ -1,17 +1,20 @@
 /* Persistence against a real PostgreSQL: the database matches memory, restarts resume exactly, and a
    database outage is caught up afterwards. The plant is driven by hand (no timers) for determinism. */
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { MGE } from '@mg/engine';
 import { toWire } from '@mg/sync';
 import { EngineHost } from '../src/engine-host.ts';
 import { Persistence } from '../src/persist.ts';
 import { runCommand, type Actor } from '../src/commands.ts';
 import type { Db } from '../src/db/index.ts';
-import { freshDatabase } from './helpers/db.ts';
+import { dbAvailable, freshDatabase } from './helpers/db.ts';
 
 let T: Awaited<ReturnType<typeof freshDatabase>>;
-beforeAll(async () => { T = await freshDatabase(); });
-afterAll(async () => { await T.drop(); });
+const NO_DB = !(await dbAvailable());
+beforeEach((c) => { if (NO_DB) c.skip(); });
+beforeAll(async () => {
+  if (NO_DB) return; T = await freshDatabase(); });
+afterAll(async () => { await T?.drop(); });
 
 const planner: Actor = { kind: 'user', id: 'u2', name: 'Ayesha Malik', role: 'authorised' };
 const count = async (db: Db, table: string) => (await db.one<{ n: number }>(`SELECT count(*)::int AS n FROM ${table}`))!.n;

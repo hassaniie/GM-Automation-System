@@ -1,11 +1,14 @@
 /* Database layer: migrations apply once and are idempotent; transactions roll back on error. */
-import { afterAll, beforeAll, expect, test } from 'vitest';
+import { afterAll, beforeAll, beforeEach, expect, test } from 'vitest';
 import { migrate } from '../src/db/index.ts';
-import { freshDatabase } from './helpers/db.ts';
+import { dbAvailable, freshDatabase } from './helpers/db.ts';
 
 let T: Awaited<ReturnType<typeof freshDatabase>>;
-beforeAll(async () => { T = await freshDatabase(); });
-afterAll(async () => { await T.drop(); });
+const NO_DB = !(await dbAvailable());
+beforeEach((c) => { if (NO_DB) c.skip(); });
+beforeAll(async () => {
+  if (NO_DB) return; T = await freshDatabase(); });
+afterAll(async () => { await T?.drop(); });
 
 test('schema is in place and migrating again does nothing', async () => {
   const tables = (await T.db.query<{ tablename: string }>("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")).map((r) => r.tablename);

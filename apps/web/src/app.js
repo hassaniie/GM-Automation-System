@@ -17,6 +17,7 @@ import { SimConsole } from './floor/sim-console.js';
 import { HowPage } from './how.js';
 import { LineOffCard } from './lib/misc.js';
 import { go, parseHash } from './lib/router.js';
+import { Act } from './lib/act.js';
 import { M, RT, bump, effectiveTheme, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
@@ -74,6 +75,8 @@ function App() {
     requestAnimationFrame(loop);
     const l = () => force(); RT.listeners.add(l);
     const key = (e) => {
+      // no shortcuts while signed out or locked, or on a line display (audit B7)
+      if (!Auth.user || Auth.locked || RT.route.page === 'display') return;
       if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setUI({ dialog: { type: 'vin' } }); return; }
       if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
       if (e.key === 'Escape') { if (RT.ui.dialog) setUI({ dialog: null }); else if (RT.ui.drawer) setUI({ drawer: null }); else setUI({ selection: null, legend: false }); return; }
@@ -83,7 +86,7 @@ function App() {
       else if (e.key === '1' || e.key === '2' || e.key === '3') { const v = ['TRIM', 'CHASSIS', 'FINAL'][+e.key - 1]; setUI({ view: v, selection: null }); Scene3D.focusView(v); }
       else if (e.key === 'a' || e.key === 'A') { const t = topAlarm(RT.S); if (t) openAlarm(t); }
       else if (e.key === 'x' || e.key === 'X') setUI({ xray: !RT.ui.xray });
-      else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); RT.running = !RT.running; bump(); }
+      else if (e.key === ' ' && e.target === document.body && can('sim')) { e.preventDefault(); Act.setRunning(!RT.running); }
     };
     window.addEventListener('keydown', key);
     return () => { RT.listeners.delete(l); window.removeEventListener('keydown', key); };
@@ -91,6 +94,8 @@ function App() {
   const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
   const gate = page !== 'display' && (!Auth.user || Auth.locked);
   const rail = !gate && page !== 'display';
+  // locking the screen drops any open dialog, so it does not reappear after unlock (audit B7)
+  useEffect(() => { if (gate && RT.ui.dialog) setUI({ dialog: null }); }, [gate]);
   return html`<main class=${'stage' + (rail ? ' has-rail' : '')}>
     ${rail ? html`<${PageRail} />` : null}
     ${RT.conn.state === 'down' ? html`<div class="conn-banner" role="alert"><${Icon} n="wifioff" size=${14} /><b>Line server not reachable</b><span>Showing the last data received at ${fmtClock(RT.S.t)} · reconnecting…</span></div>` : null}
@@ -105,8 +110,8 @@ function App() {
     : page === 'display' ? html`<${LineDisplay} />`
     : html`<${PageShell}>${page === 'admin' ? html`<${AdminPage} />` : page === 'dash' ? html`<${DashboardPage} />` : page === 'reports' ? html`<${ReportsPage} />` : page === 'how' ? html`<${HowPage} />` : html`<${Placeholder} title="Page not found" />`}</${PageShell}>`}
     <${PowerOverlay} />
-    ${!gate && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
-    ${gate ? null : html`<${React.Fragment}>
+    ${!gate && page !== 'display' && RT.ui.drawer ? html`<${AlarmDrawer} />` : null}
+    ${gate || page === 'display' ? null : html`<${React.Fragment}>
     ${d && d.type === 'scan' ? html`<${ScanDialog} key=${d.scanner + (d.vin || '')} d=${d} />` : null}
     ${d && d.type === 'offline' ? html`<${OffLineDialog} key=${d.vehicleId} d=${d} />` : null}
     ${d && d.type === 'return' ? html`<${ReturnDialog} key=${d.vehicleId} d=${d} />` : null}

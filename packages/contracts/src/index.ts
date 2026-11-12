@@ -55,8 +55,18 @@ export const isPlantEvent = (x: unknown): x is PlantEvent =>
 const pos = z.string().min(1).max(8);
 const area = z.enum(['TRIM', 'CHASSIS', 'FINAL']);
 const reason = z.string().max(500).optional();
-const breakDef = z.object({ name: z.string(), start: z.number(), end: z.number() }).passthrough();
-const shiftDef = z.object({ name: z.string(), start: z.number(), end: z.number(), breaks: z.array(breakDef) }).passthrough();
+// breaks carry a label ("Tea break"), as the screens and the rules engine use (audit B2)
+const daySec = z.number().min(0).max(86400);
+const breakDef = z.object({ label: z.string().max(60).optional(), start: daySec, end: daySec }).strict();
+const shiftDef = z.object({ name: z.string().min(1).max(40), start: daySec, end: daySec, breaks: z.array(breakDef).max(8) }).strict();
+const areaKey = z.enum(['TRIM', 'CHASSIS', 'FINAL']);
+// a day plan: each key replaces that part of the default; null goes back to the default (audit B3)
+const planPatch = z.object({
+  shifts: z.array(shiftDef).max(4).nullable().optional(),
+  targets: z.record(z.string().max(40), z.partialRecord(areaKey, z.number().int().min(0).max(999))).nullable().optional(),
+  takt: z.partialRecord(areaKey, z.number().min(60).max(3600)).nullable().optional(),
+  note: z.string().max(500).nullable().optional(),
+}).strict();
 
 export const OperatorCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('RAISE_CALL'), pos, callType: z.enum(['SUP', 'MNT']) }),
@@ -71,7 +81,7 @@ export const OperatorCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SET_TAKT'), area, sec: z.number().int().min(60).max(3600), reason }),
   z.object({ type: z.literal('SET_WARN_PCT'), pct: z.number().min(0.5).max(0.99), reason }),
   z.object({ type: z.literal('SET_DEFAULT_TARGET'), area, n: z.number().int().min(0).max(500), reason }),
-  z.object({ type: z.literal('SET_PLAN'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), patch: z.record(z.string(), z.unknown()), reason }),
+  z.object({ type: z.literal('SET_PLAN'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), patch: planPatch, reason }),
   z.object({ type: z.literal('SET_SHIFTS'), shifts: z.array(shiftDef).min(1).max(4), reason }),
   z.object({ type: z.literal('SET_BUZZER'), pos, on: z.boolean(), reason }),
   z.object({ type: z.literal('MANUAL_COMPLETE'), pos }),
