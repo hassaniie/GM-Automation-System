@@ -75,11 +75,15 @@
   .strip .cell .cid .ico { flex: none; }
   /* the lane header's hanger chips go first when a lane is narrow */
   @container lane (max-width: 420px) { .lane-h .htrack, .lane-h .xp { display: none; } }
+  /* a narrow lane header shows the line name only ("Chassis"), not "Station 2 · Chassis" */
+  @container lane (max-width: 440px) { .lane-h .ln-st { display: none; } }
   /* narrow lanes: tighter cells so the status mark and the ID both fit */
   @container lane (max-width: 480px) { .cell { padding: var(--ds-space-2) var(--ds-space-1) var(--ds-space-1); } .cell .cid { font-size: var(--ds-size-10); } .cell .cid .ico { margin-right: 2px; } }
   /* a narrow cell keeps its ID and status mark; the timer moves to the tooltip */
   .cell .mk { display: none; height: 12px; line-height: 0; }
-  @container cell (max-width: 55px) {
+  /* narrow cells (1024–1360 px screens) keep the timer in a smaller face (audit U2); only very narrow ones drop it */
+  @container cell (max-width: 60px) { .cell .ct { font-size: 9px; letter-spacing: 0; } .cell .hg, .cell .cid .ico { display: none; } }
+  @container cell (max-width: 30px) {
     .cell .ct, .cell .hg, .cell .cid .ico { display: none; }
     .cell .mk { display: block; }
   }

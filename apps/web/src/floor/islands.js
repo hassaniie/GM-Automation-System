@@ -114,7 +114,7 @@ export function Strip() {
     </div>
     <div class="lane-tabs" role="tablist" aria-label="Line">${lanes.map(([k, name]) => html`<button key=${k} role="tab" aria-selected=${stripLane === k} onClick=${() => setUI({ stripLane: k })}>${name}</button>`)}</div>
     <div class="lanes" data-lane=${stripLane}>${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} data-k=${k} style=${{ '--n': ids.length }}>
-      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}>${AREAS[k].station} · ${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
+      <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}><span class="ln-st">${AREAS[k].station} · </span>${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
       <div class="cells ticks">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
     </div>`)}</div>
   </section>`;
