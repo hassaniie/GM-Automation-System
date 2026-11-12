@@ -4,10 +4,14 @@
    components whose visibility follows the engine's build state.
    ════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MGE } from '@mg/engine';
 import { BV_FULL } from './brand.js';
 
+// three.js r186 (from r128, audit T5). The scene keeps r128's look: colour management off with linear output, and
+// light intensities multiplied by π, which is how the old (non-physical) light units compare with the current ones.
+THREE.ColorManagement.enabled = false;
+const LI = Math.PI;
 export const Scene3D = (function () {
   const E = MGE;
   const { RH, POS, EDGES, NEXT, STATIONS } = E;
@@ -689,7 +693,7 @@ export const Scene3D = (function () {
     if (!ok) return;
     themed.forEach(({ mat, key: k }) => { const c = k.startsWith('tone_') ? T.tone[k.slice(5)] : T[k]; if (c != null) mat.color.setHex(c); });
     renderer.setClearColor(T.bg); scene.fog.color.setHex(T.bg); scene.fog.near = T.fogNear; scene.fog.far = T.fogFar;
-    hemi.color.setHex(T.hemi[0]); hemi.groundColor.setHex(T.hemi[1]); hemi.intensity = T.hemi[2]; amb.intensity = T.amb; key.intensity = T.key; fill.intensity = T.fill; rim.intensity = T.rim; pools.material.opacity = T.pools; pools.visible = T.pools > 0;
+    hemi.color.setHex(T.hemi[0]); hemi.groundColor.setHex(T.hemi[1]); hemi.intensity = T.hemi[2] * LI; amb.intensity = T.amb * LI; key.intensity = T.key * LI; fill.intensity = T.fill * LI; rim.intensity = T.rim * LI; pools.material.opacity = T.pools; pools.visible = T.pools > 0;
     Object.values(pads).forEach((p) => { p.corners.material.color.setHex(T.padEdge); p.barBg.material.color.setHex(T.padEdge); });
     PM.install.color.setHex(T.install); PM.install.emissive.setHex(T.install); PM.xray.color.setHex(T.xray); PM.edge.color.setHex(T.xray); PM.sweep.color.setHex(T.install);
     chevrons.material.color.setHex(T.tone.warn);
@@ -699,7 +703,7 @@ export const Scene3D = (function () {
   /* ── init ── */
   function init(container, opts) {
     el = container; getState = opts.getState; getUI = opts.getUI; cb = opts; if (opts.theme) T = THEMES[opts.theme] || T, themeName = opts.theme || themeName;
-    try { const pr = document.createElement('canvas'); if (!(pr.getContext('webgl2') || pr.getContext('webgl'))) throw new Error('no webgl'); renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' }); } catch (e) { return false; }
+    try { const pr = document.createElement('canvas'); if (!(pr.getContext('webgl2') || pr.getContext('webgl'))) throw new Error('no webgl'); renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' }); renderer.outputColorSpace = THREE.LinearSRGBColorSpace; } catch (e) { return false; }
     // low quality on weak devices (or when asked): pixel ratio 1 and smaller shadows (audit T4)
     const weak = opts.quality === 'low' || (opts.quality !== 'high' && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4));
     renderer.setPixelRatio(weak ? 1 : Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = true;
@@ -718,13 +722,13 @@ export const Scene3D = (function () {
     });
     scene = new THREE.Scene(); scene.fog = new THREE.Fog(T.bg, T.fogNear, T.fogFar);
     camera = new THREE.PerspectiveCamera(28, 1, 0.5, 700);
-    hemi = new THREE.HemisphereLight(T.hemi[0], T.hemi[1], T.hemi[2]); scene.add(hemi);
-    amb = new THREE.AmbientLight(0xffffff, T.amb); scene.add(amb);
-    key = new THREE.DirectionalLight(0xfff6ea, T.key); key.position.set(40, 70, 40); key.castShadow = true; key.shadow.mapSize.set(weak ? 1024 : 2048, weak ? 1024 : 2048);
+    hemi = new THREE.HemisphereLight(T.hemi[0], T.hemi[1], T.hemi[2] * LI); scene.add(hemi);
+    amb = new THREE.AmbientLight(0xffffff, T.amb * LI); scene.add(amb);
+    key = new THREE.DirectionalLight(0xfff6ea, T.key * LI); key.position.set(40, 70, 40); key.castShadow = true; key.shadow.mapSize.set(weak ? 1024 : 2048, weak ? 1024 : 2048);
     Object.assign(key.shadow.camera, { left: -75, right: 75, top: 45, bottom: -45, near: 10, far: 200 }); key.shadow.bias = -0.0006; key.shadow.normalBias = 0.03; key.target.position.set(10, 0, -3); scene.add(key, key.target);
-    fill = new THREE.DirectionalLight(0x9ab8d8, T.fill); fill.position.set(-50, 30, -40); scene.add(fill);
+    fill = new THREE.DirectionalLight(0x9ab8d8, T.fill * LI); fill.position.set(-50, 30, -40); scene.add(fill);
     // cool rim from behind the shop: separates bodies, hangers and rails from the floor in dark mode
-    rim = new THREE.DirectionalLight(0xa8c8ff, T.rim); rim.position.set(-20, 26, -70); scene.add(rim);
+    rim = new THREE.DirectionalLight(0xa8c8ff, T.rim * LI); rim.position.set(-20, 26, -70); scene.add(rim);
     CM = carrierMats(); PM = partMats();
     buildEnvironment(); buildLightPools(); buildFloorBadge(); buildBvBadge(); buildSignage(); buildEquipment(); buildRails(); buildPads(); buildScanners(); buildBeacons(); buildChevrons();
     Object.values(getState().carriers).forEach(makeCarrier);

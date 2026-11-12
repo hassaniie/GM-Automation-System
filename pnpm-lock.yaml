@@ -232,8 +232,8 @@ importers:
         specifier: workspace:*
         version: link:../engine
       three:
-        specifier: 0.128.0
-        version: 0.128.0
+        specifier: 0.186.1
+        version: 0.186.1
 
   packages/sim:
     dependencies:
@@ -3680,8 +3680,8 @@ packages:
     resolution: {integrity: sha512-Stg6edJXC/6/xqGwSXwFokrUhChJ18amEjpKH89WrQQ0oVFDF+pUUcTpiwWhFUrE89Vf16FBOlwhaw+lescxMQ==}
     engines: {node: '>=20'}
 
-  three@0.128.0:
-    resolution: {integrity: sha512-i0ap/E+OaSfzw7bD1TtYnPo3VEplkl70WX5fZqZnfZsE3k3aSFudqrrC9ldFZfYFkn1zwDmBcdGfiIm/hnbyZA==}
+  three@0.186.1:
+    resolution: {integrity: sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==}
 
   thunky@1.1.0:
     resolution: {integrity: sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==}
@@ -8200,7 +8200,7 @@ snapshots:
     dependencies:
       real-require: 1.0.0
 
-  three@0.128.0: {}
+  three@0.186.1: {}
 
   thunky@1.1.0: {}
 
