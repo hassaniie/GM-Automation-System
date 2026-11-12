@@ -43,6 +43,8 @@ button { cursor: pointer; }
 .stage { position: absolute; inset: 0; overflow: hidden; }
 #scene { position: absolute; inset: 0; }
 #scene canvas { display: block; width: 100%; height: 100%; outline: none; }
+#scene canvas:focus-visible { outline: 2px solid var(--ds-focus, var(--text)); outline-offset: -4px; }
+.inspector:focus { outline: none; }
 .gutter-l { left: max(16px, env(safe-area-inset-left, 0px)); }
 .gutter-r { right: max(16px, env(safe-area-inset-right, 0px)); }
 
@@ -639,6 +641,8 @@ svg.plan text { font-family: var(--font-mono); }
 .si-avatar { width: 56px; height: 56px; display: grid; place-items: center; border-radius: var(--ds-radius-round) !important; background: var(--text); color: var(--bg); font: 600 18px/1 var(--font-ui); }
 .si-err { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--crit) 50%, transparent); background: color-mix(in srgb, var(--crit) 8%, transparent); color: var(--text); line-height: 1.4; }
 .si-err .ico { color: var(--crit); flex: none; margin-top: 1px; }
+.si-err.si-info { border-color: var(--hair-2); background: var(--fill); }
+.si-err.si-info .ico { color: var(--muted); }
 .si-field { display: grid; gap: 6px; }
 .si-field label, .si-lab label { font: 600 11px/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
 .si-lab { display: flex; justify-content: space-between; align-items: baseline; }

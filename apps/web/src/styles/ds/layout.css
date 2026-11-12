@@ -257,3 +257,25 @@
 @layer layout {
   .stage:has(.strip) { --ds-glass: var(--ds-glass-floor); --ds-glass-blur: blur(26px) saturate(100%); --glass: var(--ds-glass-floor); --blur: blur(26px) saturate(100%); }
 }
+
+/* Skip link: first stop for keyboard users, visible only when focused. */
+@layer layout {
+  .ds-skip { position: absolute; left: var(--ds-space-2); top: var(--ds-space-2); z-index: var(--ds-z-overlay); transform: translateY(-200%); padding: var(--ds-space-2) var(--ds-space-3); border: 1px solid var(--ds-border-strong); background: var(--ds-layer-1); color: var(--ds-text-primary); font: inherit; font-weight: 600; }
+  .ds-skip:focus-visible { transform: none; }
+  #page-main:focus { outline: none; }
+}
+
+/* Touch screens: the floor's own controls reach 44 px. The hit area grows through a pseudo-element, so the
+   top bar and strip keep their size (audit D4). */
+@layer layout {
+  @media (pointer: coarse) {
+    .linestate, .ubtn, .calls-pill, .lc-title { position: relative; }
+    .linestate::after, .ubtn::after, .calls-pill::after, .lc-title::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 44px; transform: translateY(-50%); }
+    .ubtn::after { left: 50%; right: auto; width: 44px; transform: translate(-50%, -50%); }
+    /* these sit in tight rows where an enlarged hit area would be clipped or overlap a neighbour, so they grow */
+    .views button, .lane-tabs button { height: 44px; }
+    .lane-h { min-height: 44px; align-items: center; }
+    .rep-jump a { display: inline-flex; align-items: center; min-height: 44px; }
+    .linkish { min-height: 32px; }
+  }
+}

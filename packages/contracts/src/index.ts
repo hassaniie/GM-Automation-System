@@ -89,6 +89,8 @@ export const OperatorCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('LOG_NOTE'), cat: z.enum(['sim', 'note']), text: z.string().max(500), extra: z.record(z.string(), z.unknown()).optional() }),
 ]);
 /** Settings the simulation console may change directly (not audited plant configuration). */
+/** Allowed range of each numeric simulator setting (rates are fractions, times are seconds); the rest are on/off. */
+export const SIM_CONFIG_RANGE: Record<string, [number, number]> = { callRate: [0, 0.4], warnPct: [0.5, 0.99], escalateAfter: [30, 1800], blockedAlarmAfter: [30, 1800], delayRate: [0, 0.3] };
 export const SIM_CONFIG_KEYS = ['autoFeed', 'autoEntryScan', 'autoExitScan', 'autoComplete', 'autoRespond', 'trimAndon', 'useSchedule', 'engineCheck', 'callRate', 'warnPct', 'escalateAfter', 'blockedAlarmAfter', 'delayRate'] as const;
 /** Simulator controls: accepted only when the edge server runs in simulation mode. */
 export const SimCommand = z.discriminatedUnion('type', [
@@ -104,7 +106,8 @@ export const SimCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SIM_CLEAR_EMERGENCY'), pos }),
   z.object({ type: z.literal('SIM_POWER_CUT') }),
   /** Simulator behaviour switches and rates from the simulation console. */
-  z.object({ type: z.literal('SIM_CONFIG'), key: z.enum(SIM_CONFIG_KEYS), value: z.union([z.boolean(), z.number().min(0).max(36000)]) }),
+  z.object({ type: z.literal('SIM_CONFIG'), key: z.enum(SIM_CONFIG_KEYS), value: z.union([z.boolean(), z.number().min(0).max(36000)]) })
+    .refine((c) => { const r = SIM_CONFIG_RANGE[c.key]; return r ? typeof c.value === 'number' && c.value >= r[0] && c.value <= r[1] : typeof c.value === 'boolean'; }, { message: 'value is outside the range allowed for this setting', path: ['value'] }),
 ]);
 export const Command = z.union([OperatorCommand, SimCommand]);
 export type OperatorCommand = z.infer<typeof OperatorCommand>;

@@ -16,7 +16,7 @@ export function SimConsole() {
     <div class="simcon-bar">
       <span class="sim-tag"><${Icon} n="flask" size=${11} />SIM</span>
       <${Button} size="sm" variant="ghost" iconRight=${RT.running ? 'pause' : 'play'} aria-label=${RT.running ? 'Pause simulation' : 'Run simulation'} onClick=${() => Act.setRunning(!RT.running)}><//>
-      <span class="micro" style=${{ whiteSpace: 'nowrap' }}>Scenario ${RT.scenario}</span>
+      <span class="micro" style=${{ whiteSpace: 'nowrap' }} role="status">Scenario ${RT.scenario}${RT.running ? '' : ' · paused'}</span>
       <${SegmentedControl} size="sm" class="speeds-ds" label="Simulation speed" value=${RT.speed} onChange=${(v) => Act.setSpeed(v)} options=${[1, 5, 15, 60].map((x) => ({ value: x, label: `${x}×` }))} />
       <${Button} size="sm" variant="ghost" iconRight=${open ? 'down' : 'up'} aria-label=${open ? 'Collapse simulation control' : 'Expand simulation control'} aria-expanded=${open} onClick=${() => setUI({ simOpen: !open, legend: false })}><//>
     </div>

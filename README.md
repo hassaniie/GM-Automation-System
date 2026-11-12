@@ -24,7 +24,7 @@ pnpm dev          # http://localhost:5173 with hot reload
 | `pnpm lint` / `pnpm typecheck` | ESLint and TypeScript |
 | `pnpm start:edge` / `pnpm dev:all` | Edge server with live screens (see below) |
 
-React 18.3.1, htm 3.1.1, three.js r128 (0.128.0) and SheetJS 0.18.5 are npm dependencies; SheetJS is a separate chunk loaded only on export. Only the Barlow and JetBrains Mono fonts come from Google Fonts. CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and both builds on every push and uploads the demo file.
+React 18.3.1, htm 3.1.1, three.js r128 (0.128.0) and SheetJS 0.18.5 are npm dependencies; SheetJS is a separate chunk loaded only on export. The Barlow and JetBrains Mono fonts ship with the app (`@fontsource`, latin subset), so nothing is fetched from the internet at run time. CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and both builds on every push and uploads the demo file.
 
 ### Live screens with the edge server
 

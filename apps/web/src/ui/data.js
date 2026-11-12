@@ -57,7 +57,7 @@ export function DataTable({ columns, rows, rowKey = (_r, i) => i, empty = 'Nothi
   const n = columns.length;
   return html`<div class=${cx('ds-table-wrap', cls)}><table class=${cx('ds-table', `ds-table--${density}`)}>
     ${caption ? html`<caption class="ds-vh">${caption}</caption>` : null}
-    <thead><tr>${columns.map((c) => html`<th key=${c.key} scope="col" class=${`ds-a-${ALIGN[c.type] || 'start'}`} style=${{ width: c.width }}>${c.label}</th>`)}</tr></thead>
+    <thead><tr>${columns.map((c) => html`<th key=${c.key} scope="col" class=${`ds-a-${ALIGN[c.type] || 'start'}`} style=${{ width: c.width }}>${c.label || html`<span class="ds-vh">${c.srLabel || (c.type === 'action' ? 'Actions' : 'Chart')}</span>`}</th>`)}</tr></thead>
     <tbody>${error ? html`<tr><td colspan=${n} class="ds-table__msg ds-table__msg--error">${error}</td></tr>`
       : rows == null ? [0, 1, 2].map((i) => html`<tr key=${i}><td colspan=${n}><${Skeleton} /></td></tr>`)
       : !rows.length ? html`<tr><td colspan=${n} class="ds-table__msg">${empty}</td></tr>`

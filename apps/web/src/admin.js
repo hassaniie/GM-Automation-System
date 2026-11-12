@@ -38,6 +38,8 @@ export function AdminPage() {
   const tabs = ADMIN_TABS.filter((t) => can(t[3]));
   if (!tabs.length) return html`<${NoAccess} what="Settings" />`;
   const cur = tabs.find((t) => t[0] === RT.route.sub) || tabs[0];
+  // an unknown tab, or one this role may not open: show the first allowed tab and put it in the address
+  if (RT.route.sub && RT.route.sub !== cur[0]) queueMicrotask(() => { if (RT.route.page === 'admin' && RT.route.sub !== cur[0]) go('admin', cur[0]); });
   return html`<div class="page-wrap admin">
     <aside class="adm-nav" aria-label="Settings sections"><div class="ds-label" style=${{ padding: '0 var(--ds-space-2) var(--ds-space-2)' }}>Settings</div>
       <${Tabs} vertical=${true} label="Settings sections" value=${cur[0]} onChange=${(k) => go('admin', k)} items=${tabs.map(([k, l, ic]) => ({ value: k, label: l, icon: ic }))} />
@@ -63,6 +65,9 @@ function TaktAdmin() {
   const S = RT.S, [draft, setDraft] = useState(() => ({ ...S.cfg.takt })), [warn, setWarn] = useState(Math.round(S.cfg.warnPct * 100)), [why, setWhy] = useState(''), [msg, setMsg] = useState(null);
   const save = () => {
     const w = M.clamp(warn, 50, 99) / 100;
+    const changed = w !== S.cfg.warnPct || M.AREA_IDS.some((a) => draft[a] !== S.cfg.takt[a]);
+    if (!changed) return setMsg({ ok: false, text: 'Nothing changed.' });
+    if (!why.trim()) return setMsg({ ok: false, text: 'Enter a reason for the change. It is kept in the audit log.' });
     const jobs = [...M.AREA_IDS.filter((a) => draft[a] !== S.cfg.takt[a]).map((a) => Act.setTakt(a, draft[a], userName(), why)), ...(w !== S.cfg.warnPct ? [Act.setWarnPct(w, userName(), why)] : [])];
     Promise.all(jobs).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg(n ? { ok: true, text: `Saved ${n} change${n > 1 ? 's' : ''}. Stations use the new takt immediately.` } : { ok: false, text: 'Nothing changed.' }); setWhy(''); }, (e) => setMsg({ ok: false, text: e.message }));
   };
@@ -75,7 +80,7 @@ function TaktAdmin() {
         <${Cluster} gap=${1}>${[-60, -30, 30, 60].map((d) => html`<${Button} key=${d} size="sm" variant="ghost" onClick=${() => setDraft({ ...draft, [a]: M.clamp(draft[a] + d, 60, 3600) })}>${d > 0 ? '+' : '−'}${Math.abs(d) >= 60 ? '1:00' : '0:30'}<//>`)}</${Cluster}><//>`; })}</${Grid}>
     <${Cluster} gap=${3} align="flex-end">
       <${Field} label="Close to limit at (% of takt)" style=${{ width: 260 }}><${NumberInput} min="50" max="99" value=${warn} onChange=${(v) => setWarn(+v || 95)} /><//>
-      <${Field} label="Reason for the change (kept in the audit log)" style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. New line balance after adding CL3" /><//>
+      <${Field} label="Reason for the change (kept in the audit log)" required=${true} style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. New line balance after adding CL3" /><//>
       <${Button} variant="primary" icon="check" onClick=${save}>Save takt<//>
     </${Cluster}>
     <${Saved} msg=${msg} />
@@ -104,7 +109,7 @@ function PlanAdmin() {
       .then(() => { persistConfig(); setDraft(null); setMsg({ ok: true, text: `Plan for ${wd(sel)} saved.${sel === today ? ' Today’s targets update now.' : ''}` }); }, (e) => setMsg({ ok: false, text: e.message }));
   };
   const reset = () => Act.setPlan(sel, { shifts: null, targets: null, takt: null, note: null }, userName(), 'Back to default plan').then(() => { persistConfig(); setDraft(null); setMsg({ ok: true, text: `${wd(sel)} uses the default plan again.` }); }, (e) => setMsg({ ok: false, text: e.message }));
-  const [defT, setDefT] = useState(() => ({ ...S.cfg.targets }));
+  const [defT, setDefT] = useState(() => ({ ...S.cfg.targets })), [defMsg, setDefMsg] = useState(null);
   const off = (s) => !d.runs[s.name];
   const shiftCols = [
     { key: 'name', label: 'Shift' },
@@ -117,7 +122,7 @@ function PlanAdmin() {
     <${PageHeader} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
     <${Panel} title="Default target per shift">
       <${Cluster} gap=${3} align="flex-end">${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${AREAS[a].name} style=${{ width: 170 }}><${NumberInput} min="0" max="999" value=${defT[a]} onChange=${(v) => setDefT({ ...defT, [a]: +v || 0 })} /><//>`)}
-        <${Button} icon="check" onClick=${() => Promise.all(M.AREA_IDS.map((a) => Act.setDefaultTarget(a, defT[a], userName()))).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }, (e) => setMsg({ ok: false, text: e.message }))}>Save defaults<//></${Cluster}><//>
+        <${Button} icon="check" onClick=${() => Promise.all(M.AREA_IDS.map((a) => Act.setDefaultTarget(a, defT[a], userName()))).then((r) => { const n = r.filter(Boolean).length; persistConfig(); setDefMsg({ ok: !!n, text: n ? 'Default targets saved.' : 'Nothing changed.' }); }, (e) => setDefMsg({ ok: false, text: e.message }))}>Save defaults<//></${Cluster}><${Saved} msg=${defMsg} /><//>
     <div class="plan-grid">
       <div class="plan-days" role="listbox" aria-label="Dates">${days.map((k) => { const p = S.cfg.calendar[k], none = p && p.shifts && !p.shifts.length; return html`<button key=${k} role="option" aria-selected=${sel === k} class="plan-day" onClick=${() => { setSel(k); setDraft(null); setMsg(null); }}>
         <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><${Tag} tone=${p && !none ? 'held' : null} icon=${null}>${none ? 'No production' : p ? 'Scheduled' : 'Default'}<//></button>`; })}</div>
@@ -158,8 +163,8 @@ function ShiftAdmin() {
     <div><${Button} variant="ghost" icon="plus" disabled=${!roomForShift} title=${roomForShift ? null : 'No room for another shift: shifts end by midnight and the last one ends after 23:00'} onClick=${() => setDraft([...draft, { name: `Shift ${String.fromCharCode(65 + draft.length)}`, start: last.end, end: Math.min(24 * 3600 - 60, last.end + 8 * 3600), breaks: [] }])}>Add shift<//>${roomForShift ? null : html` <span class="note">Shifts cannot cross midnight, and the last shift ends after 23:00.</span>`}</div>
     ${problem ? html`<p class="ds-field__error" role="alert">${problem}</p>` : null}
     <${Cluster} gap=${3} align="flex-end">
-      <${Field} label="Reason (kept in the audit log)" style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. Ramadan timings" /><//>
-      <${Button} variant="primary" icon="check" disabled=${!valid} onClick=${() => Act.setShiftPattern(draft, userName(), why).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message }))}>Save shift pattern<//>
+      <${Field} label="Reason (kept in the audit log)" required=${true} style=${{ flex: 1, minWidth: 260 }}><${TextInput} value=${why} onChange=${setWhy} placeholder="e.g. Ramadan timings" /><//>
+      <${Button} variant="primary" icon="check" disabled=${!valid} onClick=${() => (!why.trim() ? setMsg({ ok: false, text: 'Enter a reason for the change. It is kept in the audit log.' }) : Act.setShiftPattern(draft, userName(), why.trim()).then(() => { persistConfig(); setMsg({ ok: true, text: 'Shift pattern saved. It applies from the next shift boundary.' }); }, (e) => setMsg({ ok: false, text: e.message })))}>Save shift pattern<//>
     </${Cluster}>
     ${!valid ? html`<${Notice} kind="error">Each shift needs a name and must end after it starts; breaks must sit inside their shift.<//>` : null}
     <${Saved} msg=${msg} />
@@ -203,8 +208,10 @@ function CorrectAdmin() {
 }
 
 /* Users (req 30): admin only */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, PW_RULE = 'At least 8 characters, with a letter and a number.';
+const strongEnough = (pw) => pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
 function UserAdmin() {
-  const [edit, setEdit] = useState(null), [msg, setMsg] = useState(null), [, tick] = useReducer((x) => x + 1, 0);
+  const [edit, setEdit] = useState(null), [msg, setMsg] = useState(null), [showPw, setShowPw] = useState(false), [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => { if (REMOTE) Auth.loadUsers().then(tick); }, []);
   const saveUser = async (u) => {
     if (REMOTE) { // the server checks, hashes the password, ends sessions on role change, and logs it
@@ -214,10 +221,12 @@ function UserAdmin() {
       await Auth.loadUsers(); setEdit(null); setMsg({ ok: true, text: `${u.name} ${u.id ? 'updated' : 'added'}.` }); tick(); return;
     }
     if (!u.name.trim() || !u.empId.trim()) return setMsg({ ok: false, text: 'Name and employee ID are required.' });
+    if (!EMAIL_RE.test(u.email.trim())) return setMsg({ ok: false, text: 'Enter a valid work email, for example name@mgjw.pk.' });
+    if (u.newPw && !strongEnough(u.newPw)) return setMsg({ ok: false, text: PW_RULE });
     const clash = Auth.users.find((x) => x.id !== u.id && (x.empId.toLowerCase() === u.empId.toLowerCase() || (u.email && x.email.toLowerCase() === u.email.toLowerCase())));
     if (clash) return setMsg({ ok: false, text: 'That employee ID or email is already used.' });
     const isNew = !u.id; if (isNew) u.id = 'u' + Date.now().toString(36);
-    if (u.newPw) { if (u.newPw.length < 8) return setMsg({ ok: false, text: 'Passwords need at least 8 characters.' }); u.hash = await hashPw(u.id, u.newPw); }
+    if (u.newPw) u.hash = await hashPw(u.id, u.newPw);
     if (isNew && !u.hash) return setMsg({ ok: false, text: 'Set a temporary password for the new user.' });
     const { newPw, ...clean } = u;
     if (isNew) Auth.users.push({ ...clean, active: true, created: Date.now(), lastIn: null }); else Object.assign(Auth.users.find((x) => x.id === u.id), clean);
@@ -241,31 +250,37 @@ function UserAdmin() {
       <${Button} variant="primary" icon="plus" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}>Add user<//></${PageHeader}>
     <${Grid} min=${240}>${Object.entries(ROLES).map(([k, r]) => html`<${Panel} key=${k} title=${html`<span class=${'av sm r-' + k}>${r.short[0]}</span> ${r.label}`} sub=${r.desc} />`)}</${Grid}>
     <${DataTable} columns=${cols} rows=${Auth.users} rowKey=${(u) => u.id} rowClass=${(u) => (u.active ? null : 'ds-row-muted')} />
-    <${Saved} msg=${msg} />
+    <${Saved} msg=${edit ? null : msg} />
     ${edit ? html`<${Dialog} k="Users" title=${edit.id ? `Edit ${edit.name}` : 'Add a user'} onClose=${() => setEdit(null)} footer=${html`<${Button} onClick=${() => setEdit(null)}>Cancel<//><${Button} variant="primary" icon="check" onClick=${() => saveUser({ ...edit })}>${edit.id ? 'Save' : 'Add user'}<//>`}>
+        <div class="ds-stack" style=${{ display: 'grid', gap: 'var(--ds-space-3)' }} onKeyDown=${(e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); saveUser({ ...edit }); } }}>
         <${Field} label="Full name"><${TextInput} value=${edit.name} onChange=${(v) => setEdit({ ...edit, name: v })} /><//>
         <${Grid} min=${200}><${Field} label="Employee ID"><${TextInput} value=${edit.empId} onChange=${(v) => setEdit({ ...edit, empId: v.toUpperCase() })} placeholder="MG-1234" /><//>
           <${Field} label="Work email"><${TextInput} type="email" value=${edit.email} onChange=${(v) => setEdit({ ...edit, email: v })} /><//></${Grid}>
         <${Field} label="Role" hint=${ROLES[edit.role].desc}><${Select} value=${edit.role} disabled=${edit.id === Auth.user.id} onChange=${(v) => setEdit({ ...edit, role: v })} options=${Object.entries(ROLES).map(([k, r]) => [k, r.label])} /><//>
-        <${Field} label=${edit.id ? 'Reset password' : 'Temporary password'} hint=${edit.id ? 'Leave blank to keep the current one' : 'At least 8 characters'}><${TextInput} autoComplete="off" value=${edit.newPw} onChange=${(v) => setEdit({ ...edit, newPw: v })} /><//>
+        <${Field} label=${edit.id ? 'Reset password' : 'Temporary password'} hint=${edit.id ? 'Leave blank to keep the current one' : PW_RULE}><${Cluster} gap=${2} nowrap=${true}><${TextInput} type=${showPw ? 'text' : 'password'} autoComplete="new-password" style=${{ flex: 1 }} value=${edit.newPw} onChange=${(v) => setEdit({ ...edit, newPw: v })} /><${Button} size="sm" variant="ghost" icon=${showPw ? 'eyeoff' : 'eye'} aria-pressed=${showPw} onClick=${() => setShowPw(!showPw)}>${showPw ? 'Hide' : 'Show'}<//></${Cluster}><//>
         <${Saved} msg=${msg && !msg.ok ? msg : null} />
+        </div>
       </${Dialog}>` : null}
   </${Stack}>`;
 }
 
 /* Audit log: configuration changes, corrections, sign-ins */
+const AUDIT_SHOWN = 300;
 function AuditAdmin() {
   const [f, setF] = useState('all'), [remote, setRemote] = useState(null);
   useEffect(() => { if (REMOTE) api('/api/audit?limit=500').then((r) => setRemote(r.ok ? r : { changes: [], access: [], error: r.error })); }, []);
   persistConfig();
   const whenOf = (at) => new Date(at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'medium' });
   // live screens: the server's stored log (configuration changes, corrections, sign-ins, account changes)
-  const cfg = (REMOTE ? (remote ? remote.changes.map((a) => ({ ...a, at: Date.parse(a.at) })) : []) : jget('mg-andon-audit', [])).map((r) => ({ when: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
-  const auth = (REMOTE ? (remote ? remote.access.map((a) => ({ at: Date.parse(a.at), action: a.action, detail: a.detail, who: a.who })) : []) : Auth.log).map((r) => ({ when: whenOf(r.at), sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
-  const rows = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort).slice(0, 300);
-  const csv = () => downloadText('andon-audit-log.csv', 'text/csv', [['When', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...rows.map((r) => [r.when, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map((c) => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n'));
+  const cfg = (REMOTE ? (remote ? remote.changes.map((a) => ({ ...a, at: Date.parse(a.at) })) : []) : jget('mg-andon-audit', [])).map((r) => ({ when: whenOf(r.at), shop: `${r.date} ${fmtClock(r.t, false)}`, sort: r.at, kind: 'change', what: `${r.action} · ${r.target}`, detail: `${r.before} → ${r.after}`, by: r.by, reason: r.reason }));
+  const auth = (REMOTE ? (remote ? remote.access.map((a) => ({ at: Date.parse(a.at), action: a.action, detail: a.detail, who: a.who })) : []) : Auth.log).map((r) => ({ when: whenOf(r.at), shop: '', sort: r.at, kind: 'access', what: r.action, detail: r.detail, by: r.who, reason: '' }));
+  const all = [...cfg, ...auth].filter((r) => f === 'all' || r.kind === f).sort((a, b) => b.sort - a.sort), rows = all.slice(0, AUDIT_SHOWN);
+  // a cell that starts with = + - or @ would run as a formula in Excel: keep it as text
+  const cell = (c) => { const t = String(c ?? ''); return `"${(/^[=+\-@\t\r]/.test(t) ? "'" + t : t).replace(/"/g, '""')}"`; };
+  // the export holds every row of the current filter, not only the ones on screen; the byte-order mark lets Excel read the arrow
+  const csv = () => downloadText('andon-audit-log.csv', 'text/csv;charset=utf-8', '\uFEFF' + [['Recorded', 'Shop time', 'Type', 'What', 'Before → after / detail', 'By', 'Reason'], ...all.map((r) => [r.when, r.shop, r.kind, r.what, r.detail, r.by, r.reason])].map((r) => r.map(cell).join(',')).join('\r\n'));
   const cols = [
-    { key: 'when', label: 'When', type: 'time' }, { key: 'what', label: 'What' },
+    { key: 'when', label: 'Recorded', type: 'time' }, { key: 'shop', label: 'Shop time', type: 'time', render: (r) => r.shop || '—' }, { key: 'what', label: 'What' },
     { key: 'detail', label: 'Detail', type: 'code', wrap: true, render: (r) => r.detail || '—' },
     { key: 'by', label: 'By', render: (r) => (r.by || '').split(' · ')[0] }, { key: 'reason', label: 'Reason', wrap: true, render: (r) => r.reason || '—' },
   ];
@@ -274,6 +289,7 @@ function AuditAdmin() {
       <${Button} icon="download" onClick=${csv}>Export CSV<//></${PageHeader}>
     <${SegmentedControl} label="Show" value=${f} onChange=${setF} options=${[{ value: 'all', label: 'All' }, { value: 'change', label: 'Changes & corrections' }, { value: 'access', label: 'Sign-ins' }]} />
     <${DataTable} columns=${cols} rows=${REMOTE && !remote ? null : rows} error=${remote && remote.error} empty="Nothing recorded yet." />
+    <p class="note">Recorded is the date and time on this device. Shop time is the plant clock when the change was made${RT.conn.mode === 'live' ? '' : ' (simulated)'}.${all.length > rows.length ? ` Showing the latest ${rows.length} of ${all.length}; Export CSV holds all of them.` : ''}</p>
   </${Stack}>`;
 }
 export function NoAccess({ what }) { return html`<div class="page-wrap"><${EmptyState} icon="lock" title=${`${what} needs a different role`}>You are signed in as ${userName()}. Ask an administrator if you need access.<//></div>`; }

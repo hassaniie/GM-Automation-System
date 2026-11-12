@@ -55,7 +55,7 @@ const LocalAuth = {
       jset('mg-andon-tries', { n: until ? 0 : n, until });
       this.record('Sign-in failed', idOrEmail || '(blank)', u && !u.active ? 'account disabled' : '');
       if (u && !u.active) return { ok: false, reason: 'This account is disabled. Ask your administrator.' };
-      return { ok: false, reason: until ? `Too many attempts. Sign-in is paused for ${LOCKOUT_MS / 1000} s.` : `That ID and password don't match.${n >= 3 ? ` ${MAX_TRIES - n} tries left.` : ''}`, locked: !!until };
+      return { ok: false, reason: until ? `Too many attempts. Sign-in is paused for ${LOCKOUT_MS / 1000} s.` : `That ID and password don't match.${n >= 3 ? ` ${MAX_TRIES - n} ${MAX_TRIES - n === 1 ? 'try' : 'tries'} left.` : ''}`, locked: !!until };
     }
     jset('mg-andon-tries', { n: 0, until: 0 });
     this.start(u, keep, 'Signed in');
@@ -133,7 +133,7 @@ export function SignIn({ lock }) {
   // live screens show this before connecting, so there may be no plant state yet
   const S = RT.S, p = S && M.pace(S), open = S ? S.calls.filter((c) => c.clearedT == null).length : 0, ls = S && M.lineStatus(S);
   const [id, setId] = useState(lock && Auth.user ? Auth.user.empId : ''), [pw, setPw] = useState(''), [show, setShow] = useState(false), [keep, setKeep] = useState(true), [caps, setCaps] = useState(false);
-  const [busy, setBusy] = useState(false), [err, setErr] = useState(() => (Auth.ssoError || null)), [touched, setTouched] = useState(false), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
+  const [busy, setBusy] = useState(false), [err, setErr] = useState(() => (Auth.ssoError || null)), [touched, setTouched] = useState(false), [info, setInfo] = useState(null), [demo, setDemo] = useState(!lock), pwRef = useRef(null), idRef = useRef(null);
   const [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => { (lock ? pwRef : idRef).current && (lock ? pwRef : idRef).current.focus(); const i = setInterval(tick, 1000); return () => clearInterval(i); }, []);
   const t = Auth.tries(), waitS = t.until > Date.now() ? Math.ceil((t.until - Date.now()) / 1000) : 0;
@@ -169,12 +169,13 @@ export function SignIn({ lock }) {
         ${lock ? html`<div class="si-avatar">${initials(Auth.user.name)}</div>` : null}
         <h2 id="si-h">${lock ? 'Screen locked' : 'Sign in'}</h2>
         <p class="si-sub">${lock ? html`Locked after ${IDLE_LOCK_MS / 60000} minutes without use. Enter the password for <b>${Auth.user.name}</b> to continue.` : 'Use your MG JW employee ID or work email.'}</p>
-        ${err ? html`<div class="si-err" role="alert"><${Icon} n="alert" />${err}</div>` : null}
+        ${err && !waitS ? html`<div class="si-err" role="alert"><${Icon} n="alert" />${err}</div>` : null}
+        ${info && !err && !waitS ? html`<div class="si-err si-info" role="status"><${Icon} n="info" />${info}</div>` : null}
         ${waitS ? html`<div class="si-err" role="alert"><${Icon} n="lock" />Sign-in paused after ${MAX_TRIES} failed attempts. Try again in ${waitS} s.</div>` : null}
         ${!lock ? html`<div class=${'si-field' + (idErr ? ' bad' : '')}><label for="si-id">Employee ID or email</label>
           <div class="si-input"><${Icon} n="user" /><input id="si-id" ref=${idRef} autoComplete="username" spellCheck="false" value=${id} placeholder="MG-1234 or name@mgjw.pk" aria-invalid=${idErr ? 'true' : 'false'} aria-describedby=${idErr ? 'si-id-e' : null} onInput=${(e) => { setId(e.target.value); setErr(null); }} /></div>
           ${idErr ? html`<div class="si-hint bad" id="si-id-e">${idErr}</div>` : null}</div>` : null}
-        <div class=${'si-field' + (pwErr ? ' bad' : '')}><div class="si-lab"><label for="si-pw">Password</label>${!lock ? html`<button type="button" class="linkish" onClick=${() => setErr('Passwords are reset by your administrator. Ask them for a temporary password.')}>Forgot password?</button>` : null}</div>
+        <div class=${'si-field' + (pwErr ? ' bad' : '')}><div class="si-lab"><label for="si-pw">Password</label>${!lock ? html`<button type="button" class="linkish" onClick=${() => { setErr(null); setInfo('Passwords are reset by your administrator. Ask them for a temporary password.'); }}>Forgot password?</button>` : null}</div>
           <div class="si-input"><${Icon} n="lock" /><input id="si-pw" ref=${pwRef} type=${show ? 'text' : 'password'} autoComplete="current-password" value=${pw} aria-invalid=${pwErr ? 'true' : 'false'} onInput=${(e) => { setPw(e.target.value); setErr(null); }} onKeyUp=${keyCaps} onKeyDown=${keyCaps} />
             <button type="button" class="si-eye" aria-label=${show ? 'Hide password' : 'Show password'} aria-pressed=${show} onClick=${() => setShow(!show)}><${Icon} n=${show ? 'eyeoff' : 'eye'} /></button></div>
           ${pwErr ? html`<div class="si-hint bad">${pwErr}</div>` : caps ? html`<div class="si-hint warn"><${Icon} n="alert" />Caps Lock is on</div>` : null}</div>

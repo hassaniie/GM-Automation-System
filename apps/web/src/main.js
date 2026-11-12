@@ -1,4 +1,5 @@
 /* Entry point: styles, then start the app once every module is loaded. */
+import './styles/fonts.css';
 import './styles/index.css';
 import { boot } from './app.js';
 import { RT, setUI } from './lib/runtime.js';

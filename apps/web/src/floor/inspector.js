@@ -95,7 +95,7 @@ function StationInspector({ id }) {
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
       <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
       <div class="id">${id}</div><div class="sub">${P.op}</div>
-      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
+      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an && !(an.state === 'normal' && ['FAULT', 'PAUSED', 'HOLD', 'ESCALATED'].includes(st.code)) ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
       <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">
       ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
@@ -192,8 +192,10 @@ function VehicleInspector({ id }) {
 export function Inspector() {
   const sel = RT.ui.selection, ref = useRef(null);
   useEffect(() => { const upd = () => { RT.ui.panelWidth = ref.current && window.innerWidth > 760 ? ref.current.offsetWidth + 16 : 0; }; upd(); window.addEventListener('resize', upd); return () => { window.removeEventListener('resize', upd); RT.ui.panelWidth = 0; }; }, []);
+  // keyboard and screen-reader users land in the panel when it opens and go back to where they were when it closes
+  useEffect(() => { const from = document.activeElement, n = ref.current; if (n) n.focus({ preventScroll: true }); return () => { if (from && from !== document.body && from.isConnected && (!document.activeElement || document.activeElement === document.body || (n && n.contains(document.activeElement)))) from.focus({ preventScroll: true }); }; }, []);
   if (!sel) return null;
-  return html`<aside class="glass inspector ticks in" ref=${ref} aria-label="Inspector">${sel.kind === 'pos' ? html`<${StationInspector} id=${sel.id} />` : html`<${VehicleInspector} id=${sel.id} />`}</aside>`;
+  return html`<aside class="glass inspector ticks in" ref=${ref} tabindex="-1" aria-label=${sel.kind === 'pos' ? `Station ${sel.id}` : 'Vehicle record'}>${sel.kind === 'pos' ? html`<${StationInspector} id=${sel.id} />` : html`<${VehicleInspector} id=${sel.id} />`}</aside>`;
 }
 
 /* ── anchored tags ── */

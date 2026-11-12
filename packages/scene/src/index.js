@@ -719,6 +719,7 @@ export const Scene3D = (function () {
     buildEnvironment(); buildLightPools(); buildFloorBadge(); buildBvBadge(); buildSignage(); buildEquipment(); buildRails(); buildPads(); buildScanners(); buildBeacons(); buildChevrons();
     Object.values(getState().carriers).forEach(makeCarrier);
     controls = new OrbitControls(camera, renderer.domElement);
+    if (controls.listenToKeyEvents) { controls.listenToKeyEvents(renderer.domElement); controls.keyPanSpeed = 14; } // arrow keys pan when the view has focus
     Object.assign(controls, { enableDamping: true, dampingFactor: 0.09, minDistance: 14, maxDistance: 200, maxPolarAngle: 1.22, minPolarAngle: 0.2, rotateSpeed: 0.55, zoomSpeed: 0.8, panSpeed: 0.8, screenSpacePanning: false, minAzimuthAngle: -1.2, maxAzimuthAngle: 1.3 });
     const v = VIEWS.overview; controls.target.set(...v.target); resize(); camera.position.copy(camFromSpherical(v.target, v.dist, v.az, v.pol)); controls.update();
     raycaster = new THREE.Raycaster();
