@@ -72,9 +72,30 @@
   .ds-switch-row label { display: grid; gap: 2px; font-size: var(--ds-size-13); color: var(--ds-text-primary); cursor: pointer; }
   .ds-switch-row small { color: var(--ds-text-muted); font-size: var(--ds-size-12); }
 
-  /* Station call buttons (inspector): two equal columns that never widen the panel; the label wraps */
-  .ds-btn.callbtn { display: grid; align-content: center; justify-items: start; gap: var(--ds-space-1); min-width: 0; min-height: 76px; height: auto; padding: var(--ds-space-3); white-space: normal; text-align: start; }
-  .ds-btn.callbtn .cb-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); line-height: 1.2; }
+  /* Station call buttons (URD: two distinct actions). Each has its own colour (the call lamp colours used on the
+     floor and strip), its own icon in a filled tile, and a verb-first label on one line ("Call supervisor").
+     The second line says what the call is for; once pressed the button fills with its colour and the second
+     line becomes the call's state ("Waiting 01:23", "Ali at station"). Same height in every state. */
+  .ds-btn.callbtn { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--ds-space-3); min-width: 0; height: 64px; padding: 0 var(--ds-space-3); white-space: nowrap; text-align: start; text-transform: none; letter-spacing: 0;
+    color: var(--ds-text-primary); background: color-mix(in srgb, var(--tone) 12%, transparent); border-color: color-mix(in srgb, var(--tone) 60%, transparent); }
+  .ds-btn.callbtn:hover:not(:disabled) { background: color-mix(in srgb, var(--tone) 22%, transparent); border-color: var(--tone); }
+  .ds-btn.callbtn .cb-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--ds-radius-md); background: var(--tone); color: var(--ds-bg); } /* the page colour on the tone: dark on the light dark-theme tones, light on the dark light-theme ones */
+  .ds-btn.callbtn .cb-ic .ico { width: 18px; height: 18px; }
+  .ds-btn.callbtn .cb-txt { display: grid; gap: 2px; min-width: 0; }
+  .ds-btn.callbtn .cb-top { font: 600 var(--ds-size-14) / 1.2 var(--ds-font-ui); overflow: hidden; text-overflow: ellipsis; }
+  .ds-btn.callbtn .cb-sub { font: 400 var(--ds-size-12) / 1.2 var(--ds-font-ui); color: var(--ds-text-secondary); overflow: hidden; text-overflow: ellipsis; }
+  .ds-btn.callbtn[aria-pressed="true"] { background: var(--tone); border-color: var(--tone); color: var(--ds-bg); }
+  .ds-btn.callbtn[aria-pressed="true"] .cb-ic { background: color-mix(in srgb, var(--ds-bg) 18%, transparent); color: var(--ds-bg); }
+  .ds-btn.callbtn[aria-pressed="true"] .cb-sub { color: var(--ds-bg); font-family: var(--ds-font-mono); }
+
+  /* Station buzzer: icon, name with its state on a second line, and the switch. One row in every state. */
+  .buzz-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: var(--ds-space-3); padding: var(--ds-space-3); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-md); }
+  .buzz-row .bz-ic { color: var(--ds-text-muted); display: grid; }
+  .buzz-row.on .bz-ic { color: var(--ds-status-critical); }
+  .buzz-row .bz-txt { display: grid; gap: 2px; min-width: 0; }
+  .buzz-row .bz-txt b { font-size: var(--ds-size-14); }
+  .buzz-row .bz-st { font-size: var(--ds-size-12); color: var(--ds-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .buzz-row.on .bz-st { color: var(--ds-status-critical); font-family: var(--ds-font-mono); }
   .insp-body > * { min-width: 0; }
 
   /* Checkbox */

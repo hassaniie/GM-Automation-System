@@ -94,22 +94,23 @@ function StationInspector({ id }) {
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
       <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
-      <div class="id">${id}</div><div class="sub">${P.op}</div>
+      <div class="id">${id}</div><div class="sub">${P.op}${M.stationCount(S, id) > 1 ? ` · ${M.stationCount(S, id)} vehicles here` : ''}</div>
       <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an && !(an.state === 'normal' && ['crit', 'warn', 'esc', 'paused'].includes(st.tone)) ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
       <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">
       ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
         return html`<${Button} key=${t} size="lg" class="callbtn" tone=${t.toLowerCase()} pressed=${!!oc} disabled=${!can('call')} title=${oc ? `${T.label} call open since ${fmtClock(oc.raisedT, false)} · cleared by the responder` : `Call ${T.label.toLowerCase()} to ${id}`} onClick=${() => press(t)}>
-          <span class="cb-top"><${Icon} n=${CALL_ICON[t]} />${T.label}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `calling · ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} here`) : 'Call'}</span><//>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
+          <span class="cb-ic" aria-hidden="true"><${Icon} n=${CALL_ICON[t]} /></span><span class="cb-txt"><span class="cb-top">${oc ? `${T.label} called` : `Call ${T.label.toLowerCase()}`}</span><span class="cb-sub">${oc ? (oc.respondedT == null ? `Waiting ${fmtDur(S.t - oc.raisedT)}` : `${oc.respondedBy.split(' · ')[0]} at station`) : t === 'SUP' ? 'Help with the work' : 'Equipment fault'}</span></span><//>`; })}</div>` : isWork ? html`<p class="note">Trim Andon preview is off, so this station has no call buttons.</p>` : html`<p class="note">The buffer has no team. A loaded hanger waits here when CL4 is busy, and moves on by itself.</p>`}
       ${calls.length ? html`<div>${calls.map((cl) => html`<${CallRow} key=${cl.id} c=${cl} />`)}</div>` : null}
       ${live ? html`<div class="timer"><${Ring} r=${an.ratio} tone=${tone === 'ok' ? 'text' : tone} /><div>
         <div class="num" style=${{ color: an.state === 'over' ? 'var(--crit)' : 'var(--text)' }}>${fmtDur(an.cycle)}</div>
         <div class="of">cycle time · takt ${fmtDur(an.takt)}</div>
         <div class="delta" style=${{ color: an.state === 'over' ? 'var(--crit)' : an.state === 'near' ? 'var(--warn)' : 'var(--text-2)' }}>${an.cycle > an.takt ? `+${fmtDur(an.cycle - an.takt)} over takt` : `${fmtDur(an.takt - an.cycle)} to takt`}${occ && occ.completeT != null && occ.vehicleId ? ' · work finished' : ''}</div>
         <div class="note" style=${{ marginTop: 4 }}>Work ${fmtDur(occ.workT)}${occ.waitT ? ` · waiting ${fmtDur(occ.waitT)}` : ''}${occ.plannedT ? ` · breaks ${fmtDur(occ.plannedT)} (excluded)` : ''}</div></div></div>` : null}
-      ${isWork ? html`<div class="andon-row" style=${{ padding: '10px 12px', border: '1px solid var(--hair)' }}>
-        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class=${buzzOn ? 'c-crit' : 'c-muted'}><${Icon} n=${buzzEn ? 'buzz' : 'buzzoff'} /></span><span><b>Buzzer</b> <span class="c-muted">· ${!buzzEn ? 'switched off' : buzzOn ? `ringing ${fmtDur(S.t - S.buzzing[id])}` : 'quiet · rings over takt'}</span></span></span>
-        <span style=${{ display: 'flex', alignItems: 'center', gap: 8 }}><span class="note">${M.stationCount(S, id)} vehicle${M.stationCount(S, id) === 1 ? '' : 's'} here</span><span title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'}><${Switch} checked=${buzzEn} disabled=${!can('buzzer')} label=${html`<span class="ds-vh">Buzzer at ${id}</span>`} onChange=${() => Act.setBuzzer(id, !buzzEn, userName())} /></span></span></div>` : null}
+      ${isWork ? html`<div class=${'buzz-row' + (buzzOn ? ' on' : '')}>
+        <span class="bz-ic" aria-hidden="true"><${Icon} n=${buzzEn ? 'buzz' : 'buzzoff'} /></span>
+        <span class="bz-txt"><b>Buzzer</b><span class="bz-st">${!buzzEn ? 'Switched off' : buzzOn ? `Ringing ${fmtDur(S.t - S.buzzing[id])}` : 'Rings when the unit passes takt'}</span></span>
+        <span title=${can('buzzer') ? 'Switch this station’s buzzer on or off (logged)' : 'Only authorised users switch buzzers'}><${Switch} checked=${buzzEn} disabled=${!can('buzzer')} label=${html`<span class="ds-vh">Buzzer at ${id}</span>`} onChange=${() => Act.setBuzzer(id, !buzzEn, userName())} /></span></div>` : null}
       ${xf ? html`<div class="callout"><div class="ttl" style=${{ color: 'var(--transit)' }}><${Icon} n="arrow" />${M.XFER_FROM[xf.from].label}</div><div>${S.vehicles[xf.vehicleId].vin.slice(-6)} moving from ${S.carriers[S.pos[xf.from].carrierId].id} to ${S.carriers[S.pos[xf.to].carrierId].id} · ${fmtDur(Math.max(0, xf.t1 - S.t))} left</div></div>` : null}
       ${v ? html`<dl class="kv">
         <dt>VIN</dt><dd><button class="linkish" onClick=${() => select({ kind: 'veh', id: v.id })}>${v.vin}</button></dd>

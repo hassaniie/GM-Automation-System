@@ -554,10 +554,6 @@ svg.plan text { font-family: var(--font-mono); }
 .c-sup { color: var(--call-sup); } .c-mnt { color: var(--call-mnt); }
 @keyframes call-glow { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 45%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--tone) 0%, transparent); } }
 .callpad { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.callbtn { display: grid; gap: 4px; justify-items: start; text-align: left; height: auto !important; min-height: 76px; padding: 12px 14px !important; }
-.callbtn .cb-top { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
-.callbtn .cb-top .ico { width: 18px; height: 18px; }
-.callbtn .cb-sub { font-size: 12px; opacity: .85; font-family: var(--font-mono); }
 .lamp { display: inline-block; width: 8px; height: 8px; border-radius: var(--ds-radius-round) !important; flex: none; }
 .lamp.sup { background: var(--call-sup); box-shadow: 0 0 0 2px color-mix(in srgb, var(--call-sup) 30%, transparent); }
 .lamp.mnt { background: var(--call-mnt); box-shadow: 0 0 0 2px color-mix(in srgb, var(--call-mnt) 30%, transparent); }
