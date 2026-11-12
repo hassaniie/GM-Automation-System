@@ -4,6 +4,7 @@ import { adminAllowed } from '../admin.js';
 import { can } from '../auth.js';
 import { go } from './router.js';
 import { RT } from './runtime.js';
+import { confirmLeave } from './unsaved.js';
 
 const NAV = [
   ['floor', 'Floor', 'layers', () => true],
@@ -20,5 +21,6 @@ export const navPages = () => NAV.filter((p) => p[3]()).map(([value, label, icon
 /** Open a page (a line display opens on the line last shown, Chassis by default). */
 export function goPage(k) {
   const cur = RT.route.page;
+  if (k !== cur && !confirmLeave()) return;
   go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null);
 }

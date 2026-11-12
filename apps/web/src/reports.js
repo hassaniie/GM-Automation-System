@@ -6,6 +6,7 @@
    labelled as simulated history, so the date filter has something to show.
    The table definitions are shared (@mg/reports).
    ════════════════════════════════════════════════════════════════════════ */
+import { safeCell } from './lib/csv.js';
 import { MAX_RANGE_DAYS, buildReport, dateRange, datasetFromState, kpis, liveHas, reportFileName, reportSheets, selection } from '@mg/reports';
 import { NoAccess, downloadText } from './admin.js';
 import { can, userName } from './auth.js';
@@ -59,8 +60,6 @@ function synthRows(S, date, sh, lines, stations, out) {
 function loadExcel() {
   return import('exceljs').then((m) => m.default || m);
 }
-/** A spreadsheet cell that cannot run as a formula when opened (audit B13). */
-export const safeCell = (c) => (typeof c === 'string' && /^[=+\-@\t\r]/.test(c) ? `'${c}` : c);
 async function exportExcel(d, meta) {
   const sheets = reportSheets(d, { ...meta, from: meta.date, to: meta.date, exportedAt: new Date().toLocaleString('en-GB'), by: userName() }), name = reportFileName({ ...meta, from: meta.date, to: meta.date });
   try {

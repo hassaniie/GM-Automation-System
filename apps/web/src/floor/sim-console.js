@@ -2,7 +2,7 @@
 import { SCENARIOS, loadScenario } from './scenarios.js';
 import { can, userName } from '../auth.js';
 import { Act } from '../lib/act.js';
-import { AREAS, M, RT, bump, fmtClock, html, setUI } from '../lib/runtime.js';
+import { AREAS, M, RT, fmtClock, html, setUI } from '../lib/runtime.js';
 import { Icon } from '../lib/ui-kit.js';
 import { Button, Field, NumberInput, SegmentedControl, Switch } from '../ui/index.js';
 import { powerCut, setLink } from '../screens.js';

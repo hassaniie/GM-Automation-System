@@ -215,3 +215,11 @@ export interface EngineState {
 /** What a screen receives: the state, read-only. From phase 3 it is sent by the edge server. */
 export type Snapshot = Readonly<EngineState>;
 export * from './devices.ts';
+
+/* ── account rules, shared by the screens and the line server (audit B14) ── */
+/** Why a password is not acceptable, or null: at least 8 characters with a letter and a digit. */
+export const passwordProblem = (pw: string): string | null =>
+  pw.length < 8 ? 'Use at least 8 characters.' : !/[A-Za-z]/.test(pw) || !/\d/.test(pw) ? 'Use letters and at least one digit.' : null;
+/** A plausible work email (the server's check is the same shape). */
+export const emailOk = (e: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 120;
+

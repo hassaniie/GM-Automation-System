@@ -20,6 +20,5 @@ export async function verifyPassword(pw: string, stored: string | null | undefin
   return got.length === want.length && timingSafeEqual(got, want);
 }
 
-/** At least 8 characters with a letter and a digit. */
-export const passwordProblem = (pw: string) =>
-  pw.length < 8 ? 'Use at least 8 characters.' : !/[A-Za-z]/.test(pw) || !/\d/.test(pw) ? 'Use letters and at least one digit.' : null;
+/** At least 8 characters with a letter and a digit: one rule for the screens and the server. */
+export { passwordProblem } from '@mg/contracts';

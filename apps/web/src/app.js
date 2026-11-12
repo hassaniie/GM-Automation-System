@@ -18,7 +18,7 @@ import { HowPage } from './how.js';
 import { LineOffCard } from './lib/misc.js';
 import { go, parseHash } from './lib/router.js';
 import { Act } from './lib/act.js';
-import { M, RT, bump, effectiveTheme, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
+import { M, RT, effectiveTheme, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
 import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';

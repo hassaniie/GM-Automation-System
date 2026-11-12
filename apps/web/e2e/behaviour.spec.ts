@@ -93,3 +93,45 @@ test('S2: Reports → Excel downloads a real workbook with every table', async (
   expect(wb.worksheets.length).toBeGreaterThan(2);
   expect(wb.worksheets[0].rowCount).toBeGreaterThan(1);
 });
+
+test('B12: takt needs a reason, and leaving with unsaved edits asks first', async ({ page }) => {
+  await signIn(page);
+  await page.evaluate(() => { location.hash = '#/admin/takt'; });
+  const min = page.getByLabel(/takt minutes/).first();
+  await min.fill('12'); await min.blur();
+  await page.getByRole('button', { name: 'Save takt' }).click();
+  await expect(page.getByText('Give a reason')).toBeVisible();
+  let asked = '';
+  page.once('dialog', (d) => { asked = d.message(); void d.dismiss(); });
+  await page.getByRole('tab', { name: /Shifts/ }).click();
+  expect(asked).toMatch(/unsaved changes in Takt time/);
+  await expect(page).toHaveURL(/admin\/takt/);
+});
+
+test('B13: the audit log keeps real time and shop time apart, and the CSV is spreadsheet-safe', async ({ page }) => {
+  await signIn(page);
+  await page.evaluate(() => { location.hash = '#/admin/audit'; });
+  await expect(page.getByRole('columnheader', { name: 'Real time' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Shop time' })).toBeVisible();
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export CSV' }).click()]);
+  const text = (await import('node:fs')).readFileSync(await dl.path(), 'utf8');
+  expect(text.charCodeAt(0)).toBe(0xfeff);
+  expect(text).toContain('Real time');
+});
+
+test('B14: Add user submits on Enter, shows one error, and masks the password', async ({ page }) => {
+  await signIn(page);
+  await page.evaluate(() => { location.hash = '#/admin/users'; });
+  await page.getByRole('button', { name: 'Add user' }).first().click();
+  const dlg = page.getByRole('dialog');
+  await dlg.getByLabel('Full name').fill('Test Person');
+  await dlg.getByLabel('Employee ID').fill('MG-9999');
+  await dlg.getByLabel(/Work email/).fill('not-an-email');
+  await expect(dlg.getByLabel(/Temporary password/)).toHaveAttribute('type', 'password');
+  await dlg.getByLabel(/Temporary password/).fill('password');
+  await dlg.getByLabel(/Temporary password/).press('Enter');
+  await expect(page.getByText(/Enter a work email/)).toHaveCount(1);
+  await dlg.getByLabel(/Work email/).fill('test@mgmotors.com.pk');
+  await dlg.getByLabel(/Temporary password/).press('Enter');
+  await expect(page.getByText('Use letters and at least one digit.')).toHaveCount(1);
+});
