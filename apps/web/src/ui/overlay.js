@@ -21,7 +21,7 @@ export function Tabs({ value, onChange, items, label, vertical, class: cls }) {
     onChange(items[n].value);
     const next = e.currentTarget.parentElement.children[n]; if (next) next.focus();
   };
-  return html`<div class=${cx('ds-tabs', vertical && 'ds-tabs--vertical', cls)} role="tablist" aria-label=${label} aria-orientation=${vertical ? 'vertical' : 'horizontal'}>${items.map((t, i) => html`<button key=${t.value} type="button" role="tab" aria-selected=${t.value === value} tabindex=${t.value === value ? 0 : -1} title=${t.title} onClick=${() => onChange(t.value)} onKeyDown=${(e) => key(e, i)}>${t.icon ? html`<${Icon} n=${t.icon} />` : null}<span>${t.label}</span>${t.count != null ? html`<span class="ds-tabs__n">${t.count}</span>` : null}</button>`)}</div>`;
+  return html`<div class=${cx('ds-tabs', vertical && 'ds-tabs--vertical', cls)} role="tablist" aria-label=${label} aria-orientation=${vertical ? 'vertical' : 'horizontal'}>${items.map((t, i) => html`<button key=${t.value} type="button" role="tab" aria-selected=${t.value === value} tabindex=${t.value === value ? 0 : -1} title=${t.title} data-sep=${t.sep ? '' : null} onClick=${() => onChange(t.value)} onKeyDown=${(e) => key(e, i)}>${t.icon ? (vertical ? html`<span class="ds-tabs__ic"><${Icon} n=${t.icon} /></span>` : html`<${Icon} n=${t.icon} />`) : null}<span>${t.label}</span>${t.count != null ? html`<span class="ds-tabs__n">${t.count}</span>` : null}</button>`)}</div>`;
 }
 
 /**

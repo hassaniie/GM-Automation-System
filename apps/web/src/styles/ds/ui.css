@@ -225,6 +225,24 @@
   .ds-tabs--vertical { flex-direction: column; border-bottom: 0; flex-wrap: nowrap; }
   .ds-tabs--vertical button { justify-content: flex-start; width: 100%; border-radius: var(--ds-radius-md); height: var(--ds-h-md); text-transform: none; letter-spacing: 0; font-size: var(--ds-size-14); font-weight: 500; }
   .ds-tabs--vertical button[aria-selected="true"] { background: var(--ds-layer-2); box-shadow: inset 2px 0 0 var(--ds-text-primary); }
+  .ds-tabs__ic { display: none; }
+
+  /* Settings navigation: a glass card; each section is an icon tile and a label, the open one is filled.
+     Line set-up and access (users, audit) are two groups split by a hairline. */
+  @media (min-width: 901px) {
+    .adm-nav { padding: var(--ds-space-3); gap: var(--ds-space-2); border: var(--ds-border-1) solid var(--ds-glass-edge); border-radius: var(--ds-radius-md); background: var(--ds-glass); box-shadow: var(--ds-glass-shadow); -webkit-backdrop-filter: var(--ds-glass-blur); backdrop-filter: var(--ds-glass-blur); }
+    .adm-nav > .ds-label { padding: var(--ds-space-1) var(--ds-space-2) 0; }
+    .adm-nav .ds-tabs--vertical { gap: 2px; }
+    .adm-nav .ds-tabs--vertical button { height: 44px; gap: var(--ds-space-3); padding: 0 var(--ds-space-2); color: var(--ds-text-secondary); transition: background-color .15s, color .15s; }
+    .adm-nav .ds-tabs--vertical button:hover { background: var(--ds-layer-1); color: var(--ds-text-primary); }
+    .adm-nav .ds-tabs__ic { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: var(--ds-radius-md); background: var(--ds-layer-1); border: var(--ds-border-1) solid var(--ds-border-subtle); transition: background-color .15s, color .15s; }
+    .adm-nav .ds-tabs__ic .ico { width: 16px; height: 16px; }
+    .adm-nav .ds-tabs--vertical button[aria-selected="true"] { background: var(--ds-layer-2); box-shadow: none; color: var(--ds-text-primary); font-weight: 600; }
+    .adm-nav .ds-tabs--vertical button[aria-selected="true"] .ds-tabs__ic { background: var(--ds-interactive); border-color: var(--ds-interactive); color: var(--ds-on-interactive); }
+    .adm-nav .ds-tabs--vertical button[data-sep] { margin-top: var(--ds-space-3); }
+    .adm-nav .ds-tabs--vertical button[data-sep]::before { content: ""; position: absolute; left: var(--ds-space-2); right: var(--ds-space-2); top: calc(-1 * var(--ds-space-2)); height: 1px; background: var(--ds-border-subtle); }
+    @media (prefers-reduced-motion: reduce) { .adm-nav .ds-tabs--vertical button, .adm-nav .ds-tabs__ic { transition: none; } }
+  }
 
   /* ── menu ── */
   .ds-menu { position: relative; display: inline-flex; }
@@ -271,7 +289,6 @@
     .adm-nav .ds-tabs--vertical { flex-direction: row; overflow-x: auto; scrollbar-width: none; border-bottom: var(--ds-border-1) solid var(--ds-border-subtle); -webkit-mask-image: linear-gradient(90deg, black 88%, transparent); mask-image: linear-gradient(90deg, black 88%, transparent); }
     .adm-nav .ds-tabs--vertical button { width: auto; flex: none; height: var(--ds-h-sm); border-radius: var(--ds-radius-md) var(--ds-radius-md) 0 0; font-size: var(--ds-size-13); }
     .adm-nav .ds-tabs--vertical button[aria-selected="true"] { background: transparent; box-shadow: inset 0 -2px 0 var(--ds-text-primary); }
-    .adm-nav > .note { padding: 0 var(--ds-space-1) !important; margin: 0; }
   }
 }
 

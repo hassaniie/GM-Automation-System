@@ -25,11 +25,12 @@ export const Scene3D = (function () {
       xray: 0x9fb4c8, install: 0x6fe3ff, aperture: 0x050607,
     },
     light: {
-      bg: 0xdfe3e7, floor: 0xcdd3d9, zone: 0xe2e6ea, zoneEdge: 0x8f99a3, grid1: 0xd0d5da, grid2: 0xc6ccd2, pad: 0xf6f7f8, padEdge: 0x7f8992, padEdgeHi: 0x2b3137,
-      steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xaeb6be, conveyor: 0x9ea7b0, slat: 0x8d969f, equip: 0xaab2ba, equipAccent: 0x1f6fd1,
-      text: '#1f252b', textDim: '#5b6670', note: '#4d5862', warnText: '#9a6f12', hemi: [0xffffff, 0xb4bcc4, 0.42], amb: 0.1, key: 0.5, fogNear: 170, fogFar: 330,
+      // the original light look (bright floor, pale equipment); only the floor text stays darker for contrast
+      bg: 0xdfe3e7, floor: 0xd6dbe0, zone: 0xe7eaed, zoneEdge: 0x8f99a3, grid1: 0xd0d5da, grid2: 0xc6ccd2, pad: 0xf6f7f8, padEdge: 0xa9b1b9, padEdgeHi: 0x2b3137,
+      steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xf3f5f7, conveyor: 0xc9cfd5, slat: 0xb9c0c7, equip: 0xc5ccd3, equipAccent: 0x1f6fd1,
+      text: '#1f252b', textDim: '#5b6670', note: '#4d5862', warnText: '#9a6f12', hemi: [0xffffff, 0xc2c8cf, 0.62], amb: 0.18, key: 0.72, fogNear: 170, fogFar: 330,
       tone: { muted: 0x9aa3ab, text: 0x2b3239, ok: 0x1f9a66, warn: 0xd08a0b, crit: 0xe23b3b, esc: 0xd01f5e, hold: 0x4a62e0, transit: 0x0f8ea6, paused: 0x7a8794, sup: 0x7a4fe0, mnt: 0x0a7fd6 },
-      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.14, pools: 0, badge: 0.32,
+      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.26, pools: 0, badge: 0.32,
     },
   };
   let T = THEMES.dark, themeName = 'dark';
@@ -520,11 +521,11 @@ export const Scene3D = (function () {
     const G = carGeo[kind], sx = G.sx, sy = G.sy;
     const root = new THREE.Group(); scene.add(root);
     const paint = new THREE.MeshStandardMaterial({ color: new THREE.Color(v.paint.hex), metalness: 0.3, roughness: 0.42 });
-    // ISA-101: in the overview a car's paint is muted towards grey so colour still means a problem; the real colour
-    // shows on the selected or hovered car (audit D2)
+    // dark theme: in the overview a car's paint is muted towards grey so colour still means a problem; the real colour
+    // shows on the selected or hovered car (audit D2). The light theme keeps the real paint, as it always had
     paint.userData.full = paint.color.clone();
     { const hsl = {}; paint.color.getHSL(hsl); paint.userData.muted = new THREE.Color().setHSL(hsl.h, hsl.s * 0.12, 0.3 + hsl.l * 0.45); }
-    paint.color.copy(paint.userData.muted);
+    paint.color.copy(themeName === 'dark' ? paint.userData.muted : paint.userData.full);
     const id = isBuffer ? null : v.id;
     const pick = (m) => { if (id) { m.userData = { kind: 'veh', id }; pickables.push(m); } return m; };
     const shell = pick(new THREE.Mesh(G.shell, paint)); shell.castShadow = true; shell.receiveShadow = true; root.add(shell);
@@ -865,7 +866,7 @@ export const Scene3D = (function () {
       applyBuild(o, E.buildState(S, v), isSel || isHov);
       setXray(o, !!(ui.xray || (isSel && ui.xraySel)));
       o.paint.emissive.setHex(isSel ? 0x202020 : isHov ? 0x121212 : 0x000000);
-      o.paint.color.copy(isSel || isHov ? o.paint.userData.full : o.paint.userData.muted);
+      o.paint.color.copy(isSel || isHov || themeName !== 'dark' ? o.paint.userData.full : o.paint.userData.muted);
       o.ring.position.set(pose.x, 0.04, pose.z); o.ring.rotation.z = pose.yaw; o.ring.material.opacity = sel && sel.kind === 'veh' && sel.id === vid ? 0.9 : 0; o.ring.material.color.setHex(T.padEdgeHi);
     }
     for (const id of Object.keys(carObjs)) if (!seen.has(id)) disposeCar(id);
@@ -887,7 +888,20 @@ export const Scene3D = (function () {
   }
   function projectAnchors() {
     const nodes = el.parentElement.querySelectorAll('[data-anchor]'), w = el.clientWidth, h = el.clientHeight;
-    nodes.forEach((n) => { const p = anchorWorld(n.getAttribute('data-anchor')); if (!p) { n.style.visibility = 'hidden'; return; } p.project(camera); const vis = p.z < 1 && p.x > -1.1 && p.x < 1.1 && p.y > -1.1 && p.y < 1.1; n.style.visibility = vis ? 'visible' : 'hidden'; n.style.transform = `translate(${((p.x + 1) / 2) * w}px, ${((1 - p.y) / 2) * h}px)`; });
+    // tags that would overlap stack upwards instead of covering each other (the first, most urgent, stays put)
+    const placed = [];
+    nodes.forEach((n) => {
+      const p = anchorWorld(n.getAttribute('data-anchor')); if (!p) { n.style.visibility = 'hidden'; return; }
+      p.project(camera); const vis = p.z < 1 && p.x > -1.1 && p.x < 1.1 && p.y > -1.1 && p.y < 1.1; n.style.visibility = vis ? 'visible' : 'hidden';
+      const x = ((p.x + 1) / 2) * w; let y = ((1 - p.y) / 2) * h;
+      if (vis) {
+        const t = n.firstElementChild, tw = t ? t.offsetWidth : 0, th = t ? t.offsetHeight : 0, mt = parseFloat(n.style.marginTop) || 0;
+        const hit = (yy) => placed.some((r) => x - tw / 2 < r.r && x + tw / 2 > r.l && yy + mt - th < r.b && yy + mt > r.t);
+        for (let i = 0; i < 6 && hit(y); i++) y -= th + 4;
+        placed.push({ l: x - tw / 2, r: x + tw / 2, t: y + mt - th, b: y + mt });
+      }
+      n.style.transform = `translate(${x}px, ${y}px)`;
+    });
   }
   return { init, render, setTheme, setSafeArea, focusView, focusPos, focusVehicle, focusAny, get ok() { return ok; }, get theme() { return themeName; }, _debug: () => ({ scene, camera, controls, carObjs, flyTo }) };
 })();

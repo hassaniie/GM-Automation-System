@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "description": "three.js digital twin of the GA shop",
-  "exports": { ".": "./src/index.js", "./brand": "./src/brand.js" },
+  "exports": { ".": "./src/index.js", "./brand": "./src/brand.js", "./badge": "./src/badge.js" },
   "dependencies": { "@mg/engine": "workspace:*", "three": "0.186.1" }
 }

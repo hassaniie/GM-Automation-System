@@ -35,10 +35,12 @@ export function createState(seed = 7, cfg = {}) {
   return S;
 }
 export const uid = (S, p) => `${p}${S.nextId++}`;
-export function logEvent(S, cat, text, extra = {}) {
+/* extra.brief: a short line for the vehicle's own history (the inspector shows one line per step); the plant
+   event log keeps the full text. */
+export function logEvent(S, cat, text, { brief, ...extra } = {}) {
   const ev = { id: uid(S, 'ev'), t: S.t, cat, text, ...extra };
   S.events.push(ev); if (S.events.length > 900) S.events.splice(0, S.events.length - 900);
-  if (extra.vehicleId && S.vehicles[extra.vehicleId]) { const v = S.vehicles[extra.vehicleId]; v.history.push({ t: S.t, cat, text }); if (v.history.length > 90) v.history.shift(); }
+  if (extra.vehicleId && S.vehicles[extra.vehicleId]) { const v = S.vehicles[extra.vehicleId]; v.history.push({ t: S.t, cat, text: brief || text, ...(brief ? { full: text } : {}) }); if (v.history.length > 90) v.history.shift(); }
   Integration.publish(ev);
   return ev;
 }

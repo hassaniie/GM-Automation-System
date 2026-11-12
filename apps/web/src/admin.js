@@ -45,9 +45,8 @@ export function AdminPage() {
   // showing another one (audit B15)
   const denied = RT.route.sub && RT.route.sub !== cur[0] && ADMIN_TABS.some((t) => t[0] === RT.route.sub) ? ADMIN_TABS.find((t) => t[0] === RT.route.sub)[1] : null;
   return html`<div class="page-wrap admin">
-    <aside class="adm-nav" aria-label="Settings sections"><div class="ds-label" style=${{ padding: '0 var(--ds-space-2) var(--ds-space-2)' }}>Settings</div>
-      <${Tabs} vertical=${true} label="Settings sections" value=${cur[0]} onChange=${(k) => { if (k !== cur[0] && confirmLeave()) go('admin', k); }} items=${tabs.map(([k, l, ic]) => ({ value: k, label: l, icon: ic }))} />
-      <p class="note" style=${{ padding: 'var(--ds-space-3) var(--ds-space-2)' }}>${REMOTE ? 'Changes apply at once on every screen, are stored on the line server and are written to the audit log with your name.' : 'Changes apply at once, are saved on this device and are written to the audit log with your name.'}</p></aside>
+    <aside class="adm-nav" aria-label="Settings sections"><div class="ds-label">Settings</div>
+      <${Tabs} vertical=${true} label="Settings sections" value=${cur[0]} onChange=${(k) => { if (k !== cur[0] && confirmLeave()) go('admin', k); }} items=${tabs.map(([k, l, ic], i) => ({ value: k, label: l, icon: ic, sep: i > 0 && k === 'users' }))} /></aside>
     <section class="adm-body" role="tabpanel">${denied ? html`<${Notice} kind="warning" title=${`${denied} needs a different role`}>You are signed in as ${userName()}. Showing ${cur[1]} instead.<//>` : null}<${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
   </div>`;
 }
@@ -78,7 +77,7 @@ function TaktAdmin() {
   };
   const setPart = (a, m, s) => setDraft({ ...draft, [a]: M.clamp(m * 60 + s, 60, 3600) });
   return html`<${Stack} gap=${5}>
-    <${PageHeader} k="Takt time · URD req 10" title="Takt time per line" sub="The time a vehicle is allowed at each station. Cycle time above takt turns the station red, sounds its buzzer and counts as downtime." />
+    <${PageHeader} k="Takt time · URD req 10" title="Takt time per line" sub="Time allowed per station. Over takt turns the station red and counts as downtime." />
     <${Grid} min=${240}>${M.AREA_IDS.map((a) => { const m = Math.floor(draft[a] / 60), s = draft[a] % 60, ch = draft[a] !== S.cfg.takt[a];
       return html`<${Panel} key=${a} edge=${ch ? 'var(--ds-text-primary)' : null} title=${`${AREAS[a].station} · ${AREAS[a].name}${a === 'TRIM' ? ' · preview' : ''}`} sub=${`Now ${fmtDur(S.cfg.takt[a])} · close to limit at ${fmtDur(draft[a] * warn / 100)}`}>
         <div class="takt-in"><${NumberInput} min="1" max="60" value=${m} aria-label=${`${AREAS[a].name} takt minutes`} onChange=${(v) => setPart(a, +v || 0, s)} /><span>:</span><${NumberInput} min="0" max="59" value=${String(s).padStart(2, '0')} aria-label=${`${AREAS[a].name} takt seconds`} onChange=${(v) => setPart(a, m, M.clamp(+v || 0, 0, 59))} /><span class="c-muted">min : s</span></div>
@@ -126,7 +125,7 @@ function PlanAdmin() {
     ...M.AREA_IDS.map((a) => ({ key: a, label: `${AREAS[a].short} target`, type: 'number', render: (s) => html`<${NumberInput} size="sm" style=${{ width: 76 }} aria-label=${`${s.name} ${AREAS[a].short} target`} min="0" max="999" value=${d.targets[s.name][a]} disabled=${off(s)} onChange=${(v) => upd({ targets: { ...d.targets, [s.name]: { ...d.targets[s.name], [a]: +v || 0 } } })} />` })),
   ];
   return html`<${Stack} gap=${5}>
-    <${PageHeader} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Set the default target per shift for each line, and schedule different targets, takt or shift times for any of the next 14 days. Counts reset automatically at each shift start." />
+    <${PageHeader} k="Daily targets · URD req 13–15" title="Targets and production plan" sub="Default targets per shift, and changes for any of the next 14 days." />
     <${Panel} title="Default target per shift">
       <${Cluster} gap=${3} align="flex-end">${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${AREAS[a].name} style=${{ width: 170 }}><${NumberInput} min="0" max="999" value=${defT[a]} onChange=${(v) => setDefT({ ...defT, [a]: +v || 0 })} /><//>`)}
         <${Field} label="Reason (kept in the audit log)" required=${true} style=${{ flex: 1, minWidth: 220 }}><${TextInput} value=${defWhy} onChange=${setDefWhy} placeholder="e.g. New monthly volume" /><//>
@@ -158,7 +157,7 @@ function ShiftAdmin() {
   useEffect(() => { setUnsaved(changed ? 'Shifts & breaks' : null); return () => setUnsaved(null); }, [changed]);
   const last = draft[draft.length - 1], roomForShift = draft.length < 4 && last.end <= 23 * 3600;
   return html`<${Stack} gap=${4}>
-    <${PageHeader} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The default pattern for every day. Breaks and the time between shifts are planned stops: the line stops, and they are excluded from cycle time and downtime." />
+    <${PageHeader} k="Shift timings · URD req 11, 15" title="Shifts and breaks" sub="The daily pattern. Breaks are planned stops, excluded from cycle time and downtime." />
     ${draft.map((s, i) => html`<${Panel} key=${i}>
       <${Cluster} gap=${3} align="flex-end">
         <${Field} label="Shift name" style=${{ width: 200 }}><${TextInput} value=${s.name} onChange=${(v) => set(i, { name: v })} /><//>
@@ -194,7 +193,7 @@ function BuzzerAdmin() {
     { key: 'test', label: 'Test', type: 'action', render: (r) => html`<${Button} size="sm" variant="ghost" icon="vol" onClick=${() => { Horn.ensure(); Horn.buzz([r.id]); }}>Test<//>` },
   ];
   return html`<${Stack} gap=${4}>
-    <${PageHeader} k="Station buzzers · URD req 16–18" title="Buzzers" sub="Each Chassis and Final station has its own buzzer. It rings when the unit passes takt and stops when the unit leaves. Switch a station off here, for example during maintenance work." />
+    <${PageHeader} k="Station buzzers · URD req 16–18" title="Buzzers" sub="Each station rings when its unit passes takt. Switch one off for maintenance." />
     <${DataTable} columns=${cols} rows=${ids.map((id) => ({ id, en: M.buzzerEnabled(S, id), on: S.buzzing[id] != null, an: M.andonState(S, id) }))} rowKey=${(r) => r.id} status=${(r) => (r.on ? 'critical' : null)} />
     <p class="note">In the shop each buzzer is a local sounder at its station, about 85 dB at 1 m, directed at the work area so the next station is not disturbed. In this browser one speaker stands in for them: only the line in view sounds.</p>
   </${Stack}>`;
@@ -211,7 +210,7 @@ function CorrectAdmin() {
     { key: 'act', label: '', type: 'action', render: (r) => html`<${Button} size="sm" icon="swap" onClick=${() => setUI({ dialog: { type: 'correct', pos: r.id, vin: r.v.vin } })}>Correct…<//>` },
   ];
   return html`<${Stack} gap=${4}>
-    <${PageHeader} k="Tracking · URD req 7" title="Position correction" sub="If tracking gets out of step with the line, move a VIN to the station it is really at. If another unit is recorded there, the two are swapped. Every correction needs a reason and is audited." />
+    <${PageHeader} k="Tracking · URD req 7" title="Position correction" sub="Move a VIN to the station it is really at. A unit already there is swapped." />
     <${DataTable} columns=${cols} rows=${rows} rowKey=${(r) => r.id} empty="No vehicles on the work stations." />
     <${AuditMini} title="Recent corrections" rows=${auditFor((r) => /corrected|removed from station/i.test(r.action))} />
   </${Stack}>`;
@@ -292,7 +291,7 @@ function AuditAdmin() {
     { key: 'by', label: 'By', render: (r) => (r.by || '').split(' · ')[0] }, { key: 'reason', label: 'Reason', wrap: true, render: (r) => r.reason || '—' },
   ];
   return html`<${Stack} gap=${4}>
-    <${PageHeader} k="Traceability" title="Audit log" sub="Every change to takt, targets, shifts and buzzers, every position correction and every sign-in, with who and when. Real time is the clock on the wall; shop time is the plant time the change applied to.">
+    <${PageHeader} k="Traceability" title="Audit log" sub="Every settings change, correction and sign-in, with who and when.">
       <${Button} icon="download" onClick=${csv}>Export CSV<//></${PageHeader}>
     <${Cluster} gap=${3} align="flex-end">
       <${SegmentedControl} label="Show" value=${f} onChange=${setF} options=${[{ value: 'all', label: 'All' }, { value: 'change', label: 'Changes & corrections' }, { value: 'access', label: 'Sign-ins' }]} />
@@ -327,7 +326,7 @@ function DisplayAdmin() {
     { key: 'act', label: '', type: 'action', render: (d) => (d.revoked_at ? null : html`<${Button} size="sm" variant="ghost" onClick=${() => revoke(d)}>Revoke<//>`) },
   ];
   return html`<${Stack} gap=${4}>
-    <${PageHeader} k="Line displays · URD req 23" title="Display links" sub="Create one link per TV. Open it once on the TV: it then shows its line, read-only, with no sign-in. Revoke a link to disconnect that TV." />
+    <${PageHeader} k="Line displays · URD req 23" title="Display links" sub="One link per TV: read-only, no sign-in. Revoke to disconnect." />
     <${Cluster} gap=${3} align="flex-end">
       <${Field} label="Display name" style=${{ flex: 1, minWidth: 240 }}><${TextInput} value=${name} onChange=${setName} placeholder="e.g. Chassis line TV" /><//>
       <${Field} label="Line" style=${{ width: 160 }}><${Select} value=${line} onChange=${setLine} options=${[['trim', 'Trim'], ['chassis', 'Chassis'], ['final', 'Final']]} /><//>

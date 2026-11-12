@@ -18,6 +18,7 @@ import { HowPage } from './how.js';
 import { LineOffCard } from './lib/misc.js';
 import { go, parseHash } from './lib/router.js';
 import { Act } from './lib/act.js';
+import { PageBadge } from './lib/badge.js';
 import { M, RT, effectiveTheme, fmtClock, html, setUI, store, useEffect, useReducer, useRef, useState } from './lib/runtime.js';
 import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
@@ -32,7 +33,7 @@ function PageRail() {
 }
 /* Non-floor screens share the header and scroll their own body. */
 function PageShell({ children }) {
-  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header><div class="page-scroll" id="content" tabIndex="-1">${children}</div></div>`;
+  return html`<div class="page-shell"><${PageBadge} /><header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header><div class="page-scroll" id="content" tabIndex="-1">${children}</div></div>`;
 }
 function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 

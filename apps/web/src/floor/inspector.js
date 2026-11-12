@@ -186,7 +186,7 @@ function VehicleInspector({ id }) {
       </div></div>
       ${rows.length ? html`<div class="sec"><div class="micro"><span>Time at each station</span><span>cycle vs takt</span></div><${DataTable} columns=${stationCols(S)} rows=${rows} /></div>` : null}
       <div class="sec"><div class="micro"><span>Build</span><span>${installed} / ${items.length} components</span></div><${BuildList} v=${v} /></div>
-      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-14).reverse().map((e, i) => html`<li key=${i}><span class="tm">${fmtClock(e.t, false)}</span><span>${e.text}</span></li>`)}</ul></div>
+      <div class="sec"><div class="micro">History</div><ul class="timeline">${v.history.slice(-14).reverse().map((e, i) => html`<li key=${i} title=${e.full || e.text}><span class="tm">${fmtClock(e.t, false)}</span><span class="tx">${e.text}</span></li>`)}</ul></div>
     </div></${React.Fragment}>`;
 }
 export function Inspector() {

@@ -10,7 +10,7 @@
       .adm-card, .adm-tab, .cfg, .dev-card, .rep-filters, .rep-kpis > div, .plan-day, .timeline, .stimeline, .elog, .confirm-row,
       .lineoff, .lcd-banner, .lcd-none, .scanwin, .signin, .si-acct, .si-demo, .si-err, .si-input, .si-live, .si-soon,
       input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) { border-radius: var(--ds-radius-md); }
-  :is(.cell, .lc-cell, .chip, .tag, .sim-tag, .hchip, .dev-val, .paint, .lcd-pill, .toggle, .lane-h .xp, .cell .hg) { border-radius: var(--ds-radius-sm); }
+  :is(.cell, .chip, .tag, .sim-tag, .hchip, .dev-val, .paint, .lcd-pill, .toggle, .lane-h .xp, .cell .hg) { border-radius: var(--ds-radius-sm); }
 
   /* ── corner ticks: a frame with the box's own curve, masked so only the corners show ── */
   .ticks::after,
@@ -29,5 +29,5 @@
   .ticks::after { --tick-c: var(--tick, var(--ds-tick)); --tick-len: 12px; --tick-inset: -1px; }
   /* controls: 7 px brackets outside the control on hover / focus / selection */
   :is(.btn, .ibtn, .alarm-pill, .views button, .tabs button, .cell, .scn, .arow)::after { --tick-c: var(--bk, var(--ds-text-primary)); --tick-len: 7px; --tick-inset: var(--bk-in, -5px); }
-  :is(.cell, .lc-cell)::after { --box-r: var(--ds-radius-sm); }
+  .cell::after { --box-r: var(--ds-radius-sm); }
 }

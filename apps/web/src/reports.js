@@ -102,7 +102,7 @@ function LocalReports() {
   const empty = shift === 'all' ? names.length > 0 && names.every((n) => d.notStarted.includes(n)) : d.notStarted.includes(shift);
   const doXlsx = async () => { if (empty) { setBusy('empty'); return; } setBusy('xlsx'); const k = await exportExcel(d, meta); setBusy(k === 'csv' ? 'csv' : null); };
   return html`<${Stack} gap=${4} class="page-wrap reports" id="report-print">
-    <${PageHeader} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. ${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
+    <${PageHeader} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
       <${Button} icon="download" loading=${busy === 'xlsx'} onClick=${doXlsx}>Excel<//><${Button} icon="file" onClick=${() => window.print()} title="Opens the print dialog: choose Save as PDF">Print / PDF<//></${PageHeader}>
     ${busy === 'csv' ? html`<${Notice} kind="warning">The Excel library could not load (offline?), so a CSV with every table was downloaded instead.<//>` : null}
     ${busy === 'empty' ? html`<${Notice} kind="warning">Nothing to export yet: ${shift === 'all' ? 'no shift' : shift} has not started on ${wd(date)}. Pick a shift that has run.<//>` : null}
@@ -137,7 +137,7 @@ function ServerReports() {
   const problem = !days ? (from > to ? 'The start date is after the end date.' : `Choose at most ${MAX_RANGE_DAYS} days.`) : null;
   const d = res && res.q === q ? res.report : null;
   return html`<${Stack} gap=${4} class="page-wrap reports" id="report-print">
-    <${PageHeader} k="Reports · URD req 28–29" title=${`${rangeText} · ${shift === 'all' ? 'All shifts' : shift} · ${lineLabel(line)}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. Source: <b>line server database</b>${d && live ? ' · updates every 10 s' : ''}.`}>
+    <${PageHeader} k="Reports · URD req 28–29" title=${`${rangeText} · ${shift === 'all' ? 'All shifts' : shift} · ${lineLabel(line)}`} sub=${html`Source: <b>line server database</b>${d && live ? ' · updates every 10 s' : ''}.`}>
       <${Button} icon="download" href=${`/api/reports/file.xlsx?${q}`} disabled=${!days} download>Excel<//><${Button} icon="file" href=${`/api/reports/file.pdf?${q}`} disabled=${!days} download>PDF<//></${PageHeader}>
     <${Filters}>
       <${Field} label="From"><${DateInput} max=${today} value=${from} onChange=${(v) => v && setFromDate(v)} /><//>
@@ -221,11 +221,11 @@ function ReportBody({ d, line }) {
       <${Panel}><${Stat} label="Assist calls" value=${k.calls} size="lg" /><//><${Panel}><${Stat} label="Avg response" value=${k.avgResponse != null ? fmtDur(k.avgResponse) : '—'} size="lg" /><//>
       <${Panel}><${Stat} label="Avg time to clear" value=${k.avgClear != null ? fmtDur(k.avgClear) : '—'} size="lg" /><//></${Grid}>
     ${d.byDay.length ? html`<${Panel} ticks=${true} class="rsec" id="rs-day" title="By day" sub="Totals of every shift on each day."><${DataTable} columns=${byDay} rows=${d.byDay} /><//>` : null}
-    <${Panel} ticks=${true} class="rsec" id="rs-prod" title="Production summary" sub="Completed is counted when a unit leaves the last station of each line (TL6, CL4, FL7). Offlined units never count."><${DataTable} columns=${prod} rows=${d.prod} empty="No shift has run yet for this selection." /><//>
-    <${Panel} ticks=${true} class="rsec" id="rs-cycle" title="Station cycle times" sub="Cycle time = time a vehicle spent at the station, breaks excluded. The marker is takt."><${DataTable} columns=${cycle} rows=${d.cycle} /><//>
-    <${Panel} ticks=${true} class="rsec" id="rs-down" title="Downtime" sub="At the station: time its unit was over takt. Caused: the same time, put down to the station that held the others up. Planned stops are excluded."><${DataTable} columns=${down} rows=${downRows} empty="No downtime in this selection." /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-prod" title="Production summary" sub="Counted as a unit leaves TL6, CL4 or FL7. Offlined units never count."><${DataTable} columns=${prod} rows=${d.prod} empty="No shift has run yet for this selection." /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-cycle" title="Station cycle times" sub="Time at the station, breaks excluded. The marker is takt."><${DataTable} columns=${cycle} rows=${d.cycle} /><//>
+    <${Panel} ticks=${true} class="rsec" id="rs-down" title="Downtime" sub="Over-takt time at each station, and the time it held others up."><${DataTable} columns=${down} rows=${downRows} empty="No downtime in this selection." /><//>
     <${Panel} ticks=${true} class="rsec" id="rs-off" title="Offlined vehicles"><${DataTable} columns=${off} rows=${d.off} empty="No vehicles offlined in this selection." /><//>
-    <${Panel} ticks=${true} class="rsec" id="rs-calls" title="Assist calls" sub="Response = call to help arriving. Time to clear = call to the responder clearing it.">
+    <${Panel} ticks=${true} class="rsec" id="rs-calls" title="Assist calls" sub="Response: until help arrives. Clear: until the call is cleared.">
       <${Cluster} gap=${7}>${['Supervisor', 'Maintenance'].map((t) => { const l = d.calls.filter((c) => c.type === t && c.response != null); return html`<${Stat} key=${t} label=${html`<span class=${'c-' + (t === 'Supervisor' ? 'sup' : 'mnt')}>${t}</span>`} value=${d.calls.filter((c) => c.type === t).length} delta=${`avg response ${l.length ? fmtDur(sum(l, 'response') / l.length) : '—'} · longest ${l.length ? fmtDur(Math.max(...l.map((c) => c.response))) : '—'}`} />`; })}</${Cluster}>
       <${DataTable} columns=${calls} rows=${d.calls} empty="No calls in this selection." /><//>`;
 }

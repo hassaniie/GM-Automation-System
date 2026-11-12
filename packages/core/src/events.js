@@ -19,7 +19,7 @@ import { logEvent } from './state.js';
  */
 function arrive(S, pos, from, carrierId, vehicleId) {
   startOcc(S, pos, carrierId, vehicleId);
-  if (vehicleId) logEvent(S, 'move', `${S.vehicles[vehicleId].vin.slice(-6)} arrived ${dispId(pos)} from ${dispId(from)} on ${carrierId} · presence confirmed`, { vehicleId, pos });
+  if (vehicleId) logEvent(S, 'move', `${S.vehicles[vehicleId].vin.slice(-6)} arrived ${dispId(pos)} from ${dispId(from)} on ${carrierId} · presence confirmed`, { vehicleId, pos, brief: `Arrived ${dispId(pos)} · ${carrierId}` });
 }
 /** @param {EngineState} S @param {string} vehicleId @param {string} from @param {string} to */
 function transferBody(S, vehicleId, from, to) {
@@ -31,7 +31,7 @@ function transferBody(S, vehicleId, from, to) {
   cu.vehicleId = null; uo.vehicleId = null; uo.completeT = S.t; uo.completeBy = 'PASS';
   lo.pendingBody = null; cl.vehicleId = v.id; v.carrierId = cl.id;
   startOcc(S, to, cl.id, v.id);
-  logEvent(S, 'move', `${v.vin.slice(-6)} transferred ${cu.kind.toLowerCase()} ${cu.id} → ${cl.kind.toLowerCase()} ${cl.id} · ${XFER_FROM[from].label}`, { vehicleId: v.id, pos: to });
+  logEvent(S, 'move', `${v.vin.slice(-6)} transferred ${cu.kind.toLowerCase()} ${cu.id} → ${cl.kind.toLowerCase()} ${cl.id} · ${XFER_FROM[from].label}`, { vehicleId: v.id, pos: to, brief: `Moved ${cu.id} → ${cl.id}` });
 }
 /**
  * Applies one plant event to the state and returns what the rule returns (e.g. the scan record).

@@ -13,26 +13,26 @@ export function raiseOrUpdate(S, key, data) {
     if (data.level && data.level !== a.level && SEV[data.level] > SEV[a.level]) {
       a.history.push({ t: S.t, text: `${lv(a.level)} → ${lv(data.level)}` });
       a.level = data.level; a.levelT = S.t; a.msg = data.msg || a.msg; a.ackT = null; a.ackBy = null;
-      logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(a.pos)} · ${a.msg}`, { vehicleId: a.vehicleId, pos: a.pos });
+      logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(a.pos)} · ${a.msg}`, { vehicleId: a.vehicleId, pos: a.pos, brief: `${lv(data.level)} · ${dispId(a.pos)}` });
     }
     return a;
   }
   a = { id: uid(S, 'al'), key, raisedT: S.t, levelT: S.t, ackT: null, ackBy: null, resolvedT: null, resolution: null, history: [{ t: S.t, text: `Raised as ${lv(data.level)}` }], ...data };
   S.alarms.push(a); S.alarmByKey[key] = a;
   if (S.alarms.length > 400) { const old = S.alarms.shift(); if (S.alarmByKey[old.key] === old) delete S.alarmByKey[old.key]; }
-  if (data.level !== 'WARNING') logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(data.pos)} · ${data.msg}`, { vehicleId: data.vehicleId, pos: data.pos });
+  if (data.level !== 'WARNING') logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(data.pos)} · ${data.msg}`, { vehicleId: data.vehicleId, pos: data.pos, brief: `${lv(data.level)} · ${dispId(data.pos)}` });
   return a;
 }
 export function resolveAlarmsFor(S, pred, resolution) {
   for (const a of S.alarms) if (a.resolvedT == null && pred(a)) {
     a.resolvedT = S.t; a.resolution = resolution; a.history.push({ t: S.t, text: `Resolved · ${resolution}` });
-    if (a.level !== 'WARNING') logEvent(S, 'alarm', `Resolved · ${dispId(a.pos)} · ${resolution}`, { vehicleId: a.vehicleId, pos: a.pos });
+    if (a.level !== 'WARNING') logEvent(S, 'alarm', `Resolved · ${dispId(a.pos)} · ${resolution}`, { vehicleId: a.vehicleId, pos: a.pos, brief: `Cleared · ${dispId(a.pos)}` });
   }
 }
 export function ackAlarm(S, id, by = 'Supervisor') {
   const a = S.alarms.find((x) => x.id === id); if (!a || a.resolvedT != null || a.ackT != null) return;
   a.ackT = S.t; a.ackBy = by; a.history.push({ t: S.t, text: `Acknowledged by ${by} (condition still open)` });
-  logEvent(S, 'alarm', `Acknowledged · ${lv(a.level)} · ${dispId(a.pos)} · condition still open`, { vehicleId: a.vehicleId, pos: a.pos });
+  logEvent(S, 'alarm', `Acknowledged · ${lv(a.level)} · ${dispId(a.pos)} · condition still open`, { vehicleId: a.vehicleId, pos: a.pos, brief: `Acknowledged · ${dispId(a.pos)}` });
 }
 export const alarmActive = (a) => a.resolvedT == null;
 export const alarmUnacked = (a) => a.resolvedT == null && a.ackT == null;

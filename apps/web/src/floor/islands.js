@@ -5,7 +5,7 @@ import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { UserMenu } from '../auth.js';
 import { openAlarm, select, topAlarm } from './scenarios.js';
 import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI, useRef, useState } from '../lib/runtime.js';
-import { useFit, usePopover } from '../lib/fit.js';
+import { usePopover } from '../lib/fit.js';
 import { goPage, navPages } from '../lib/pages.js';
 import { ANDON_LABEL, ANDON_TONE, Horn, Icon, MgMark, STATUS_ICON, tv } from '../lib/ui-kit.js';
 
@@ -14,15 +14,12 @@ export function IdIsland() {
   return html`<div class="seg id-island">
     <div class="brand"><${MgMark} /><div><div class="brand-name">GA Operations</div><div class="brand-sub">MG JW Automobile</div></div></div>
     <div class="clock"><span class="num">${fmtClock(S.t)}</span><span class="micro" style=${{ color: S.planned ? 'var(--paused)' : null }}>${S.planned ? (S.planned.kind === 'OFF' ? 'No shift' : S.planned.label) : sh.name}</span></div>
-    ${RT.conn.mode === 'local'
-      ? html`<span class="sim-tag" title="All data is simulated in this browser. No PLC, scanner or sensor is connected."><${Icon} n="flask" size=${10} />SIMULATION</span>`
-      : RT.conn.state === 'live'
-        ? RT.conn.mode === 'live'
-          ? devDown.length
-            ? html`<span class="sim-tag down" role="status" title=${devDown.map((a) => a.msg).join(' · ')}><${Icon} n="wifioff" size=${10} />DEVICE DOWN</span>`
-            : html`<span class="sim-tag live" title="Live: the plant's PLC and scanners drive what every screen shows."><${Icon} n="link" size=${10} />LIVE</span>`
-          : html`<span class="sim-tag edge" title=${RT.conn.mode === 'shadow' ? 'Shadow: the plant devices are connected and logged (Settings → Devices), but the screens show the simulator.' : `Live from the line server (edge ${RT.conn.server || ''}). Every screen shows the same plant. The plant itself is still simulated.`}><${Icon} n="flask" size=${10} />${RT.conn.mode === 'shadow' ? 'SIM · SHADOW' : 'SIM · EDGE'}</span>`
-        : html`<span class="sim-tag down" role="status" title="Lost the line server. Showing the last data received; reconnecting."><${Icon} n="wifioff" size=${10} />RECONNECTING</span>`}
+    ${RT.conn.mode === 'local' ? null
+      : RT.conn.state !== 'live'
+        ? html`<span class="sim-tag down" role="status" title="Lost the line server. Showing the last data received; reconnecting."><${Icon} n="wifioff" size=${10} />RECONNECTING</span>`
+        : RT.conn.mode === 'live' && devDown.length
+          ? html`<span class="sim-tag down" role="status" title=${devDown.map((a) => a.msg).join(' · ')}><${Icon} n="wifioff" size=${10} />DEVICE DOWN</span>`
+          : null}
     <div class="shiftbar" role="progressbar" aria-label="Shift progress: productive time elapsed" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(p.frac * 100)} title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;
 }
@@ -30,32 +27,20 @@ export function StateIsland() {
   const S = RT.S, p = M.pace(S), ls0 = M.lineStatus(S);
   // a paused simulator says so, instead of a line that reads Running while nothing moves (audit B15)
   const ls = !RT.running && RT.conn.mode !== 'live' && ls0.code === 'RUNNING' ? { ...ls0, code: 'SIM_PAUSED', label: 'Simulation paused', tone: 'paused' } : ls0;
-  const wip = S.vehOrder.filter((id) => M.isActive(S.vehicles[id])).length;
-  const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
-  const row = useRef(null), hidden = useFit(row, 120), [more, setMore] = useState(false), moreBtn = useRef(null), pop = useRef(null);
-  usePopover(more, setMore, moreBtn, pop);
-  // only the line state never folds; the rest fold into More from the highest number when the top bar is short of
-  // room, Completed last (audit U2)
-  const metrics = [
-    { key: 'line', p: 1, body: html`<span class="micro">Line</span>
-      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span><span class="ls-t">${ls.label}</span></button>` },
-    { key: 'done', p: 2, title: 'Final line: vehicles completed this shift against the shift target', body: html`<span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span>` },
-    { key: 'remaining', p: 4, body: html`<span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span>` },
-    { key: 'down', p: 3, title: 'Final line downtime this shift: time with at least one station over takt, breaks excluded', body: html`<span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span>` },
-    { key: 'lasthour', p: 5, body: html`<span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span>` },
-    { key: 'wip', p: 6, body: html`<span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span>` },
-  ];
-  const folded = metrics.filter((m) => hidden.has(m.key));
-  return html`<section class="state-island" role="status" aria-live="polite" ref=${row}>
-    ${metrics.map((m) => html`<div key=${m.key} class=${'metric' + (m.key === 'line' ? ' lead' : '')} data-fit=${m.key} data-priority=${m.p} title=${m.title} hidden=${hidden.has(m.key)}>${m.body}</div>`)}
-    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} title="More line figures" onClick=${() => setMore(!more)}><span class="hud-btn-l">More</span>${' '}<span class="fit-n">${folded.length}</span><${Icon} n="down" size=${14} /></button>
-      ${more ? html`<div class="glass fit-pop" ref=${pop} role="dialog" aria-label="More figures">${folded.map((m) => html`<div key=${m.key} class="metric" title=${m.title}>${m.body}</div>`)}</div>` : null}</div>` : null}
+  // three figures only: the line state, completed against target (with what is left) and downtime. The rest
+  // lives on the Dashboard, so nothing has to fold away
+  return html`<section class="state-island" role="status" aria-live="polite">
+    <div class="metric lead"><span class="micro">Line</span>
+      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span><span class="ls-t">${ls.label}</span></button></div>
+    <div class="metric" title=${`Final line: ${p.done} completed of ${p.target} this shift, ${p.remaining} to go`}><span class="micro">Completed</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span></div>
+    <div class="metric m-down" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}</span></div>
   </section>`;
 }
 function CallsPill() {
   const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
-  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`Calls ${open.length}: ${sup} supervisor, ${mnt} maintenance`} title="Assist calls">
-    <span class="lamp sup" style=${{ opacity: sup ? 1 : 0.25 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.25 }}></span>CALLS${' '}<span class="n">${open.length}</span></button>`;
+  const tip = open.length ? `Open help calls: ${sup} supervisor, ${mnt} maintenance` : 'Help calls: none open';
+  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`Calls ${open.length}: ${sup} supervisor, ${mnt} maintenance`} title=${tip}>
+    <span class="lamps" aria-hidden="true"><span class="lamp sup" style=${{ opacity: sup ? 1 : 0.3 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.3 }}></span></span>Calls${' '}<span class="n">${open.length}</span></button>`;
 }
 /* The tools (search, scan, x-ray, theme, sound) as one menu when the top bar is narrow. */
 function ToolsMenu({ themeIcon }) {

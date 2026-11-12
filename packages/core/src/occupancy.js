@@ -41,9 +41,9 @@ export function completeWork(S, posId, by) {
     if (POS[posId].kind === 'work') {
       v.done[posId] = true;
       const tgt = targetFor(posId, v), over = occ.workT - tgt;
-      logEvent(S, over > 0 ? 'alarm' : 'work', `${posId} complete · ${v.vin.slice(-6)} · ${fmtDur(occ.workT)} vs ${fmtDur(tgt)}${over > 0 ? ` (+${fmtDur(over)})` : ''} · ${by === 'MANUAL' ? 'confirmed by team' : 'detected (simulated sensor)'}`, { vehicleId: v.id, pos: posId });
+      logEvent(S, over > 0 ? 'alarm' : 'work', `${posId} complete · ${v.vin.slice(-6)} · ${fmtDur(occ.workT)} vs ${fmtDur(tgt)}${over > 0 ? ` (+${fmtDur(over)})` : ''} · ${by === 'MANUAL' ? 'confirmed by team' : 'detected (simulated sensor)'}`, { vehicleId: v.id, pos: posId, brief: `${posId} done · ${fmtDur(occ.workT)}${over > 0 ? ` (+${fmtDur(over)})` : ''}` });
     }
-    if (POS[posId].exit) { v.state = 'AWAITING_LINE_OFF'; logEvent(S, 'work', `${v.vin.slice(-6)} finished at ${posId} · driving off past the end-of-line photo-eye`, { vehicleId: v.id, pos: posId }); }
+    if (POS[posId].exit) { v.state = 'AWAITING_LINE_OFF'; logEvent(S, 'work', `${v.vin.slice(-6)} finished at ${posId} · driving off past the end-of-line photo-eye`, { vehicleId: v.id, pos: posId, brief: `Driving off at ${posId}` }); }
   }
   resolveAlarmsFor(S, (a) => a.type === 'DELAY' && a.pos === posId && a.vehicleId === occ.vehicleId, `Work confirmed complete after ${fmtDur(occ.workT)}`);
 }

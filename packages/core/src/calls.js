@@ -31,7 +31,7 @@ export function respondCall(S, callId, by) {
   c.respondedT = S.t; c.respondedBy = by;
   const a = S.alarmByKey[`CALL:${c.type}:${c.pos}`];
   if (a && a.resolvedT == null) { a.ackT = S.t; a.ackBy = by; a.history.push({ t: S.t, text: `${by} responded after ${fmtDur(S.t - c.raisedT)}` }); }
-  logEvent(S, 'call', `${CALL_TYPES[c.type].label} responded at ${dispId(c.pos)} · ${by} · ${fmtDur(S.t - c.raisedT)} after the call`, { pos: c.pos, vehicleId: c.vehicleId });
+  logEvent(S, 'call', `${CALL_TYPES[c.type].label} responded at ${dispId(c.pos)} · ${by} · ${fmtDur(S.t - c.raisedT)} after the call`, { pos: c.pos, vehicleId: c.vehicleId, brief: `${CALL_TYPES[c.type].label} came · ${fmtDur(S.t - c.raisedT)}` });
   return true;
 }
 export function clearCall(S, callId, by, note = '') {

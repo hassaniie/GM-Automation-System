@@ -74,7 +74,7 @@ export function DashboardPage() {
   const S = RT.S, L = RT.link, d = L.up ? dashData(S) : L.snap, live = L.up;
   const sh = d.shift || {};
   return html`<div class="page-wrap dash">
-    <${PageHeader} k="Main dashboard · all lines" title=${html`General Assembly · ${sh.name || 'No shift'}${d.planned ? html` <${Tag} tone="paused">${d.planned.label}<//>` : null}`} sub=${`${sh.name ? `${sh.date} · ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)}` : 'Between shifts'} · counts reset at each shift start.`}>
+    <${PageHeader} k="Main dashboard · all lines" title=${html`General Assembly · ${sh.name || 'No shift'}${d.planned ? html` <${Tag} tone="paused">${d.planned.label}<//>` : null}`} sub=${`${sh.name ? `${sh.date} · ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)}` : 'Between shifts'}`}>
       ${live ? html`<div class="dash-live"><span class="livedot"></span><span>Live · updated ${fmtClock(d.t)}</span></div>` : null}</${PageHeader}>
     ${!live ? html`<${Notice} kind="critical" title="Link to the shop is down" style=${{ marginBottom: 'var(--ds-space-4)' }}>Since ${fmtClock(L.downAt, false)}. Showing the last data received (${fmtClock(d.t, false)}). Line displays on the floor are unaffected.<//>` : null}
     ${L.lastSync && live ? html`<${Notice} kind="success" title="Link restored" style=${{ marginBottom: 'var(--ds-space-4)' }} actions=${html`<${Button} size="sm" variant="ghost" onClick=${() => { L.lastSync = null; bump(); }}>Dismiss<//>`}>After ${fmtDur(L.lastSync.dur)}. ${L.lastSync.n} events recorded during the outage have synced; nothing was lost.<//>` : null}
@@ -82,9 +82,9 @@ export function DashboardPage() {
       <div class="dash-lines">${d.lines.map((l) => html`<${LineCard} key=${l.a} l=${l} />`)}</div>
       <aside class="dash-side">
         <${Panel} ticks=${true} title="Active calls" actions=${html`<span class="mono">${d.calls.length}</span>`}>
-          ${d.calls.length ? d.calls.map((c) => live ? html`<${CallRow} key=${c.id} c=${S.calls.find((x) => x.id === c.id) || c} compact />` : html`<div key=${c.id} class="callrow"><span class=${'lamp ' + c.type.toLowerCase()}></span><div>${M.CALL_TYPES[c.type].label} · ${c.pos}</div><span class="wait">${fmtDur(d.t - c.raisedT)}</span></div>`) : html`<p class="note">No open calls. Each one appears here with its station and waiting time the moment it is pressed.</p>`}
+          ${d.calls.length ? d.calls.map((c) => live ? html`<${CallRow} key=${c.id} c=${S.calls.find((x) => x.id === c.id) || c} compact />` : html`<div key=${c.id} class="callrow"><span class=${'lamp ' + c.type.toLowerCase()}></span><div>${M.CALL_TYPES[c.type].label} · ${c.pos}</div><span class="wait">${fmtDur(d.t - c.raisedT)}</span></div>`) : html`<p class="note">No open calls.</p>`}
           <div class="dash-kv"><span>Calls this shift</span><b class="mono">${d.nCalls}</b><span>Average response</span><b class="mono">${d.avgResp != null ? fmtDur(d.avgResp) : '—'}</b></div><//>
-        <${Panel} ticks=${true} title="Downtime by cause" sub="Time stations spent over takt this shift, put down to the station that caused it.">
+        <${Panel} ticks=${true} title="Downtime by cause" sub="Over-takt time this shift, by the station that caused it.">
           ${d.causes.length ? html`<ul class="mix" style=${{ marginTop: 8 }}>${d.causes.map(([id, sec]) => html`<li key=${id}><button class="linkish mono" onClick=${() => drillStation(id)}>${id}</button><${Meter} size="sm" value=${sec / d.causes[0][1]} label=${`${id} share of downtime`} /><span class="mono">${fmtDur(sec)}</span></li>`)}</ul>` : html`<p class="note">No downtime yet this shift.</p>`}<//>
         <${Panel} ticks=${true} title="Offlined this shift"><${DataTable} columns=${OFF_COLS} rows=${d.offline.slice(-6).reverse()} rowKey=${(o) => o.vin + o.t} empty="None. Offlined units are removed from counts and the target." /><//>
       </aside>
@@ -103,16 +103,12 @@ function LineCard({ l }) {
     <div class="lc-head"><button class="lc-title" onClick=${() => go('display', l.a.toLowerCase())} title="Open the line display"><span class="micro">${AREAS[l.a].station}</span><span>${AREAS[l.a].name}</span><${Icon} n="tv" /></button>
       <span class=${'andon-state c-' + STATE_TONE[l.state]}>${STATE_LABEL[l.state]}</span></div>
     <div class="lc-kpis">
-      <div><span class="micro">Completed</span><b class="num">${l.done}<small>/ ${l.target}</small></b><span class=${l.delta < -2 ? 'c-crit' : l.delta < 0 ? 'c-warn' : 'c-muted'}>${l.delta === 0 ? 'on plan' : l.delta > 0 ? `+${l.delta} ahead` : `${-l.delta} behind`}</span></div>
-      <div><span class="micro">Remaining</span><b class="num">${l.remaining}</b></div>
+      <div><span class="micro">Completed</span><b class="num">${l.done}<small>/ ${l.target}</small></b><span class=${l.delta < -2 ? 'c-crit' : l.delta < 0 ? 'c-warn' : 'c-muted'}>${l.delta === 0 ? 'on plan' : l.delta > 0 ? `+${l.delta} ahead` : `${-l.delta} behind`} · ${l.remaining} to go</span></div>
       <div><span class="micro">Downtime</span><b class="num" style=${{ color: downtimeTone(l.down, l.a) }}>${fmtDur(l.down)}</b></div>
       <div><span class="micro">Takt</span><b class="num">${fmtDur(l.takt)}</b></div>
-      <div><span class="micro">In line</span><b class="num">${l.wip}</b></div>
       <div><span class="micro">Calls</span><b class="num" style=${{ color: l.calls ? 'var(--call-sup)' : null }}>${l.calls}</b></div>
     </div>
     <div class="lc-prog" title=${`Plan now ${l.plan.toFixed(1)}`}><i style=${{ width: `${pct * 100}%` }}></i><b style=${{ left: `${planPct * 100}%` }}></b></div>
-    <div class="lc-st" style=${{ gridTemplateColumns: `repeat(${l.st.length}, 1fr)` }}>${l.st.map((s) => html`<button key=${s.id} class=${'lc-cell s-' + s.state} onClick=${() => drillStation(s.id)} title=${`${s.id} · ${STATE_LABEL[s.state]}${s.vin ? ` · ${s.vin}` : ''}${s.state !== 'idle' ? ` · ${fmtDur(s.cycle)} / ${fmtDur(s.takt)}` : ''}`}>
-      <span class="id">${s.id}${s.calls.map((t, i) => html`<i key=${i} class=${'lamp ' + t.toLowerCase()}></i>`)}${s.buzz ? html`<span class="bz"><${Icon} n="buzz" /></span>` : null}</span><span class="cy">${s.state === 'idle' ? '—' : fmtDur(s.cycle)}</span></button>`)}</div>
     <div class="lc-foot"><span class="micro">Completed per hour</span><span class="spark">${l.hours.map((n, i) => html`<i key=${i} style=${{ height: `${(n / mx) * 100}%` }} title=${`Hour ${i + 1}: ${n}`}></i>`)}</span><span class="mono c-muted">${l.lastHour} last hour</span>${preview ? html`<span class="xp">Trim Andon preview</span>` : null}</div>
   <//>`;
 }

@@ -3,8 +3,8 @@
    Page navigation is the rail on the left (ui/nav.js); the top bar carries
    identity, the line's status and the alerts, in that order of importance.
    Identity, alerts, the user menu and the Bolt & Volt mark never move,
-   shrink or hide; the status row takes what is left and folds its
-   lower-priority figures into "More" (lib/fit.js); the tools fold into one
+   shrink or hide; the status row takes what is left and shows three
+   figures (line state, completed, downtime); the tools fold into one
    menu below 1920 px.
    Breakpoints: compact < 1024 · regular 1024–1439 · wide 1440–1919 · ultra ≥ 1920
    ════════════════════════════════════════════════════════════════════════ */
@@ -18,6 +18,11 @@
   }
   /* on page screens the bar sits in the flow: inset with margins (a relative offset would push it past the edge) */
   .page-shell > .hud { inset: auto; margin: var(--gt) var(--gr) 0 var(--gl); }
+  /* the bar's glass (fill and blur) sits on a layer behind its content: a menu inside an element that has its own
+     backdrop-filter cannot cover the page (Chromium), so the user and Tools menus would show the page through */
+  .hud.glass { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .hud.glass::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: none; pointer-events: none; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .hud.glass::before { background: var(--glass-solid); } }
   .hud > .id-island { grid-area: id; min-width: 0; }
   .hud > .state-island { grid-area: status; min-width: 0; width: 100%; overflow: hidden; justify-content: flex-start; border-right: 0; }
   .hud > .act-island { grid-area: act; display: flex; align-items: stretch; }
@@ -28,14 +33,12 @@
   .hud .state-island > .metric.lead .ls-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 1279px) { .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-15, 15px); letter-spacing: .02em; gap: var(--ds-space-2); } }
   .hud .state-island > .metric.lead { min-width: 0; flex-shrink: 1; }
-  .fit-more { flex: none; position: relative; display: flex; align-items: stretch; margin-left: auto; }
+  /* under 1280 px the bar keeps line state and completed; each line's downtime stays on the strip below */
+  @media (max-width: 1279px) { .hud .state-island > .metric.m-down { display: none; } }
   /* labelled fold buttons: "More 4 ▾" for figures, "Tools ▾" for the tool icons */
-  .fit-more .ibtn, .tools-menu > .ibtn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
-  .fit-more .ibtn:hover, .tools-menu > .ibtn:hover, .fit-more .ibtn[aria-expanded="true"], .tools-menu > .ibtn[aria-expanded="true"] { color: var(--ds-text-primary); }
+  .tools-menu > .ibtn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
+  .tools-menu > .ibtn:hover, .tools-menu > .ibtn[aria-expanded="true"] { color: var(--ds-text-primary); }
   .hud-btn-l { font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: var(--ds-tracking-label); text-transform: uppercase; }
-  .fit-n { display: inline-grid; place-items: center; min-width: 20px; height: 18px; padding: 0 var(--ds-space-1); border-radius: var(--ds-radius-sm); background: var(--ds-layer-2); color: var(--ds-text-primary); font: 600 var(--ds-size-11) / 1 var(--ds-font-mono); }
-  .fit-pop { position: absolute; top: calc(100% + var(--ds-space-2)); right: 0; z-index: var(--ds-z-overlay); display: grid; gap: var(--ds-space-3); padding: var(--ds-space-4); min-width: 220px; }
-  .fit-pop .metric { border: 0; padding: 0; }
 
   /* actions: tools | alerts | user | partner mark */
   .hud-tools, .hud-alerts { display: flex; align-items: stretch; }
@@ -164,11 +167,10 @@
   .tl-menu, .tools-pages { display: none; }
   /* 768–1279 px: More and Tools go compact (count or icon, with a chevron) so the line status keeps its full text (audit U2) */
   @media (min-width: 768px) and (max-width: 1279px) {
-    .fit-more .hud-btn-l { display: none; }
     .tl-tools { display: none; }
     .tl-menu { display: inline-flex; align-items: center; }
     .tl-menu .hud-btn-l { display: none; }
-    .fit-more .ibtn, .tools-menu > .ibtn { padding: 0 var(--ds-space-3); }
+    .tools-menu > .ibtn { padding: 0 var(--ds-space-3); }
   }
   .um-h { padding: var(--ds-space-2) var(--ds-space-3) var(--ds-space-1); color: var(--ds-text-muted); font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: var(--ds-tracking-label); text-transform: uppercase; }
   .tools-pages .um-item[aria-current="page"] { background: var(--ds-layer-2); color: var(--ds-text-primary); font-weight: 600; }
@@ -191,7 +193,7 @@
     .hud .tools-menu { grid-area: menu; display: flex; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
     .hud .hud-alerts { grid-area: alerts; justify-content: flex-end; align-items: center; gap: var(--ds-space-2); padding-right: var(--ds-space-2); border-left: 0; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
     .hud .tools-menu > .ibtn { height: 43px; padding: 0 var(--ds-space-3); }
-    .hud .alarm-pill { height: 34px; padding: 0 var(--ds-space-3); border-left: 0; }
+    .hud .alarm-pill, .hud .calls-pill { height: 34px; min-height: 0; padding: 0 var(--ds-space-3); border-left: 0; }
     .tl-tools { display: none; }
     .tl-menu { display: inline-flex; align-items: center; gap: var(--ds-space-2); }
     .tools-pages { display: block; }
@@ -225,33 +227,27 @@
   @media (max-width: 1023px) {
     .hud .bv-mark { padding: 0 var(--ds-space-3) 0 var(--ds-space-2); }
     .hud .bv-mark img { height: 22px; }
-    .hud .alarm-pill { padding: 0 var(--ds-space-3); }
+    .hud .alarm-pill, .hud .calls-pill { padding: 0 var(--ds-space-3); }
   }
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Page backdrop: the dashboard, reports, settings and guide sit on soft
-   light and the floor's grid, so their glass cards and menus read as glass
-   (glass needs something behind it). Fixed: it does not scroll.
+   Page backdrop: the dashboard, reports, settings and guide sit on a flat
+   background with the MG badge in 3D, centred behind the content
+   (lib/badge.js). Cards are glass over it. Fixed: it does not scroll.
    ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
-  .page-shell {
-    --bd-a: color-mix(in srgb, var(--ds-azure-d) 16%, transparent);
-    --bd-b: color-mix(in srgb, var(--ds-violet-d) 10%, transparent);
-    --bd-c: color-mix(in srgb, var(--ds-brand) 8%, transparent);
-    --bd-grid: color-mix(in srgb, var(--ds-text-primary) 5%, transparent);
-    background:
-      radial-gradient(1100px 680px at 12% -8%, var(--bd-a), transparent 62%),
-      radial-gradient(900px 640px at 98% 28%, var(--bd-b), transparent 60%),
-      radial-gradient(800px 520px at 40% 108%, var(--bd-c), transparent 62%),
-      repeating-linear-gradient(0deg, var(--bd-grid) 0 1px, transparent 1px 48px),
-      repeating-linear-gradient(90deg, var(--bd-grid) 0 1px, transparent 1px 48px),
-      var(--ds-bg);
-  }
-  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .page-shell { --bd-a: color-mix(in srgb, var(--ds-azure-l) 12%, transparent); --bd-b: color-mix(in srgb, var(--ds-violet-l) 8%, transparent); } }
-  :root[data-theme="light"] .page-shell { --bd-a: color-mix(in srgb, var(--ds-azure-l) 12%, transparent); --bd-b: color-mix(in srgb, var(--ds-violet-l) 8%, transparent); }
+  /* lighter blur than over the floor, so the badge reads through the cards as a shape, not a smudge */
+  .page-shell { background: var(--ds-bg); --ds-glass-blur: blur(10px) saturate(120%); --blur: blur(10px) saturate(120%); }
+  .page-shell > .page-scroll { position: relative; z-index: 1; } /* above the badge; the bar keeps its own, higher layer */
+  .page-badge { position: fixed; z-index: 0; left: 50%; top: 50%; width: min(62vmin, 720px); aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; transition: opacity .6s ease; }
+  .page-badge.on { opacity: var(--badge-o, 1); }
+  @media (min-width: 1024px) { .page-badge { left: calc(50% + var(--ds-rail-space) / 2); } } /* centred on the content, right of the rail */
+  @media (max-width: 599px) { .page-badge { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .page-badge { transition: none; } }
   @media print {
     .page-shell { background: none; }
+    .page-badge { display: none; }
     .page-shell .ds-panel { background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
   }
 }

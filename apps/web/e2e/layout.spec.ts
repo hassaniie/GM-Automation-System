@@ -119,8 +119,12 @@ test('the top bar fits during a long status such as an emergency stop', async ({
     found.push(...(await page.evaluate((w) => {
       const isl = document.querySelector('.state-island'); if (!isl) return [];
       const R = isl.getBoundingClientRect();
-      return [...isl.querySelectorAll('.metric:not([hidden]), .fit-more')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > R.right + 1; })
-        .map((e) => `${w}px: ${e.className} is cut off by the status area`);
+      const ms = [...isl.querySelectorAll('.metric')].filter((e) => getComputedStyle(e).display !== 'none');
+      const out = ms.filter((e) => { const r = e.getBoundingClientRect(); return r.width === 0 || r.right > R.right + 1; })
+        .map((e) => `${w}px: ${e.textContent} is hidden or cut off by the status area`);
+      if (ms.length !== (w < 1280 ? 2 : 3)) out.push(`${w}px: ${ms.length} figures in the top bar`);
+      if (document.querySelector('.hud .sim-tag:not(.down)')) out.push(`${w}px: simulation tag in the top bar`);
+      return out;
     }, w)));
   }
   expect(found).toEqual([]);
@@ -149,4 +153,38 @@ test('dashboard: all three line cards fit above the fold at 1440×900', async ({
   await page.waitForTimeout(400);
   const bottom = await page.evaluate(() => document.querySelectorAll('.lcard')[2].getBoundingClientRect().bottom);
   expect(bottom).toBeLessThanOrEqual(900);
+});
+
+test('line displays: every cycle time and bar stays inside its card (Trim and Final)', async ({ page }) => {
+  await signIn(page, 'dark');
+  const found: string[] = [];
+  for (const [w, h] of [[1280, 720], [1920, 1080]] as const) {
+    await page.setViewportSize({ width: w, height: h });
+    for (const line of ['trim', 'final']) {
+      await page.evaluate((l) => { location.hash = `#/display/${l}`; }, line);
+      await page.locator('.lcd-cell').first().waitFor();
+      await page.waitForTimeout(300);
+      found.push(...(await page.evaluate(([w, line]) => [...document.querySelectorAll('.lcd-cell')].flatMap((c) => {
+        const R = c.getBoundingClientRect();
+        return [...c.querySelectorAll('.lc-cy, .lc-bar')].filter((e) => e.scrollWidth > (e as HTMLElement).clientWidth + 1 || e.getBoundingClientRect().right > R.right + 1)
+          .map((e) => `${w}px ${line}: ${e.className} spills out of its card`);
+      }), [w, line] as const)));
+    }
+  }
+  expect(found).toEqual([]);
+});
+
+test('page screens show the MG badge behind the content; menus are solid', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page, 'dark');
+  for (const p of ['dash', 'reports', 'admin/takt', 'how']) {
+    await page.evaluate((p) => { location.hash = `#/${p}`; }, p);
+    await expect(page.locator('canvas.page-badge'), p).toHaveCount(1);
+  }
+  await page.locator('.ubtn').click();
+  const alpha = await page.locator('.umenu-pop').evaluate((e) => { const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)!; return m.length > 3 ? Number(m[3]) : 1; });
+  expect(alpha).toBeGreaterThan(0.9);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => { location.hash = '#/floor'; });
+  await expect(page.locator('canvas.page-badge')).toHaveCount(0);
 });

@@ -44,7 +44,7 @@ export function endTick(S, dt = 1) {
   // 10. buzzers: start when a unit passes takt, stop when it leaves (or the station is switched off)
   for (const id of WORK_POS) {
     const on = buzzerOn(S, id);
-    if (on && !S.buzzing[id]) { S.buzzing[id] = S.t; if (S.recording) logEvent(S, 'andon', `Buzzer on at ${id} · unit over takt`, { pos: id, vehicleId: S.pos[id].occ && S.pos[id].occ.vehicleId }); }
+    if (on && !S.buzzing[id]) { S.buzzing[id] = S.t; if (S.recording) logEvent(S, 'andon', `Buzzer on at ${id} · unit over takt`, { brief: `Buzzer at ${id}`, pos: id, vehicleId: S.pos[id].occ && S.pos[id].occ.vehicleId }); }
     else if (!on && S.buzzing[id] != null) delete S.buzzing[id];
   }
 }

@@ -40,7 +40,7 @@ export function entryScan(S, raw, source = 'MANUAL') {
   S.vehicles[v.id] = v; S.vehOrder.push(v.id); S.lastEntryT = S.t;
   E.occ.pendingBody = v.id;
   S.anims.push({ id: uid(S, 'an'), vehicleId: v.id, kind: 'entry', t0: S.t, t1: S.t + 30, path: bufferToEntryPath(Math.max(0, head)), y0: H_BUFFER, y1: H_TRIM });
-  logEvent(S, 'scan', `Scanner 1 accepted ${v.vin} · ${variant.name} · ${body.paint.name}. Line-in recorded; assembly timer started.`, { vehicleId: v.id, pos: 'TL1' });
+  logEvent(S, 'scan', `Scanner 1 accepted ${v.vin} · ${variant.name} · ${body.paint.name}. Line-in recorded; assembly timer started.`, { vehicleId: v.id, pos: 'TL1', brief: `Line-in at TL1 · ${variant.name}` });
   return res(true, `Registered ${variant.name}. Assembly timer started at ${fmtClock(S.t)}.`, { vehicleId: v.id });
 }
 export function finishEntry(S, v) {
@@ -79,7 +79,7 @@ export function exitScan(S, raw, source = 'PHOTO_EYE') {
   const sk = S.shift ? S.shift.key : '';
   if (S.recording) S.stats.completed.push({ vin: v.vin, t: S.t, dur: v.totalDur, variant: v.variant.code, name: v.variant.name, model: v.variant.model, paint: v.paint.name, shiftKey: sk, returned: v.returns.length > 0, n: S.stats.completed.filter((c) => c.shiftKey === sk).length + 1 });
   S.anims.push({ id: uid(S, 'an'), vehicleId: v.id, kind: 'storage', t0: S.t, t1: S.t + 40, path: STORAGE_PATH, y0: H_FINAL, y1: 0.36 });
-  logEvent(S, 'scan', `End-of-line photo-eye · ${v.vin} completed. Lined off after ${fmtDur(v.totalDur)}.`, { vehicleId: v.id, pos: 'FL7' });
+  logEvent(S, 'scan', `End-of-line photo-eye · ${v.vin} completed. Lined off after ${fmtDur(v.totalDur)}.`, { vehicleId: v.id, pos: 'FL7', brief: `Completed · ${fmtDur(v.totalDur)}` });
   resolveAlarmsFor(S, (a) => a.vehicleId === v.id, 'Vehicle lined off');
   return res(true, `Completion recorded. Total assembly time ${fmtDur(v.totalDur)}.`, { vehicleId: v.id, dur: v.totalDur });
 }
@@ -111,9 +111,9 @@ export function engineScan(S, v, forceOk = false) {
   if (mism) {
     raiseOrUpdate(S, `QUAL:CL2:${v.id}`, { type: 'QUALITY', level: 'HOLD', pos: 'CL2', vehicleId: v.id, vin: v.vin, msg: `Engine scan mismatch: ${got}… is not valid for ${v.variant.name} (expects ${expect}…)` });
     if (S.recording) S.stats.quality++;
-    logEvent(S, 'exception', `CL2 engine/transmission scan mismatch on ${v.vin.slice(-6)} · quality hold`, { vehicleId: v.id, pos: 'CL2' });
+    logEvent(S, 'exception', `CL2 engine/transmission scan mismatch on ${v.vin.slice(-6)} · quality hold`, { vehicleId: v.id, pos: 'CL2', brief: 'CL2 scan mismatch · hold' });
   } else {
     resolveAlarmsFor(S, (a) => a.key === `QUAL:CL2:${v.id}`, 'Correct engine/transmission scanned and paired');
-    logEvent(S, 'scan', `CL2 paired engine ${v.engine.engineNo} / transmission ${v.engine.transNo} to ${v.vin.slice(-6)}`, { vehicleId: v.id, pos: 'CL2' });
+    logEvent(S, 'scan', `CL2 paired engine ${v.engine.engineNo} / transmission ${v.engine.transNo} to ${v.vin.slice(-6)}`, { vehicleId: v.id, pos: 'CL2', brief: 'CL2 engine paired' });
   }
 }
