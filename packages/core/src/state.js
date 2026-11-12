@@ -72,7 +72,11 @@ export function trimHistory(S, beforeT) {
   S.stats.offline = S.stats.offline.filter((r) => keep(r) || (S.vehicles[r.vehicleId] && S.vehicles[r.vehicleId].state !== 'LINED_OFF'));
   S.calls = S.calls.filter((c) => c.clearedT == null || c.clearedT >= beforeT);
   for (const h of S.history) if (h.key && h.end != null && h.end < beforeT) delete S.down[h.key];
+  const alarmsBefore = S.alarms.length;
+  S.alarms = S.alarms.filter((a) => a.resolvedT == null || a.resolvedT >= beforeT);
+  for (const [k, a] of Object.entries(S.alarmByKey || {})) if (a && a.resolvedT != null && a.resolvedT < beforeT) delete S.alarmByKey[k];
   return {
+    alarms: alarmsBefore - S.alarms.length,
     vehicles: gone.size, prod: before.prod - S.prod.length, segments: before.segments - S.stats.segments.length,
     completed: before.completed - S.stats.completed.length, offline: before.offline - S.stats.offline.length, calls: before.calls - S.calls.length,
   };

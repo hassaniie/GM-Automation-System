@@ -95,7 +95,7 @@ function StationInspector({ id }) {
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
       <div class="micro">${AREAS[P.area].station} · ${AREAS[P.area].name}${!inScope && isWork ? ' · expansion preview' : ''}</div>
       <div class="id">${id}</div><div class="sub">${P.op}</div>
-      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
+      <div style=${{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>${an && !(an.state === 'normal' && ['crit', 'warn', 'esc', 'paused'].includes(st.tone)) ? html`<span class=${'andon-state c-' + ANDON_TONE[an.state]}>${ANDON_LABEL[an.state]}</span>` : null}<${StatusChip} st=${st} /></div></div>
       <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">
       ${isWork && callsOk ? html`<div class="callpad" role="group" aria-label="Station call buttons">${['SUP', 'MNT'].map((t) => { const oc = M.openCall(S, id, t), T = M.CALL_TYPES[t];
@@ -161,7 +161,7 @@ function VehicleInspector({ id }) {
   return html`<${React.Fragment}>
     <div class="insp-head"><div style=${{ flex: 1, minWidth: 0 }}>
       <div class="micro">Vehicle record</div><div style=${{ marginTop: 6 }}><${VinText} vin=${v.vin} big /></div>
-      <div class="sub">${v.variant.name} · ${v.variant.ptLabel} · <${PaintChip} p=${v.paint} /></div>
+      <div class="sub">${[v.variant.name, v.variant.name.includes(v.variant.ptLabel) ? null : v.variant.ptLabel].filter(Boolean).join(' · ')} <span style=${{ whiteSpace: 'nowrap' }}>· <${PaintChip} p=${v.paint} /></span></div>
       <div style=${{ marginTop: 10 }}><span class=${'chip c-' + tone}><${Icon} n=${ic} />${lbl}</span></div></div>
       <${Button} size="sm" variant="ghost" iconRight="x" aria-label="Close inspector" onClick=${() => setUI({ selection: null })}><//></div>
     <div class="insp-body">

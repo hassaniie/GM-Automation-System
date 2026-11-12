@@ -98,11 +98,14 @@ function LocalReports() {
   useEffect(() => { const i = setInterval(tick, 2000); return () => clearInterval(i); }, []);
   const d = reportData(S, date, shift, line), names = M.shiftsFor(S, date).map((s) => s.name);
   const meta = { date, shift: shift === 'all' ? 'All shifts' : shift, line: lineLabel(line), sources: d.sources.join('; ') || 'no data' };
-  const doXlsx = async () => { setBusy('xlsx'); const k = await exportExcel(d, meta); setBusy(k === 'csv' ? 'csv' : null); };
+  // nothing to export when the chosen shift (or every shift) has not started yet (audit B15)
+  const empty = shift === 'all' ? names.length > 0 && names.every((n) => d.notStarted.includes(n)) : d.notStarted.includes(shift);
+  const doXlsx = async () => { if (empty) { setBusy('empty'); return; } setBusy('xlsx'); const k = await exportExcel(d, meta); setBusy(k === 'csv' ? 'csv' : null); };
   return html`<${Stack} gap=${4} class="page-wrap reports" id="report-print">
     <${PageHeader} k="Reports · URD req 28–29" title=${`${wd(date)} · ${meta.shift} · ${meta.line}`} sub=${html`Production, cycle times, downtime, offlined vehicles and assist-call response times. ${d.sources.length ? html`Source: <b>${d.sources.join(' · ')}</b>.` : ''}${d.notStarted.length ? ` ${d.notStarted.join(', ')} not started yet.` : ''}`}>
       <${Button} icon="download" loading=${busy === 'xlsx'} onClick=${doXlsx}>Excel<//><${Button} icon="file" onClick=${() => window.print()} title="Opens the print dialog: choose Save as PDF">Print / PDF<//></${PageHeader}>
     ${busy === 'csv' ? html`<${Notice} kind="warning">The Excel library could not load (offline?), so a CSV with every table was downloaded instead.<//>` : null}
+    ${busy === 'empty' ? html`<${Notice} kind="warning">Nothing to export yet: ${shift === 'all' ? 'no shift' : shift} has not started on ${wd(date)}. Pick a shift that has run.<//>` : null}
     <${Filters}>
       <${Field} label="Day"><${Select} value=${date} onChange=${setDate} options=${days.map((k, i) => [k, `${wd(k)}${i === 0 ? ' · today' : ''}`])} /><//>
       <${ShiftLineFilters} names=${names} shift=${shift} setShift=${setShift} line=${line} setLine=${setLine} />

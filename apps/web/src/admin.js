@@ -41,11 +41,14 @@ export function AdminPage() {
   const tabs = ADMIN_TABS.filter((t) => can(t[3]));
   if (!tabs.length) return html`<${NoAccess} what="Settings" />`;
   const cur = tabs.find((t) => t[0] === RT.route.sub) || tabs[0];
+  // a section this role may not open (e.g. #/admin/users for an authorised person): say so instead of silently
+  // showing another one (audit B15)
+  const denied = RT.route.sub && RT.route.sub !== cur[0] && ADMIN_TABS.some((t) => t[0] === RT.route.sub) ? ADMIN_TABS.find((t) => t[0] === RT.route.sub)[1] : null;
   return html`<div class="page-wrap admin">
     <aside class="adm-nav" aria-label="Settings sections"><div class="ds-label" style=${{ padding: '0 var(--ds-space-2) var(--ds-space-2)' }}>Settings</div>
       <${Tabs} vertical=${true} label="Settings sections" value=${cur[0]} onChange=${(k) => { if (k !== cur[0] && confirmLeave()) go('admin', k); }} items=${tabs.map(([k, l, ic]) => ({ value: k, label: l, icon: ic }))} />
       <p class="note" style=${{ padding: 'var(--ds-space-3) var(--ds-space-2)' }}>${REMOTE ? 'Changes apply at once on every screen, are stored on the line server and are written to the audit log with your name.' : 'Changes apply at once, are saved on this device and are written to the audit log with your name.'}</p></aside>
-    <section class="adm-body" role="tabpanel"><${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
+    <section class="adm-body" role="tabpanel">${denied ? html`<${Notice} kind="warning" title=${`${denied} needs a different role`}>You are signed in as ${userName()}. Showing ${cur[1]} instead.<//>` : null}<${ADMIN_VIEWS[cur[0]]} key=${cur[0]} /></section>
   </div>`;
 }
 /** @deprecated use PageHeader from ./ui (kept so older imports keep working) */
@@ -134,7 +137,7 @@ function PlanAdmin() {
         <span>${wd(k)}${k === today ? html` <b class="c-ok">· today</b>` : ''}</span><${Tag} tone=${p && !none ? 'held' : null} icon=${null}>${none ? 'No production' : p ? 'Scheduled' : 'Default'}<//></button>`; })}</div>
       <${Panel} title=${`${wd(sel)} · ${sel}`}>
         <${DataTable} columns=${shiftCols} rows=${base} rowKey=${(s) => s.name} />
-        <${Cluster} gap=${3}>${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${`${AREAS[a].short} takt from this date`} style=${{ width: 200 }}><${Select} value=${d.takt[a] || ''} onChange=${(v) => upd({ takt: { ...d.takt, [a]: +v || undefined } })} options=${[['', `Keep current (${fmtDur(S.cfg.takt[a])})`], ...[480, 510, 540, 570, 600, 630, 660, 720, 780, 840, 900].map((x) => [x, fmtDur(x)])]} /><//>`)}</${Cluster}>
+        <${Cluster} gap=${3}>${M.AREA_IDS.map((a) => html`<${Field} key=${a} label=${`${AREAS[a].short} takt from this date`} style=${{ width: 200 }}><${Select} value=${d.takt[a] || ''} onChange=${(v) => upd({ takt: { ...d.takt, [a]: +v || undefined } })} options=${[['', `Keep current (${fmtDur(S.cfg.takt[a])})`], ...[...new Set([...Array.from({ length: 31 }, (_, i) => 300 + i * 30), S.cfg.takt[a], ...(d.takt[a] ? [d.takt[a]] : [])])].sort((x, y) => x - y).map((x) => [x, fmtDur(x)])]} /><//>`)}</${Cluster}>
         <${Field} label="Note (the reason, kept in the audit log)" required=${true}><${TextInput} value=${d.note} onChange=${(v) => upd({ note: v })} placeholder="e.g. Reduced plan: parts shortage on ZS rear bumpers" /><//>
         <${Cluster}><${Button} variant="primary" icon="calendar" onClick=${() => save(d.note)}>Save plan for ${wd(sel)}<//>${S.cfg.calendar[sel] ? html`<${Button} variant="ghost" onClick=${reset}>Use default plan<//>` : null}</${Cluster}>
         <${Saved} msg=${msg} />

@@ -87,6 +87,13 @@ describe('edge server', () => {
     const bad = await a.send({ type: 'SET_TAKT', area: 'PAINT', sec: 10 });
     expect(bad.ok).toBe(false);
     expect(bad.error).toMatch(/Invalid command/);
+    const pct = await a.send({ type: 'SIM_CONFIG', key: 'callRate', value: 500 });
+    expect(pct.ok).toBe(false);
+    expect(pct.error).toMatch(/callRate must be a number from 0 to 0.4/);
+    const sw = await a.send({ type: 'SIM_CONFIG', key: 'autoFeed', value: 3 });
+    expect(sw.ok).toBe(false);
+    const okCfg = await a.send({ type: 'SIM_CONFIG', key: 'escalateAfter', value: 240 });
+    expect(okCfg.ok, okCfg.error).toBe(true);
     const unknown = await a.send({ type: 'DROP_TABLES' });
     expect(unknown.ok).toBe(false);
     const rest = await fetch(`${base}/api/commands`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'SET_TAKT', area: 'CHASSIS', sec: 540, reason: 'test' }) });

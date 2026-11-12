@@ -27,7 +27,9 @@ export function IdIsland() {
   </div>`;
 }
 export function StateIsland() {
-  const S = RT.S, p = M.pace(S), ls = M.lineStatus(S);
+  const S = RT.S, p = M.pace(S), ls0 = M.lineStatus(S);
+  // a paused simulator says so, instead of a line that reads Running while nothing moves (audit B15)
+  const ls = !RT.running && RT.conn.mode !== 'live' && ls0.code === 'RUNNING' ? { ...ls0, code: 'SIM_PAUSED', label: 'Simulation paused', tone: 'paused' } : ls0;
   const wip = S.vehOrder.filter((id) => M.isActive(S.vehicles[id])).length;
   const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
   const row = useRef(null), hidden = useFit(row, 120), [more, setMore] = useState(false), moreBtn = useRef(null), pop = useRef(null);

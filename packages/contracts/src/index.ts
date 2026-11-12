@@ -89,6 +89,8 @@ export const OperatorCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('LOG_NOTE'), cat: z.enum(['sim', 'note']), text: z.string().max(500), extra: z.record(z.string(), z.unknown()).optional() }),
 ]);
 /** Settings the simulation console may change directly (not audited plant configuration). */
+/** Ranges of the numeric simulator settings; every other key is a switch. */
+export const SIM_CONFIG_RANGE = { callRate: [0, 0.4], delayRate: [0, 0.3], warnPct: [0.5, 0.99], escalateAfter: [30, 1800], blockedAlarmAfter: [30, 1800] } as const;
 export const SIM_CONFIG_KEYS = ['autoFeed', 'autoEntryScan', 'autoExitScan', 'autoComplete', 'autoRespond', 'trimAndon', 'useSchedule', 'engineCheck', 'callRate', 'warnPct', 'escalateAfter', 'blockedAlarmAfter', 'delayRate'] as const;
 /** Simulator controls: accepted only when the edge server runs in simulation mode. */
 export const SimCommand = z.discriminatedUnion('type', [
@@ -104,7 +106,12 @@ export const SimCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SIM_CLEAR_EMERGENCY'), pos }),
   z.object({ type: z.literal('SIM_POWER_CUT') }),
   /** Simulator behaviour switches and rates from the simulation console. */
-  z.object({ type: z.literal('SIM_CONFIG'), key: z.enum(SIM_CONFIG_KEYS), value: z.union([z.boolean(), z.number().min(0).max(36000)]) }),
+  z.object({ type: z.literal('SIM_CONFIG'), key: z.enum(SIM_CONFIG_KEYS), value: z.union([z.boolean(), z.number()]) }).superRefine((c, ctx) => {
+    // each setting has its own type and range (audit S3): rates are fractions, times are seconds
+    const range = SIM_CONFIG_RANGE[c.key as keyof typeof SIM_CONFIG_RANGE];
+    if (!range) { if (typeof c.value !== 'boolean') ctx.addIssue({ code: 'custom', path: ['value'], message: `${c.key} is on or off` }); return; }
+    if (typeof c.value !== 'number' || !Number.isFinite(c.value) || c.value < range[0] || c.value > range[1]) ctx.addIssue({ code: 'custom', path: ['value'], message: `${c.key} must be a number from ${range[0]} to ${range[1]}` });
+  }),
 ]);
 export const Command = z.union([OperatorCommand, SimCommand]);
 export type OperatorCommand = z.infer<typeof OperatorCommand>;

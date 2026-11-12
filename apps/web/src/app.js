@@ -65,6 +65,9 @@ function App() {
         if (!idle || now - last3d > 500) { last3d = now; lastRev3d = RT.rev; Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now); }
       }
       Horn.tick(now);
+      // a screen left running for days keeps only the last two plant days of finished vehicles and resolved alarms in
+      // memory (audit S3); the line server trims its own copy once it is stored
+      if (!REMOTE && now - (RT._trimAt || 0) > 60000) { RT._trimAt = now; M.trimHistory(RT.S, (M.dayOf(RT.S.t) - 2) * 86400); }
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
       // a new state (scenario load, power cut, server snapshot) is not a car finishing: remember its last one quietly (audit B10)
       const lastKey = lastC ? `${lastC.vin}|${lastC.t}` : null;
