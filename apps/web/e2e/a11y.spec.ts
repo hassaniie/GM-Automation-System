@@ -52,6 +52,24 @@ test.describe('screens', () => {
         const v = await serious(page);
         if (v.length) found[r] = v;
       }
+      // open states: menus, the station panel, the alarm drawer and a dialog (audit D3)
+      await page.evaluate(() => { location.hash = '#/floor'; });
+      await page.waitForTimeout(400);
+      const opens: [string, () => Promise<void>][] = [
+        ['user menu', () => page.locator('.ubtn').click()],
+        ['tools menu', () => page.locator('.tools-menu > button, .tools-btn').first().click()],
+        ['station panel', () => page.evaluate(() => (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ selection: { kind: 'pos', id: 'FL3' } }))],
+        ['alarm drawer', () => page.evaluate(() => (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ selection: null, drawer: 'active' }))],
+        ['VIN dialog', () => page.evaluate(() => (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ drawer: null, dialog: { type: 'vin' } }))],
+      ];
+      for (const [name, open] of opens) {
+        await open();
+        await page.waitForTimeout(400);
+        const v = await serious(page);
+        if (v.length) found[name] = v;
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(200);
+      }
       expect(found).toEqual({});
     });
   }

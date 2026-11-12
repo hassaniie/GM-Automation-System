@@ -11,6 +11,7 @@ import { Button, Checkbox, Switch } from './ui/index.js';
 import { Icon, MgMark, tv } from './lib/ui-kit.js';
 import { api } from './lib/api.js';
 import { REMOTE, reconnect } from './lib/source.js';
+import { usePopover } from './lib/fit.js';
 
 export { ROLES } from '@mg/contracts';
 import { ROLES } from '@mg/contracts';
@@ -206,20 +207,32 @@ function SignInFlow() {
   </svg>`;
 }
 
-/* ── user menu (top bar) ── */
+/* ── user menu (top bar) ──
+   A dialog-style popover (it holds a switch and text, so it is not a menu): closes on Escape or a click outside,
+   arrow keys move between its controls (audit B9, D3). */
+const setMenu = (v) => setUI({ menu: v });
+const menuKeys = (e) => {
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+  const items = [...e.currentTarget.querySelectorAll('button, [role="switch"], input')].filter((x) => !x.disabled);
+  const i = items.indexOf(document.activeElement);
+  const n = e.key === 'Home' ? 0 : e.key === 'End' ? items.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+  items[n]?.focus(); e.preventDefault();
+};
 export function UserMenu() {
-  const u = Auth.user; if (!u) return null;
-  const open = RT.ui.menu;
-  return html`<div class="umenu"><button class=${'ubtn r-' + u.role} aria-haspopup="menu" aria-expanded=${!!open} title=${`${u.name} · ${ROLES[u.role].label}`} onClick=${() => setUI({ menu: !open })}>${initials(u.name)}</button>
-    ${open ? html`<div class="glass umenu-pop ticks" role="menu">
-      <div class="um-head"><span class=${'av r-' + u.role}>${initials(u.name)}</span><div><b>${u.name}</b><div class="c-muted" style=${{ fontSize: 12 }}>${ROLES[u.role].label} · ${u.empId}</div></div></div>
+  const btn = useRef(null), pop = useRef(null);
+  const u = Auth.user, open = !!(u && RT.ui.menu);
+  usePopover(open, setMenu, btn, pop);
+  if (!u) return null;
+  return html`<div class="umenu"><button ref=${btn} class=${'ubtn r-' + u.role} aria-haspopup="dialog" aria-expanded=${open} aria-label=${`${initials(u.name)} · ${u.name}, ${ROLES[u.role].label}: account and preferences`} title=${`${u.name} · ${ROLES[u.role].label}`} onClick=${() => setMenu(!open)}>${initials(u.name)}</button>
+    ${open ? html`<div class="glass umenu-pop ticks" role="dialog" aria-label="Account and preferences" ref=${pop} onKeyDown=${menuKeys}>
+      <div class="um-head"><span class=${'av r-' + u.role} aria-hidden="true">${initials(u.name)}</span><div><b>${u.name}</b><div class="c-muted" style=${{ fontSize: 12 }}>${ROLES[u.role].label} · ${u.empId}</div></div></div>
       <p class="note">${ROLES[u.role].desc}</p>
       <div class="micro" style=${{ margin: '8px 0 4px' }}>Switch demo user</div>
-      ${Auth.users.filter((x) => x.active && x.id !== u.id).map((x) => html`<button key=${x.id} class="um-item" role="menuitem" onClick=${() => Auth.switchTo(x)}><span class=${'av sm r-' + x.role}>${initials(x.name)}</span>${x.name}<span class="c-muted">${ROLES[x.role].short}</span></button>`)}
+      ${Auth.users.filter((x) => x.active && x.id !== u.id).map((x) => html`<button key=${x.id} class="um-item" onClick=${() => Auth.switchTo(x)}><span class=${'av sm r-' + x.role} aria-hidden="true">${initials(x.name)}</span>${x.name}<span class="c-muted">${ROLES[x.role].short}</span></button>`)}
       <div class="um-sep"></div>
       <div class="um-pref"><${Switch} checked=${largeTouch()} onChange=${setLargeTouch} label="Large touch targets" hint="Bigger buttons on this device, for gloves" /></div>
       <div class="um-sep"></div>
-      <button class="um-item" role="menuitem" onClick=${() => { Auth.locked = true; Auth.record('Screen locked', u.name); setUI({ menu: false }); }}><${Icon} n="lock" />Lock screen</button>
-      <button class="um-item" role="menuitem" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign out</button>
+      <button class="um-item" onClick=${() => { Auth.locked = true; Auth.record('Screen locked', u.name); setUI({ menu: false, dialog: null }); }}><${Icon} n="lock" />Lock screen</button>
+      <button class="um-item" onClick=${() => Auth.signOut()}><${Icon} n="logout" />Sign out</button>
     </div>` : null}</div>`;
 }

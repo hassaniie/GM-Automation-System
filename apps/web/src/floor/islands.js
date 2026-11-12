@@ -88,7 +88,7 @@ export function ActIsland() {
     <${ToolsMenu} themeIcon=${themeIcon} />
     <span class="sep"></span>
     <div class="hud-alerts"><${CallsPill} />
-    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer ? null : 'active' })} aria-label=${`Alarms ${active.length}: ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS${' '}<span class="n">${active.length}</span></button></div>
+    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer && RT.ui.drawer !== 'calls' ? null : 'active' })} aria-label=${`Alarms ${active.length}: ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS${' '}<span class="n">${active.length}</span></button></div>
     <span class="sep"></span>
     <${UserMenu} />
     <span class="sep"></span>

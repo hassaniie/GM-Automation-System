@@ -103,6 +103,7 @@
   .ds-field__label { font-size: var(--ds-size-12); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ds-text-muted); }
   .ds-field__req { color: var(--ds-status-critical); }
   .ds-field__hint { font-size: var(--ds-size-12); color: var(--ds-text-muted); line-height: 1.4; }
+  .ds-field__note { display: block; font-size: var(--ds-size-12); color: var(--ds-status-warning); line-height: 1.4; }
   .ds-field__error { font-size: var(--ds-size-12); color: var(--ds-status-critical); line-height: 1.4; }
   .ds-field--inline { grid-template-columns: auto 1fr; align-items: center; column-gap: var(--ds-space-3); }
   .ds-input {

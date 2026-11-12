@@ -32,10 +32,36 @@ export function TextInput({ value, onChange, invalid, class: cls, size = 'md', .
   const a = useField({ invalid, ...rest });
   return html`<input class=${cx('ds-input', `ds-input--${size}`, cls)} value=${value ?? ''} onInput=${val(onChange)} ...${rest} ...${a} />`;
 }
-/** Number input. onChange gets a number ('' when empty). */
-export function NumberInput({ value, onChange, invalid, class: cls, size = 'md', ...rest }) {
+/**
+ * Number input. While someone types, the field keeps exactly what they typed and onChange gets the number only
+ * when it is inside min–max, so a half-typed value never snaps (typing 7 into an empty field gives 7, not 17).
+ * On leaving the field an empty value goes back to the current one, and an out-of-range value is clamped, with a
+ * visible "adjusted" note (audit B11). Without min/max every number is passed on, '' when empty.
+ */
+export function NumberInput({ value, onChange, invalid, class: cls, size = 'md', min, max, ...rest }) {
   const a = useField({ invalid, ...rest });
-  return html`<input type="number" inputmode="decimal" class=${cx('ds-input', 'ds-input--num', `ds-input--${size}`, cls)} value=${value ?? ''} onInput=${val(onChange, true)} ...${rest} ...${a} />`;
+  const [draft, setDraft] = React.useState(null), [note, setNote] = React.useState(null);
+  const lo = min === undefined || min === '' ? -Infinity : +min, hi = max === undefined || max === '' ? Infinity : +max;
+  const bounded = lo > -Infinity || hi < Infinity;
+  React.useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(null), 4000); return () => clearTimeout(t); }, [note]);
+  const input = (e) => {
+    const t = e.target.value; setDraft(t); setNote(null);
+    if (!bounded) { onChange && onChange(t === '' ? '' : Number(t)); return; }
+    const n = Number(t);
+    if (t !== '' && Number.isFinite(n) && n >= lo && n <= hi) onChange && onChange(n);
+  };
+  const commit = () => {
+    if (draft === null) return;
+    const t = draft; setDraft(null);
+    if (!bounded || t === '') return;
+    const n = Number(t);
+    if (!Number.isFinite(n)) return;
+    const c = Math.min(hi, Math.max(lo, n));
+    if (c !== n) { onChange && onChange(c); setNote(`Adjusted to ${c}: allowed ${lo > -Infinity ? lo : '…'}–${hi < Infinity ? hi : '…'}`); }
+  };
+  const field = html`<input type="number" inputmode="decimal" class=${cx('ds-input', 'ds-input--num', `ds-input--${size}`, cls)} min=${min} max=${max}
+    value=${draft ?? value ?? ''} onInput=${input} onBlur=${commit} onKeyDown=${(e) => { if (e.key === 'Enter') commit(); }} ...${rest} ...${a} />`;
+  return note ? html`${field}<span class="ds-field__note" role="status">${note}</span>` : field;
 }
 /** Date (YYYY-MM-DD) and time (HH:MM) inputs. */
 export function DateInput({ value, onChange, invalid, class: cls, size = 'md', ...rest }) {

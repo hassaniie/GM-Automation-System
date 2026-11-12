@@ -8,7 +8,7 @@ export const PaintChip = ({ p }) => html`<span class="paint"><i style=${{ backgr
 
 /* Line-off moment: a short card when a unit passes the end-of-line photo-eye at FL7. */
 export function LineOffCard() {
-  const lo = RT.ui.lineoff; if (!lo) return null;
+  const lo = RT.ui.lineoff; if (!lo || RT.ui.drawer || RT.ui.selection) return null; // never under an open side panel
   const c = lo.rec;
   return html`<div class="glass lineoff ticks" role="status" aria-live="polite">
     <div class="lo-mark"><${MgMark} /></div>

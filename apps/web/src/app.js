@@ -66,7 +66,10 @@ function App() {
       }
       Horn.tick(now);
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
-      if (lastC && lastC !== RT._seenLineOff) { if (RT._seenLineOff !== undefined && floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastC; }
+      // a new state (scenario load, power cut, server snapshot) is not a car finishing: remember its last one quietly (audit B10)
+      const lastKey = lastC ? `${lastC.vin}|${lastC.t}` : null;
+      if (RT._seenS !== RT.S) { RT._seenS = RT.S; RT._seenLineOff = lastKey; if (RT.ui.lineoff) setUI({ lineoff: null }); }
+      else if (lastKey && lastKey !== RT._seenLineOff) { if (floor) setUI({ lineoff: { rec: lastC, at: now } }); RT._seenLineOff = lastKey; }
       if (RT.ui.lineoff && now - RT.ui.lineoff.at > 6500) setUI({ lineoff: null });
       if (now - (RT._persistAt || 0) > 10000) { RT._persistAt = now; if (Auth.user) persistConfig(); }
       if (now - lastPaint > (RT.ui.view2D || !floor ? 120 : 250) || RT.rev !== lastRev) { lastPaint = now; lastRev = RT.rev; force(); }
