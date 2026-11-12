@@ -55,21 +55,31 @@ function synthRows(S, date, sh, lines, stations, out) {
   out.calls.sort((x, y) => x.t - y.t);
 }
 
-// SheetJS is loaded only when a report is exported (separate chunk).
-function loadXLSX() {
-  return import('xlsx').then((m) => m.default || m);
+// ExcelJS (the library the line server uses) is loaded only when a report is exported, as its own chunk (audit S2).
+function loadExcel() {
+  return import('exceljs').then((m) => m.default || m);
 }
+/** A spreadsheet cell that cannot run as a formula when opened (audit B13). */
+export const safeCell = (c) => (typeof c === 'string' && /^[=+\-@\t\r]/.test(c) ? `'${c}` : c);
 async function exportExcel(d, meta) {
   const sheets = reportSheets(d, { ...meta, from: meta.date, to: meta.date, exportedAt: new Date().toLocaleString('en-GB'), by: userName() }), name = reportFileName({ ...meta, from: meta.date, to: meta.date });
   try {
-    const X = await loadXLSX(), wb = X.utils.book_new();
-    for (const [n, rows] of Object.entries(sheets)) { const ws = X.utils.aoa_to_sheet(rows); ws['!cols'] = rows[0].map((_, i) => ({ wch: Math.min(48, Math.max(10, ...rows.map((r) => String(r[i] == null ? '' : r[i]).length + 2))) })); X.utils.book_append_sheet(wb, ws, n.slice(0, 31)); }
-    X.writeFile(wb, `${name}.xlsx`);
+    const ExcelJS = await loadExcel(), wb = new ExcelJS.Workbook();
+    for (const [n, rows] of Object.entries(sheets)) {
+      const ws = wb.addWorksheet(n.slice(0, 31));
+      for (const r of rows) ws.addRow(r.map(safeCell));
+      ws.columns.forEach((col, i) => { col.width = Math.min(48, Math.max(10, ...rows.map((r) => String(r[i] == null ? '' : r[i]).length + 2))); });
+      if (rows.length) ws.getRow(1).font = { bold: true };
+    }
+    const buf = await wb.xlsx.writeBuffer();
+    const url = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: `${name}.xlsx` });
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
     return 'xlsx';
   } catch (e) {
-    // offline fallback: one CSV with every table
-    const csv = Object.entries(sheets).map(([n, rows]) => `${n}\n` + rows.map((r) => r.map((c) => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(',')).join('\n')).join('\n\n');
-    downloadText(`${name}.csv`, 'text/csv', csv); return 'csv';
+    // offline fallback: one CSV with every table (byte-order mark so Excel reads UTF-8)
+    const csv = Object.entries(sheets).map(([n, rows]) => `${n}\n` + rows.map((r) => r.map((c) => `"${String(c == null ? '' : safeCell(c)).replace(/"/g, '""')}"`).join(',')).join('\n')).join('\n\n');
+    downloadText(`${name}.csv`, 'text/csv', '\ufeff' + csv); return 'csv';
   }
 }
 

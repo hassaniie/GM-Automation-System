@@ -79,3 +79,17 @@ test('B11: number fields keep what is typed and clamp on leaving', async ({ page
   await expect(sec).toHaveValue(/59/);
   await expect(page.locator('.ds-field__note')).toContainText('Adjusted to 59');
 });
+
+test('S2: Reports → Excel downloads a real workbook with every table', async ({ page }) => {
+  await signIn(page);
+  await page.evaluate(() => { location.hash = '#/reports'; });
+  const btn = page.getByRole('button', { name: 'Excel' });
+  await btn.waitFor();
+  const [dl] = await Promise.all([page.waitForEvent('download'), btn.click()]);
+  expect(dl.suggestedFilename()).toMatch(/\.xlsx$/);
+  const ExcelJS = (await import('exceljs')).default;
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(await dl.path());
+  expect(wb.worksheets.length).toBeGreaterThan(2);
+  expect(wb.worksheets[0].rowCount).toBeGreaterThan(1);
+});

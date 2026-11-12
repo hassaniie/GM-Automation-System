@@ -16,16 +16,16 @@ export const Scene3D = (function () {
       // lifted epoxy-grey floor with a cool bias; production zones read as lighter bays
       bg: 0x0b0e12, floor: 0x12171c, zone: 0x171d24, zoneEdge: 0x3f4a56, grid1: 0x151a20, grid2: 0x1a2027, pad: 0x1c232b, padEdge: 0x4a5562, padEdgeHi: 0xc9d2da,
       steel: 0x8f99a4, steelDark: 0x3a424b, rail: 0x7a8591, column: 0x2a323b, conveyor: 0x2a323b, slat: 0x333c46, equip: 0x3c454f, equipAccent: 0x4f97e0,
-      text: '#d3d9df', textDim: '#7d8894', note: '#98a4b0', warnText: '#d6b062', hemi: [0xd8e2ee, 0x1a2027, 0.95], amb: 0.26, key: 1.4, rim: 0.7, fill: 0.5, pools: 1, badge: 0.42, fogNear: 170, fogFar: 330,
+      text: '#e4e8ec', textDim: '#a2acb7', note: '#aab4bf', warnText: '#d6b062', hemi: [0xd8e2ee, 0x1a2027, 0.95], amb: 0.26, key: 1.4, rim: 0.7, fill: 0.5, pools: 1, badge: 0.42, fogNear: 170, fogFar: 330,
       tone: { muted: 0x5c6670, text: 0xd9dee3, ok: 0x3fc28a, warn: 0xf0a92a, crit: 0xff4d4a, esc: 0xff3d7f, hold: 0x8ea2ff, transit: 0x50c4d8, paused: 0x9aa6b2, sup: 0xb394ff, mnt: 0x4fb4ff },
       xray: 0x9fb4c8, install: 0x6fe3ff, aperture: 0x050607,
     },
     light: {
-      bg: 0xdfe3e7, floor: 0xd6dbe0, zone: 0xe7eaed, zoneEdge: 0x8f99a3, grid1: 0xd0d5da, grid2: 0xc6ccd2, pad: 0xf6f7f8, padEdge: 0xa9b1b9, padEdgeHi: 0x2b3137,
-      steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xf3f5f7, conveyor: 0xc9cfd5, slat: 0xb9c0c7, equip: 0xc5ccd3, equipAccent: 0x1f6fd1,
-      text: '#2b3239', textDim: '#7d8892', note: '#5d6974', warnText: '#9a6f12', hemi: [0xffffff, 0xc2c8cf, 0.95], amb: 0.3, key: 1.0, fogNear: 170, fogFar: 330,
+      bg: 0xdfe3e7, floor: 0xcdd3d9, zone: 0xe2e6ea, zoneEdge: 0x8f99a3, grid1: 0xd0d5da, grid2: 0xc6ccd2, pad: 0xf6f7f8, padEdge: 0x7f8992, padEdgeHi: 0x2b3137,
+      steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xaeb6be, conveyor: 0x9ea7b0, slat: 0x8d969f, equip: 0xaab2ba, equipAccent: 0x1f6fd1,
+      text: '#1f252b', textDim: '#5b6670', note: '#4d5862', warnText: '#9a6f12', hemi: [0xffffff, 0xb4bcc4, 0.42], amb: 0.1, key: 0.5, fogNear: 170, fogFar: 330,
       tone: { muted: 0x9aa3ab, text: 0x2b3239, ok: 0x1f9a66, warn: 0xd08a0b, crit: 0xe23b3b, esc: 0xd01f5e, hold: 0x4a62e0, transit: 0x0f8ea6, paused: 0x7a8794, sup: 0x7a4fe0, mnt: 0x0a7fd6 },
-      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.38, pools: 0, badge: 0.32,
+      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.14, pools: 0, badge: 0.32,
     },
   };
   let T = THEMES.dark, themeName = 'dark';
@@ -116,7 +116,8 @@ export const Scene3D = (function () {
     Object.entries(EDGES).forEach(([k, p]) => { const q = p.at(0.5); const m = new THREE.Mesh(arrowGeo, arrowMat); m.rotation.x = -Math.PI / 2; m.rotation.z = Math.atan2(-q.dz, q.dx); m.position.set(q.x, k.startsWith('FL') ? 0.32 : 0.02, q.z); scene.add(m); });
     // building column grid
     const colMat = tm('column', { roughness: 0.8 });
-    for (let x = -54; x <= 72; x += 18) [-31, 25].forEach((z) => box(0.7, 9, 0.7, colMat, x, 4.5, z));
+    // north row only: the south row stood between the default camera and the floor labels ("FINA · LINE", audit T1)
+    for (let x = -54; x <= 72; x += 18) box(0.7, 9, 0.7, colMat, x, 4.5, -31);
     // paint-shop feed and storage exit
     floorText('FROM PAINT SHOP  →', -63, 11, 7, { size: 40, weight: 500, colorKey: 'textDim', letter: 3 });
     floorText('PAINTED BODY BUFFER', -53.8, 3.2, 6.5, { size: 36, weight: 600, colorKey: 'textDim', letter: 3 });
@@ -158,7 +159,7 @@ export const Scene3D = (function () {
       t.image = cv; t.needsUpdate = true;
     });
     tex.anisotropy = 8;
-    floorBadge = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: T.badge, depthWrite: false }));
+    floorBadge = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), /* smaller than the lines beside it (audit T5) */ new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: T.badge, depthWrite: false }));
     floorBadge.rotation.x = -Math.PI / 2; floorBadge.position.set(43, 0.013, -12); floorBadge.renderOrder = 1; scene.add(floorBadge);
     floorText('MG MOTORS · GENERAL ASSEMBLY', 33, -0.6, 20, { size: 46, weight: 600, colorKey: 'textDim', letter: 14, w: 1280 });
   }
@@ -179,8 +180,8 @@ export const Scene3D = (function () {
       tex.needsUpdate = true;
     };
     img.onload = draw; img.src = BV_FULL;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(20, 20 * H / W), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
-    m.rotation.x = -Math.PI / 2; m.position.set(-52.5, 0.014, -29); m.renderOrder = 1; scene.add(m);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(14, 14 * H / W), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2; m.position.set(-55.5, 0.014, -29); m.renderOrder = 1; scene.add(m);
     bvRedraw = draw;
   }
   let bvRedraw = null;
@@ -515,6 +516,11 @@ export const Scene3D = (function () {
     const G = carGeo[kind], sx = G.sx, sy = G.sy;
     const root = new THREE.Group(); scene.add(root);
     const paint = new THREE.MeshStandardMaterial({ color: new THREE.Color(v.paint.hex), metalness: 0.3, roughness: 0.42 });
+    // ISA-101: in the overview a car's paint is muted towards grey so colour still means a problem; the real colour
+    // shows on the selected or hovered car (audit D2)
+    paint.userData.full = paint.color.clone();
+    { const hsl = {}; paint.color.getHSL(hsl); paint.userData.muted = new THREE.Color().setHSL(hsl.h, hsl.s * 0.12, 0.3 + hsl.l * 0.45); }
+    paint.color.copy(paint.userData.muted);
     const id = isBuffer ? null : v.id;
     const pick = (m) => { if (id) { m.userData = { kind: 'veh', id }; pickables.push(m); } return m; };
     const shell = pick(new THREE.Mesh(G.shell, paint)); shell.castShadow = true; shell.receiveShadow = true; root.add(shell);
@@ -603,7 +609,11 @@ export const Scene3D = (function () {
   }
   function disposeCar(id) {
     const o = carObjs[id]; if (!o) return;
-    scene.remove(o.root); scene.remove(o.ring); o.paint.dispose();
+    scene.remove(o.root); scene.remove(o.ring); o.paint.dispose(); o.ring.material.dispose();
+    // free this car's own geometries (tubes, badges, ring); the shared body shapes and unit box stay (audit T5)
+    const shared = new Set([unitBox, ...Object.values(carGeo).flatMap((g) => Object.values(g).filter((x) => x && x.isBufferGeometry))]);
+    const free = (n) => { if (n.geometry && !shared.has(n.geometry)) n.geometry.dispose(); };
+    o.root.traverse(free); free(o.ring);
     o.root.traverse((n) => { const i = pickables.indexOf(n); if (i >= 0) pickables.splice(i, 1); });
     delete carObjs[id];
   }
@@ -657,15 +667,16 @@ export const Scene3D = (function () {
     FINAL: { target: [38, 0.5, 11.5], dist: 62, az: 0.32, pol: 0.88 },
   };
   function camFromSpherical(target, dist, az, pol) {
-    const aspect = el.clientWidth / Math.max(1, el.clientHeight), k = aspect < 1.5 ? Math.min(2, 1.5 / aspect) : 1, d = dist * k;
+    const aspect = el.clientWidth / Math.max(1, el.clientHeight), k = aspect < 1.5 ? Math.min(3.4, 1.5 / aspect) : 1, d = dist * k; // portrait screens back off further so the whole shop fits (audit T5)
+    controls.maxDistance = Math.max(200, d * 1.15);
     return new THREE.Vector3(target[0] + d * Math.sin(pol) * Math.sin(az), target[1] + d * Math.cos(pol), target[2] + d * Math.sin(pol) * Math.cos(az));
   }
   function flyTo(target, dist, az, pol, ms = 1150) { camAnim = { t0: performance.now(), ms, fromPos: camera.position.clone(), fromTgt: controls.target.clone(), toPos: camFromSpherical(target, dist, az, pol), toTgt: new THREE.Vector3(...target) }; }
   function focusView(name) { const v = VIEWS[name] || VIEWS.overview; flyTo(v.target, v.dist, v.az, v.pol); }
   function currentAzPol() { const off = camera.position.clone().sub(controls.target); const r = off.length(); return { az: Math.atan2(off.x, off.z), pol: Math.acos(off.y / r) }; }
   function focusPoint(x, y, z, dist) { const { az, pol } = currentAzPol(); flyTo([x, y, z], dist, Math.max(-0.9, Math.min(1.1, az)), Math.min(Math.max(pol, 0.72), 0.98)); }
-  function focusPos(id) { const P = POS[id]; focusPoint(P.x, P.hang > 1.5 ? 2.4 : 1.2, P.z, 34); }
-  function focusVehicle(vid) { const o = carObjs[vid]; if (o && o.vis) focusPoint(o.vis.x, o.vis.y + 0.8, o.vis.z, 24); }
+  function focusPos(id) { const P = POS[id]; focusPoint(P.x, P.hang > 1.5 ? 2.4 : 1.2, P.z, 46); }
+  function focusVehicle(vid) { const o = carObjs[vid]; if (o && o.vis) focusPoint(o.vis.x, o.vis.y + 0.8, o.vis.z, 32); }
   function focusAny(sel) {
     if (!sel) return;
     if (sel.kind === 'pos') focusPos(sel.id); else if (sel.kind === 'veh') focusVehicle(sel.id);
@@ -708,7 +719,7 @@ export const Scene3D = (function () {
     buildEnvironment(); buildLightPools(); buildFloorBadge(); buildBvBadge(); buildSignage(); buildEquipment(); buildRails(); buildPads(); buildScanners(); buildBeacons(); buildChevrons();
     Object.values(getState().carriers).forEach(makeCarrier);
     controls = new OrbitControls(camera, renderer.domElement);
-    Object.assign(controls, { enableDamping: true, dampingFactor: 0.09, minDistance: 8, maxDistance: 220, maxPolarAngle: 1.22, minPolarAngle: 0.2, rotateSpeed: 0.55, zoomSpeed: 0.8, panSpeed: 0.8, screenSpacePanning: false, minAzimuthAngle: -1.2, maxAzimuthAngle: 1.3 });
+    Object.assign(controls, { enableDamping: true, dampingFactor: 0.09, minDistance: 14, maxDistance: 200, maxPolarAngle: 1.22, minPolarAngle: 0.2, rotateSpeed: 0.55, zoomSpeed: 0.8, panSpeed: 0.8, screenSpacePanning: false, minAzimuthAngle: -1.2, maxAzimuthAngle: 1.3 });
     const v = VIEWS.overview; controls.target.set(...v.target); resize(); camera.position.copy(camFromSpherical(v.target, v.dist, v.az, v.pol)); controls.update();
     raycaster = new THREE.Raycaster();
     const cvs = renderer.domElement;
@@ -758,7 +769,13 @@ export const Scene3D = (function () {
     // frame the line inside the UI safe area: the inspector on the right, the top bar and the strip
     viewShift += ((ui.panelWidth || 0) + safe.right - safe.left - viewShift) * 0.12;
     viewShiftY += (safe.bottom - safe.top - viewShiftY) * 0.12;
-    if (floorBadge) floorBadge.material.opacity = T.badge * E.clamp((camera.position.distanceTo(controls.target) - 30) / 70, 0.35, 1);
+    const camDist = camera.position.distanceTo(controls.target);
+    if (floorBadge) floorBadge.material.opacity = T.badge * E.clamp((camDist - 30) / 70, 0.35, 1);
+    // fog follows the camera, so zooming out never sinks the shop into fog; small floor labels show only when the camera
+    // is close enough to read them (audit T2, T5)
+    scene.fog.near = camDist + 70; scene.fog.far = camDist + 280;
+    const smallA = E.clamp((125 - camDist) / 35, 0, 1);
+    for (const t of texts) if (t.o.size < 60) { t.mesh.material.opacity = smallA; t.mesh.visible = smallA > 0.02; }
     const w = el.clientWidth, h = el.clientHeight;
     if (Math.abs(viewShift) > 0.5 || Math.abs(viewShiftY) > 0.5) camera.setViewOffset(w, h, viewShift / 2, viewShiftY / 2, w, h); else camera.clearViewOffset();
     const pulse = 0.5 + 0.5 * Math.sin(now / 320), sel = ui.selection, hov = ui.hover;
@@ -834,6 +851,7 @@ export const Scene3D = (function () {
       applyBuild(o, E.buildState(S, v), isSel || isHov);
       setXray(o, !!(ui.xray || (isSel && ui.xraySel)));
       o.paint.emissive.setHex(isSel ? 0x202020 : isHov ? 0x121212 : 0x000000);
+      o.paint.color.copy(isSel || isHov ? o.paint.userData.full : o.paint.userData.muted);
       o.ring.position.set(pose.x, 0.04, pose.z); o.ring.rotation.z = pose.yaw; o.ring.material.opacity = sel && sel.kind === 'veh' && sel.id === vid ? 0.9 : 0; o.ring.material.color.setHex(T.padEdgeHi);
     }
     for (const id of Object.keys(carObjs)) if (!seen.has(id)) disposeCar(id);
