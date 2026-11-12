@@ -8,6 +8,12 @@
   :root {
     /* neutrals: cool graphite, light → dark */
     --ds-n-0: #ffffff; --ds-n-25: #f6f7f9; --ds-n-50: #f2f4f6; --ds-n-100: #e8ebee; --ds-n-200: #c3cad1; --ds-n-300: #9aa6b2;
+
+    /* fixed dark surfaces, the same in both themes: the line display (TV), the sign-in hero and the scanner art */
+    --ds-tv-bg: #07090b; --ds-tv-surface: #0f1418; --ds-tv-line: #26303a; --ds-tv-text: #eef2f5; --ds-tv-muted: #8b97a3; --ds-tv-dim: #7a8590;
+    --ds-tv-bar: #dbe3ea; --ds-tv-ok: #2ecc71; --ds-tv-over: #ff3b30; --ds-tv-over-text: #ff6b62; --ds-tv-warn-text: #f0c46a; --ds-tv-sup: #6c3fd8; --ds-tv-mnt: #0a6fc2;
+    --ds-hero-text: #e8edf2; --ds-hero-1: #1d2731; --ds-hero-2: #0d1217; --ds-hero-3: #080b0e; --ds-hero-muted: #93a0ad; --ds-hero-body: #b5c0ca; --ds-hero-foot: #7f8b97;
+    --ds-scan-bg: #050607; --ds-scan-bars: #d6d9dc; --ds-scan-laser: #ff3b3b; --ds-red-mg-alt: #cc1f26;
     --ds-n-400: #8b959f; --ds-n-500: #5f6a76; --ds-n-600: #606972; --ds-n-700: #3a434c; --ds-n-800: #121417; --ds-n-850: #0f1215;
     --ds-n-900: #0c1014; --ds-n-950: #08090b;
     /* MG brand (identity only, never a status) */
@@ -45,6 +51,9 @@
     --ds-ease-standard: cubic-bezier(.2, 0, .38, .9); --ds-ease-emphasised: cubic-bezier(.2, .7, .2, 1);
     /* stacking layers (named; never raw numbers) */
     --ds-z-scene: 0; --ds-z-scene-tags: 10; --ds-z-chrome: 20; --ds-z-panel: 30; --ds-z-drawer: 40; --ds-z-overlay: 50; --ds-z-toast: 60; --ds-z-critical: 70;
+    /* finer steps used inside the floor's layers (same values as before the migration, named so the order is explicit) */
+    --ds-z-scene-anchor: 5; --ds-z-scene-note: 6; --ds-z-floor-console: 12; --ds-z-floor-card: 13; --ds-z-floor-panel: 14; --ds-z-floor-pop: 15;
+    --ds-z-drawer-floor: 25; --ds-z-drawer-tablet: 26; --ds-z-display: 70; --ds-z-signin: 80; --ds-z-power: 95;
     /* breakpoints (documentation; media queries cannot read variables):
        compact < 1024 · regular 1024–1439 · wide 1440–1919 · ultra ≥ 1920 */
   }
