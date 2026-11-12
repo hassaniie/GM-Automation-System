@@ -13,7 +13,6 @@ import { ActIsland, IdIsland, StateIsland, Strip } from './floor/islands.js';
 import { Plan2D } from './floor/plan2d.js';
 import { DEMO_AFTER, SCENARIOS, applyScenarioHints, freshState, injectDemoDelay, openAlarm, select, topAlarm } from './floor/scenarios.js';
 import { REMOTE, remoteAcc, startRemote } from './lib/source.js';
-import { SimConsole } from './floor/sim-console.js';
 import { HowPage } from './how.js';
 import { LineOffCard } from './lib/misc.js';
 import { go, parseHash } from './lib/router.js';
@@ -124,7 +123,7 @@ function App() {
     ${RT.ui.view2D ? html`<${Plan2D} fallback=${!webgl} />` : html`<${Anchors} />`}
     ${!RT.ui.view2D ? html`<${HoverCard} />` : null}
     <header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header>
-    <${Strip} /><${SimConsole} /><${LineOffCard} />
+    <${Strip} /><${LineOffCard} />
     ${RT.ui.legend ? html`<${Legend} />` : null}
     ${RT.ui.selection ? html`<${Inspector} key=${RT.ui.selection.kind + RT.ui.selection.id} />` : null}</${React.Fragment}>`
     : page === 'display' ? html`<${LineDisplay} />`

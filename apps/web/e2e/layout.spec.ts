@@ -83,19 +83,19 @@ test('station panel and alarm drawer never clip their content', async ({ page })
   expect(found).toEqual([]);
 });
 
-test('the open simulation console and Key never run under the page rail', async ({ page }) => {
+test('the open simulator menu and Key never run under the page rail', async ({ page }) => {
   await signIn(page, 'dark');
   const found: string[] = [];
   for (const [w, h] of [[1024, 768], [1440, 900], [1920, 1080]]) {
     await page.setViewportSize({ width: w, height: h });
-    // the two share the bottom-left corner, so they open one at a time; each is checked open
-    for (const [ui, s] of [[{ simOpen: true, legend: false }, '.simcon-body'], [{ simOpen: false, legend: true }, '.legend-pop']] as const) {
+    // each is checked open
+    for (const [ui, s] of [[{ simOpen: true, legend: false }, '.sim-pop'], [{ simOpen: false, legend: true }, '.legend-pop']] as const) {
     await page.evaluate((ui) => { location.hash = '#/floor'; (window as unknown as { __mg: { setUI: (u: object) => void } }).__mg.setUI({ ...ui, selection: null, drawer: null }); }, ui);
     await page.locator(s).waitFor();
     await page.waitForTimeout(300);
     found.push(...(await page.evaluate(([w, s]) => {
       const rail = document.querySelector('.ds-rail')?.getBoundingClientRect(); if (!rail) return [`${w}px: no rail`];
-      return [s === '.simcon-body' ? '.simcon' : s].flatMap((s) => {
+      return [s].flatMap((s) => {
         const r = document.querySelector(s)!.getBoundingClientRect();
         const hit = r.left < rail.right && r.right > rail.left && r.top < rail.bottom && r.bottom > rail.top;
         return hit ? [`${w}px: ${s} overlaps the rail`] : [];

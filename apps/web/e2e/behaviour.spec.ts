@@ -40,12 +40,12 @@ test('B9: the user menu closes on Escape and on a click outside', async ({ page 
 
 test('B6: a view-only account sees no simulator controls', async ({ page }) => {
   await signIn(page);
-  await expect(page.locator('.simcon')).toHaveCount(1);
+  await expect(page.locator('.sim-btn')).toHaveCount(1);
   await page.locator('.ubtn').click();
   await page.locator('.um-item', { hasText: /View only|Head Office/ }).first().click();
   await page.evaluate(() => { location.hash = '#/floor'; (window as unknown as MG).__mg.setUI({ selection: { kind: 'pos', id: 'FL3' } }); });
   await page.locator('.inspector').waitFor();
-  await expect(page.locator('.simcon')).toHaveCount(0);
+  await expect(page.locator('.sim-btn')).toHaveCount(0);
   await expect(page.locator('.inspector', { hasText: 'Simulation only' })).toHaveCount(0);
 });
 

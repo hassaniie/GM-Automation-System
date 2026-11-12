@@ -1,5 +1,5 @@
 /* The MG badge in 3D: a slowly swaying, extruded badge centred behind the page screens (Dashboard, Reports,
-   Settings, Guide). Neutral metal, never red: on these screens red is reserved for problems.
+   Settings, Guide), in its own MG red: the ring and letters in red satin metal standing proud of the plate.
    Light on the GPU: about 30 frames a second at most, pixel ratio capped at 1.5, and nothing is drawn while
    the tab is hidden, the canvas is off screen or the user prefers reduced motion (one still frame then). */
 import * as THREE from 'three';
@@ -8,8 +8,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MG_BADGE_PLATE, MG_BADGE_RED } from './brand.js';
 
 const THEMES = {
-  dark: { plate: 0x171a1f, chrome: 0x7d8691, env: 0.1, hemi: 0.35, key: 1.6, rim: 1.2, opacity: 0.5 },
-  light: { plate: 0xeceef1, chrome: 0xb4bbc3, env: 0.14, hemi: 0.8, key: 1.2, rim: 0.5, opacity: 0.3 },
+  dark: { plate: 0x171a1f, chrome: 0xb3141f, env: 0.1, hemi: 0.35, key: 1.6, rim: 1.2, opacity: 0.5 },
+  light: { plate: 0xeceef1, chrome: 0xc8102e, env: 0.14, hemi: 0.8, key: 1.2, rim: 0.5, opacity: 0.3 },
 };
 THREE.ColorManagement.enabled = false; // as the floor scene: colours are used as written, one look whichever loads first
 const UNIT = 1200; // the traced badge is 1200 × 1200
@@ -37,7 +37,7 @@ export function mountBadge(canvas, { theme = 'dark', onLost } = {}) {
   const rim = new THREE.DirectionalLight(0xdfe7ff, 1); rim.position.set(1400, -600, -400); scene.add(rim);
 
   const plateMat = new THREE.MeshStandardMaterial({ metalness: 0.2, roughness: 0.6 });
-  const chromeMat = new THREE.MeshStandardMaterial({ metalness: 0.85, roughness: 0.32 });
+  const chromeMat = new THREE.MeshStandardMaterial({ metalness: 0.55, roughness: 0.35 });
   const bevel = { bevelEnabled: true, bevelSegments: 4, curveSegments: 18 };
   const plateGeo = new THREE.ExtrudeGeometry(shapesOf(MG_BADGE_PLATE), { ...bevel, depth: 60, bevelThickness: 14, bevelSize: 10 });
   const redGeo = new THREE.ExtrudeGeometry(shapesOf(MG_BADGE_RED), { ...bevel, depth: 46, bevelThickness: 12, bevelSize: 5 });

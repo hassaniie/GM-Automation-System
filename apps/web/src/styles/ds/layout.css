@@ -44,6 +44,19 @@
   .hud-tools, .hud-alerts { display: flex; align-items: stretch; }
   .hud-alerts { border-left: var(--ds-border-1) solid var(--ds-border-subtle); }
   .tools-menu { display: none; position: relative; align-items: stretch; }
+  /* simulator: "Scenario n · 15× ▾" in the bar opens its menu (run, speed, scenarios, plant settings) */
+  .sim-menu { position: relative; display: flex; align-items: stretch; }
+  .sim-btn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); white-space: nowrap; }
+  .sim-btn:hover, .sim-btn[aria-expanded="true"] { color: var(--ds-text-primary); }
+  .sim-btn .sim-x { font-size: var(--ds-size-11); color: var(--ds-text-muted); }
+  .sim-dot { width: 8px; height: 8px; border-radius: var(--ds-radius-round); background: var(--ds-text-disabled); }
+  .sim-dot.on { background: var(--ds-status-sim); }
+  .sim-pop { right: 0; width: min(400px, calc(100vw - 2 * var(--g))); padding: 0; gap: 0; }
+  .sim-pop-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-space-3); padding: var(--ds-space-3); }
+  .sim-pop .simcon-body { max-height: min(64vh, 620px); }
+  .sim-pop .scn .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* one line each; the full description is the tooltip */
+  @media (max-width: 1279px) { .sim-btn .sim-x { display: none; } }
+  @media (max-width: 1023px) { .hud .sim-menu { display: none; } } /* phones: Run / Pause is in the menu */
   .tools-pop { width: 260px; }
   @media (max-width: 1439px) {
     .hud-tools { display: none; }
@@ -90,6 +103,9 @@
     .cell .ct, .cell .hg, .cell .cid .ico { display: none; }
     .cell .mk { display: block; }
   }
+  /* the four view buttons: a 2 × 2 grid of equal buttons, icon and label left-aligned, centred on the cards */
+  .strip .views { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ds-space-1); align-content: center; }
+  .strip .views button { display: inline-flex; align-items: center; justify-content: flex-start; gap: var(--ds-space-2); width: 100%; height: 30px; padding: 0 var(--ds-space-3); }
   .lane-tabs { display: none; }
   @media (max-width: 1023px) {
     :root { --strip-h: 136px; }
@@ -106,12 +122,13 @@
 
 /* cell status: a coloured top edge and an icon instead of tinting the whole cell (ISA-101: normal is quiet) */
 @layer components {
-  /* one card per station on the strip's glass: no grid box behind them, no corner marks, one radius and one
-     hairline for every card. A problem station is tinted lightly and gets its coloured top edge. */
-  .strip .cells { gap: var(--ds-space-1); background: none; border: 0; }
-  .strip .cell { background: var(--ds-layer-1); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-sm); }
+  /* one card per line: its stations sit side by side, split by full-height hairlines (the line's own
+     border and dividers, no corner marks). A problem station is tinted lightly and gets its coloured top edge. */
+  .strip .cells { gap: 0; background: var(--ds-layer-1); border: var(--ds-border-1) solid var(--ds-border-strong); border-radius: var(--ds-radius-md); overflow: hidden; }
+  .strip .cell { background: transparent; border: 0; border-left: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: 0; }
+  .strip .cell:first-child { border-left: 0; }
   .strip .cell::after { content: none; }
-  .strip .cell:hover { background: var(--ds-layer-2); }
+  .strip .cell:hover { background: var(--ds-layer-1); }
   .strip .cell.over, .strip .cell.x { background: color-mix(in srgb, var(--ds-status-critical) 10%, transparent); }
   .strip .cell.near { background: color-mix(in srgb, var(--ds-status-warning) 9%, transparent); }
   .strip .cell.held { background: color-mix(in srgb, var(--ds-status-held) 9%, transparent); }
@@ -126,7 +143,7 @@
   .strip .cell.over .mk, .strip .cell.x .mk { color: var(--ds-status-critical); }
   .strip .cell.near .mk { color: var(--ds-status-warning); }
   .strip .cell.held .mk { color: var(--ds-status-held); }
-  .strip .cell[aria-pressed="true"] { border-color: var(--ds-text-primary); }
+  .strip .cell[aria-pressed="true"] { background: var(--ds-layer-2); box-shadow: inset 0 0 0 1px var(--ds-text-primary); }
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -158,8 +175,7 @@
   /* floor panels docked bottom-left (simulation console, Key) start right of the rail, so neither runs under it when
      it grows upward (audit U1) */
   @media (min-width: 768px) {
-    .stage.has-rail .simcon, .stage.has-rail .legend-pop { left: calc(var(--gl) + var(--ds-rail-space)); }
-    .stage.has-rail .simcon { width: min(420px, calc(100vw - var(--gl) - var(--ds-rail-space) - var(--gr))); }
+    .stage.has-rail .legend-pop { left: calc(var(--gl) + var(--ds-rail-space)); }
   }
   /* page screens: the content starts right of the rail */
   .stage.has-rail > .page-shell > .page-scroll { padding-left: var(--ds-rail-space); }
@@ -220,13 +236,12 @@
     /* strip: views, then line tabs, then the chosen line's stations */
     .strip { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); padding: var(--ds-space-2) var(--ds-space-3); }
     .strip .views { grid-column: 1; grid-row: 1; display: flex; flex-wrap: nowrap; gap: var(--ds-space-1); border-right: 0; padding-right: 0; }
+    .strip .views button { width: auto; }
     .strip .lane-tabs { grid-column: 1; grid-row: 2; }
     .strip .lane-tabs button { flex: 1 1 0; }
     .strip .lanes { grid-column: 1; grid-row: 3; }
 
     /* floating panels: full width */
-    .simcon { left: var(--gl); right: var(--gr); width: auto; }
-    .simcon-bar .micro { display: none; }
     .drawer { top: calc(var(--gt) + var(--hud-h) + var(--g)); left: var(--gl); right: var(--gr); bottom: var(--gb); width: auto; }
     .inspector { top: auto; left: var(--gl); right: var(--gr); bottom: var(--gb); width: auto; max-height: 70dvh; }
   }

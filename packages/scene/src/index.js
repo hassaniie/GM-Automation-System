@@ -158,18 +158,16 @@ export const Scene3D = (function () {
   }
 
   /* MG branding painted on the open floor north of the Final line (x 33–53, z −22…−2):
-     the official badge in neutral grey at full strength, untouched by fog (as is the Bolt & Volt mark). */
+     the official red badge at full strength, untouched by fog (as is the Bolt & Volt mark). */
   function buildFloorBadge() {
     // painted as a neutral watermark (design system: red on the floor means an alarm, never decoration)
-    // one neutral ink per theme, so the badge reads at full strength on either floor: light grey on the dark
-    // floor, dark grey on the light one
+    // the official badge in its own MG red, at full strength on either floor
     const img = new Image(), cv = document.createElement('canvas'); cv.width = cv.height = 400; // sized before the texture: a GPU texture cannot change size
     const tex = new THREE.CanvasTexture(cv);
     const draw = () => {
       if (!img.complete || !img.naturalWidth) return;
       const cx = cv.getContext('2d'); cx.clearRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
-      cx.globalCompositeOperation = 'source-in'; cx.fillStyle = themeName === 'dark' ? '#8d97a2' : '#7a838c'; cx.fillRect(0, 0, cv.width, cv.height);
-      cx.globalCompositeOperation = 'source-over'; tex.needsUpdate = true;
+      tex.needsUpdate = true;
     };
     img.onload = draw; img.src = MG_FLOOR_LOGO; badgeRedraw = draw;
     tex.anisotropy = ANISO;

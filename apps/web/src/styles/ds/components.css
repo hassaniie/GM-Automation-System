@@ -5,7 +5,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 @layer components {
   /* ── corners ── */
-  :is(.glass, .panel, .hud, .strip, .simcon, .inspector, .drawer, .report, .dialog, .umenu-pop, .charttip,
+  :is(.glass, .panel, .hud, .strip, .inspector, .drawer, .report, .dialog, .umenu-pop, .charttip,
       .btn, .ibtn, .alarm-pill, .tabs, .views, .speeds, .vsearch, .vresult, .scn, .callrow, .callout, .result,
       .adm-card, .adm-tab, .cfg, .dev-card, .rep-filters, .rep-kpis > div, .plan-day, .timeline, .stimeline, .elog, .confirm-row,
       .lineoff, .lcd-banner, .lcd-none, .scanwin, .signin, .si-acct, .si-demo, .si-err, .si-input, .si-live, .si-soon,

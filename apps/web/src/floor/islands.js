@@ -2,7 +2,9 @@
 import { downtimeTone, planTone } from '../lib/tone.js';
 import { Scene3D } from '../lib/scene.js';
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
-import { UserMenu } from '../auth.js';
+import { UserMenu, can } from '../auth.js';
+import { Act } from '../lib/act.js';
+import { SimMenu } from './sim-console.js';
 import { openAlarm, select, topAlarm } from './scenarios.js';
 import { AREAS, M, POS, RT, cycleTheme, dispId, fmtClock, fmtDur, html, setUI, useRef, useState } from '../lib/runtime.js';
 import { usePopover } from '../lib/fit.js';
@@ -57,6 +59,7 @@ function ToolsMenu({ themeIcon }) {
     ['scanin', 'Line-in scan at TL1', () => setUI({ dialog: { type: 'scan', scanner: 'ENTRY' } })],
     ['xray', RT.ui.xray ? 'X-ray view: on' : 'X-ray view: off', () => setUI({ xray: !RT.ui.xray })],
     [themeIcon, `Theme: ${RT.ui.theme}`, cycleTheme],
+    ...(RT.conn.mode !== 'live' && can('sim') ? [[RT.running ? 'pause' : 'play', RT.running ? 'Pause simulation' : 'Run simulation', () => Act.setRunning(!RT.running)]] : []),
     [RT.ui.muted ? 'mute' : 'vol', RT.ui.muted ? 'Alarm sound: muted' : 'Alarm sound: on', () => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }],
   ];
   // on phones the same menu also lists the pages (the rail is hidden there) and is labelled "Menu"
@@ -78,6 +81,7 @@ export function ActIsland() {
     <button class="ibtn" title=${`Theme: ${RT.ui.theme}`} aria-label=${`Theme ${RT.ui.theme}. Switch theme`} onClick=${cycleTheme}><${Icon} n=${themeIcon} /></button>
     <button class="ibtn" title=${RT.ui.muted ? 'Alarm sound muted' : 'Alarm sound on'} aria-label=${RT.ui.muted ? 'Unmute alarm sound' : 'Mute alarm sound'} onClick=${() => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }}><${Icon} n=${RT.ui.muted ? 'mute' : 'vol'} /></button>
     </div>
+    <${SimMenu} />
     <${ToolsMenu} themeIcon=${themeIcon} />
     <span class="sep"></span>
     <div class="hud-alerts"><${AlertsButton} active=${active} unacked=${unacked} /></div>
@@ -99,7 +103,7 @@ export function Strip() {
       <button aria-pressed=${RT.ui.view === 'overview' && !RT.ui.view2D} onClick=${() => go('overview')}><${Icon} n="layers" size=${14} />3D</button>
       <button aria-pressed=${RT.ui.view2D} onClick=${() => go('2D')}><${Icon} n="map" size=${14} />2D</button>
       <button class=${top ? 'alert' : ''} disabled=${!top} onClick=${() => top && openAlarm(top)} title="Focus the most urgent alarm (A)"><${Icon} n="target" size=${14} />Alarm</button>
-      <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend, simOpen: false })}><${Icon} n="info" size=${14} />Key</button>
+      <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend })}><${Icon} n="info" size=${14} />Key</button>
     </div>
     <div class="lane-tabs" role="tablist" aria-label="Line">${lanes.map(([k, name]) => html`<button key=${k} role="tab" aria-selected=${stripLane === k} onClick=${() => setUI({ stripLane: k })}>${name}</button>`)}</div>
     <div class="lanes" data-lane=${stripLane}>${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} data-k=${k} style=${{ '--n': ids.length }}>

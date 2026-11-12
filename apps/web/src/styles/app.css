@@ -114,8 +114,6 @@ button { cursor: pointer; }
 .cell.idle .cid { color: var(--muted); }
 
 /* simulation console */
-.simcon { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(132px + env(safe-area-inset-bottom, 0px)); width: min(400px, calc(100vw - 32px)); border-style: dashed; border-color: color-mix(in srgb, var(--sim) 45%, transparent); z-index: var(--ds-z-floor-console); }
-.simcon-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; }
 .simcon-body { border-top: 1px dashed var(--hair-2); padding: 12px; display: grid; gap: 16px; max-height: min(56vh, 540px); overflow: auto; }
 /* scroll cue (audit U6): the bottom edge fades while there is more below; the fade goes once scrolled to the end */
 .simcon-body { mask-image: linear-gradient(black calc(100% - 28px), transparent); }
@@ -297,8 +295,6 @@ svg.plan text { font-family: var(--font-mono); }
 .cell.w { background: color-mix(in srgb, var(--hold) 12%, var(--bg)); }
 .lane-h .micro { font-size: 10px; }
 /* simulation console sits on the strip, flush left */
-.simcon { left: 0; bottom: calc(var(--strip-h) + env(safe-area-inset-bottom, 0px)); width: min(420px, 100vw); border-width: 1px 1px 0 0; border-style: solid; border-color: var(--hair-2); box-shadow: none; }
-.simcon-bar { padding: 6px 8px 6px max(16px, env(safe-area-inset-left, 0px)); }
 .simcon-body { border-top: 1px solid var(--hair); }
 .scn { border-left: 2px solid transparent; }
 .scn[aria-current="true"] { border-left-color: var(--sim); background: var(--fill); }
@@ -323,7 +319,7 @@ svg.plan text { font-family: var(--font-mono); }
 .shiftbar, .cell .bar, .build .pg, .route .s { border-radius: 0; }
 /* flush frames: registration marks sit just inside the edge so screen edges never clip them */
 /* every frame gets a full 1px border so the marks sit exactly on its border line */
-.hud.ticks, .strip.ticks, .simcon.ticks, .inspector.ticks, .drawer.ticks, .report.ticks { border-width: 1px; border-style: solid; border-color: var(--hair-2); }
+.hud.ticks, .strip.ticks, .inspector.ticks, .drawer.ticks, .report.ticks { border-width: 1px; border-style: solid; border-color: var(--hair-2); }
 .cells.ticks::after { inset: -1px; }
 /* overflow would clip marks drawn on the border, so frames don't clip; their inner bodies scroll */
 .inspector.ticks, .drawer.ticks { overflow: visible; }
@@ -343,7 +339,6 @@ svg.plan text { font-family: var(--font-mono); }
   .inspector, .drawer { top: 104px; }
   .strip { grid-template-columns: 1fr; } .views { grid-template-columns: repeat(4, auto); border-right: 0; padding-right: 0; }
   .lane { flex: none; } .cells { grid-auto-columns: 58px; }
-  .simcon { width: 100vw; }
   .inspector { top: auto; bottom: 0; left: 0; width: auto; max-height: 64%; border-width: 1px 0 0 0; }
   .span-8, .span-4, .span-7, .span-5, .span-6 { grid-column: span 12; }
 }
@@ -351,8 +346,6 @@ svg.plan text { font-family: var(--font-mono); }
 :root { --g: 8px; --gl: max(var(--g), env(safe-area-inset-left, 0px)); --gr: max(var(--g), env(safe-area-inset-right, 0px)); --gt: calc(var(--g) + env(safe-area-inset-top, 0px)); --gb: calc(var(--g) + env(safe-area-inset-bottom, 0px)); }
 .hud { top: var(--gt); left: var(--gl); right: var(--gr); padding-left: 0; padding-right: 0; }
 .strip { left: var(--gl); right: var(--gr); bottom: var(--gb); height: var(--strip-h); padding: 12px 16px; }
-.simcon { left: var(--gl); bottom: calc(var(--gb) + var(--strip-h) + var(--g)); width: min(420px, calc(100vw - 2 * var(--g))); }
-.simcon-bar { padding: 6px 8px 6px 12px; }
 .inspector { top: calc(var(--gt) + var(--hud-h) + var(--g)); right: var(--gr); bottom: calc(var(--gb) + var(--strip-h) + var(--g)); width: min(420px, calc(100vw - 2 * var(--g))); padding-right: 0; }
 .drawer { top: calc(var(--gt) + var(--hud-h) + var(--g)); right: var(--gr); bottom: var(--gb); width: min(460px, calc(100vw - 2 * var(--g))); }
 .stage:has(.strip) .drawer { bottom: calc(var(--gb) + var(--strip-h) + var(--g)); } /* on the floor it stops above the strip, like the station panel (audit U5) */
@@ -364,9 +357,8 @@ svg.plan text { font-family: var(--font-mono); }
 @media (max-width: 760px) {
   .inspector { top: auto; left: var(--gl); right: var(--gr); bottom: var(--gb); width: auto; }
   .drawer { top: calc(var(--gt) + 160px + var(--g)); }
-  .simcon { right: var(--gr); width: auto; }
 }
-@media (min-width: 2200px) { :root { --hud-h: 72px; --strip-h: 130px; } .hud, .strip, .simcon, .inspector, .drawer, .legend-pop, .hovercard, .tag { zoom: 1.2; } }
+@media (min-width: 2200px) { :root { --hud-h: 72px; --strip-h: 130px; } .hud, .strip, .inspector, .drawer, .legend-pop, .hovercard, .tag { zoom: 1.2; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; } }
 /* ═══ v4 · STATE SYSTEM ═══════════════════════════════════════════════════════
    One grammar for every interactive element:
@@ -787,7 +779,7 @@ svg.plan text { font-family: var(--font-mono); }
 .rep-filters select, .rep-filters input { height: 38px; padding: 0 10px; border: 1px solid var(--hair-2); background: var(--bg); color: var(--text); font: 500 14px/1 var(--font-ui); }
 .rep-jump { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
 .rep-jump a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--hair-2); } .rep-jump a:hover { color: var(--text); }
-.rsec { display: grid; gap: 10px; overflow-x: auto; }
+.rsec { display: grid; gap: 10px; } /* wide tables scroll inside their own wrapper (.ds-table-wrap), never the whole section */
 .rsec .ds-table { min-width: 640px; }
 /* ═════════ how it works ═════════ */
 .how { display: grid; gap: 16px; }
@@ -797,7 +789,7 @@ svg.plan text { font-family: var(--font-mono); }
 .six .ds-panel { display: grid; gap: 8px; align-content: start; } .six .ds-panel p { margin: 0; line-height: 1.55; color: var(--text-2); }
 .six-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
 .how-ul { margin: 0; padding-left: 18px; color: var(--text-2); line-height: 1.6; }
-.cov { overflow-x: auto; } .cov .ds-table { min-width: 760px; } .cov td:nth-child(2) { width: 32%; } .cov td:nth-child(3) { width: 44%; }
+.cov .ds-table { min-width: 760px; } .cov td:nth-child(2) { width: 32%; } .cov td:nth-child(3) { width: 44%; }
 .arch { width: 100%; height: auto; margin-top: 10px; }
 .ar-box rect { fill: var(--fill); stroke: var(--hair-2); } .ar-box.core rect { stroke: var(--text); stroke-width: 1.5; }
 .ar-t { font: 600 13px/1 var(--font-ui); fill: var(--text); } .ar-s { font: 400 11.5px/1 var(--font-ui); fill: var(--text-2); }
@@ -809,7 +801,7 @@ svg.plan text { font-family: var(--font-mono); }
   :root { color-scheme: light; --bg: var(--ds-n-0); }
   html, body { height: auto !important; overflow: visible !important; background: var(--ds-n-0) !important; }
   #app, .stage, .page-shell, .page-scroll { position: static !important; inset: auto !important; overflow: visible !important; height: auto !important; }
-  .hud, #scene, .simcon, .strip, .noprint, .drawer, .anchors, .lineoff, .umenu-pop, .ds-rail, .tools-pop, .toast, .toasts { display: none !important; }
+  .hud, #scene, .strip, .noprint, .drawer, .anchors, .lineoff, .umenu-pop, .ds-rail, .tools-pop, .toast, .toasts { display: none !important; }
   .stage.has-rail > .page-shell > .page-scroll { padding: 0 !important; }
   .page-scroll .ds-btn { display: none !important; }
   .page-shell .glass, .page-shell .ds-panel { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--ds-n-0) !important; }
