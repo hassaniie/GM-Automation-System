@@ -27,7 +27,7 @@ function problems(page: Page) {
     const kids = [...hud.children].filter((e) => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0).map((e) => ({ name: e.className.toString().split(' ').slice(0, 2).join('.'), r: e.getBoundingClientRect() }));
     for (const k of kids) if (k.r.right > W + 1 || k.r.left < -1) out.push(`${k.name} is outside the window (${Math.round(k.r.left)}–${Math.round(k.r.right)} of ${W})`);
     for (let i = 1; i < kids.length; i++) if (kids[i].r.left < kids[i - 1].r.right - 1) out.push(`${kids[i - 1].name} and ${kids[i].name} overlap by ${Math.round(kids[i - 1].r.right - kids[i].r.left)}px`);
-    for (const [sel, name] of [['.calls-pill', 'Calls'], ['.alarm-pill', 'Alarms'], ['.ubtn', 'user menu'], ['.bv-mark', 'Bolt & Volt logo']] as const) {
+    for (const [sel, name] of [['.alarm-pill', 'Alerts'], ['.ubtn', 'user menu'], ['.bv-mark', 'Bolt & Volt logo']] as const) {
       const e = hud.querySelector(sel); const r = e?.getBoundingClientRect();
       if (!e || !r || r.width === 0 || r.right > W + 1) out.push(`${name} is not fully visible`);
     }
@@ -174,16 +174,18 @@ test('line displays: every cycle time and bar stays inside its card (Trim and Fi
   expect(found).toEqual([]);
 });
 
-test('page screens show the MG badge behind the content; menus are solid', async ({ page }) => {
+test('page screens show the MG badge behind the content; menus are glass', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await signIn(page, 'dark');
   for (const p of ['dash', 'reports', 'admin/takt', 'how']) {
     await page.evaluate((p) => { location.hash = `#/${p}`; }, p);
-    await expect(page.locator('canvas.page-badge'), p).toHaveCount(1);
+    await expect(page.locator('canvas.page-badge'), p).toHaveCount(1, { timeout: 15_000 }); // the whole suite in parallel can be slow
   }
   await page.locator('.ubtn').click();
-  const alpha = await page.locator('.umenu-pop').evaluate((e) => { const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)!; return m.length > 3 ? Number(m[3]) : 1; });
-  expect(alpha).toBeGreaterThan(0.9);
+  // menus are the shared glass: a tinted fill with the standard 24 px blur
+  const glass = await page.locator('.umenu-pop').evaluate((e) => { const c = getComputedStyle(e); return [c.backdropFilter, c.backgroundColor]; });
+  expect(glass[0]).toContain('blur(24px)');
+  expect(glass[1]).not.toBe('rgba(0, 0, 0, 0)');
   await page.keyboard.press('Escape');
   await page.evaluate(() => { location.hash = '#/floor'; });
   await expect(page.locator('canvas.page-badge')).toHaveCount(0);

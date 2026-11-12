@@ -78,7 +78,7 @@ test('touch screen: small floor controls take a tap 21 px around their centre', 
   await page.locator('.strip .views button').first().waitFor();
   const small = await page.evaluate(() => {
     const out: string[] = [];
-    for (const sel of ['.strip .views button', '.lane-h', '.ubtn', '.calls-pill', '.alarm-pill']) {
+    for (const sel of ['.strip .views button', '.lane-h', '.ubtn', '.alarm-pill']) {
       for (const el of [...document.querySelectorAll(sel)].slice(0, 2)) {
         const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
         for (const [x, y] of [[cx, cy - 21], [cx, cy + 21], [cx - 21, cy], [cx + 21, cy]]) {

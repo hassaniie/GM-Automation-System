@@ -67,7 +67,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
   .strip { --ds-strip-h: var(--strip-h); height: calc(var(--ds-strip-h) + env(safe-area-inset-bottom, 0px)); overflow: hidden; z-index: var(--ds-z-chrome); }
-  .strip .lanes { display: grid; grid-template-columns: 6fr 5fr 7fr; gap: var(--ds-space-3); overflow: hidden; min-width: 0; padding: 1px; }
+  .strip .lanes { display: grid; grid-template-columns: 6fr 5fr 7fr; gap: var(--ds-space-5); overflow: hidden; min-width: 0; padding: 1px; }
   .strip .lane { display: grid; grid-template-rows: auto 1fr; gap: var(--ds-space-2); min-width: 0; overflow: hidden; container: lane / inline-size; }
   .strip .lane-h { min-width: 0; overflow: hidden; }
   .strip .lane-h > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -106,7 +106,15 @@
 
 /* cell status: a coloured top edge and an icon instead of tinting the whole cell (ISA-101: normal is quiet) */
 @layer components {
-  .strip .cell.over, .strip .cell.near, .strip .cell.x, .strip .cell.held { background: color-mix(in srgb, var(--ds-bg) 55%, transparent); }
+  /* one card per station on the strip's glass: no grid box behind them, no corner marks, one radius and one
+     hairline for every card. A problem station is tinted lightly and gets its coloured top edge. */
+  .strip .cells { gap: var(--ds-space-1); background: none; border: 0; }
+  .strip .cell { background: var(--ds-layer-1); border: var(--ds-border-1) solid var(--ds-border-subtle); border-radius: var(--ds-radius-sm); }
+  .strip .cell::after { content: none; }
+  .strip .cell:hover { background: var(--ds-layer-2); }
+  .strip .cell.over, .strip .cell.x { background: color-mix(in srgb, var(--ds-status-critical) 10%, transparent); }
+  .strip .cell.near { background: color-mix(in srgb, var(--ds-status-warning) 9%, transparent); }
+  .strip .cell.held { background: color-mix(in srgb, var(--ds-status-held) 9%, transparent); }
   .strip .cell.over { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-critical); }
   .strip .cell.x { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-critical); }
   .strip .cell.near { box-shadow: inset 0 var(--ds-border-3) 0 var(--ds-status-warning); }
@@ -118,7 +126,7 @@
   .strip .cell.over .mk, .strip .cell.x .mk { color: var(--ds-status-critical); }
   .strip .cell.near .mk { color: var(--ds-status-warning); }
   .strip .cell.held .mk { color: var(--ds-status-held); }
-  .strip .cell[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--ds-text-secondary); }
+  .strip .cell[aria-pressed="true"] { border-color: var(--ds-text-primary); }
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -193,7 +201,7 @@
     .hud .tools-menu { grid-area: menu; display: flex; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
     .hud .hud-alerts { grid-area: alerts; justify-content: flex-end; align-items: center; gap: var(--ds-space-2); padding-right: var(--ds-space-2); border-left: 0; border-top: var(--ds-border-1) solid var(--ds-border-subtle); }
     .hud .tools-menu > .ibtn { height: 43px; padding: 0 var(--ds-space-3); }
-    .hud .alarm-pill, .hud .calls-pill { height: 34px; min-height: 0; padding: 0 var(--ds-space-3); border-left: 0; }
+    .hud .alarm-pill { height: 34px; min-height: 0; padding: 0 var(--ds-space-3); border-left: 0; }
     .tl-tools { display: none; }
     .tl-menu { display: inline-flex; align-items: center; gap: var(--ds-space-2); }
     .tools-pages { display: block; }
@@ -202,8 +210,8 @@
     .hud .tools-pop { left: 0; right: auto; width: min(280px, calc(100vw - 2 * var(--g))); max-height: calc(100dvh - 140px); overflow-y: auto; }
     .hud .umenu-pop:not(.tools-pop) { right: 0; width: min(320px, calc(100vw - 2 * var(--g))); max-height: calc(100dvh - 140px); overflow-y: auto; }
     /* tab rows that scroll sideways fade out at the right edge, so the hidden tabs are noticed */
-    .drawer-tabs { -webkit-mask-image: linear-gradient(90deg, black 85%, transparent); mask-image: linear-gradient(90deg, black 85%, transparent); }
-    .drawer-tabs button { flex: none; }
+    .drawer-tabs { grid-auto-columns: max-content; overflow-x: auto; -webkit-mask-image: linear-gradient(90deg, black 85%, transparent); mask-image: linear-gradient(90deg, black 85%, transparent); }
+    .drawer-tabs button { padding: 0 var(--ds-space-3); }
 
     /* page navigation is in the menu */
     .ds-rail { display: none; }
@@ -227,7 +235,7 @@
   @media (max-width: 1023px) {
     .hud .bv-mark { padding: 0 var(--ds-space-3) 0 var(--ds-space-2); }
     .hud .bv-mark img { height: 22px; }
-    .hud .alarm-pill, .hud .calls-pill { padding: 0 var(--ds-space-3); }
+    .hud .alarm-pill { padding: 0 var(--ds-space-3); }
   }
 }
 

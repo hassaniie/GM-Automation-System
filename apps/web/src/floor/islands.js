@@ -36,11 +36,16 @@ export function StateIsland() {
     <div class="metric m-down" title="Final line downtime this shift: time with at least one station over takt, breaks excluded"><span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}</span></div>
   </section>`;
 }
-function CallsPill() {
-  const S = RT.S, open = S.calls.filter((c) => c.clearedT == null), sup = open.filter((c) => c.type === 'SUP').length, mnt = open.length - sup;
-  const tip = open.length ? `Open help calls: ${sup} supervisor, ${mnt} maintenance` : 'Help calls: none open';
-  return html`<button class=${'calls-pill' + (open.length ? ' hot' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer === 'calls' ? null : 'calls' })} aria-label=${`Calls ${open.length}: ${sup} supervisor, ${mnt} maintenance`} title=${tip}>
-    <span class="lamps" aria-hidden="true"><span class="lamp sup" style=${{ opacity: sup ? 1 : 0.3 }}></span><span class="lamp mnt" style=${{ opacity: mnt ? 1 : 0.3 }}></span></span>Calls${' '}<span class="n">${open.length}</span></button>`;
+/* One button for everything that needs attention: assist calls and alarms open the same panel, so the bar
+   has a single entry. The count is both together; the two lamps show which call types are waiting. It opens on
+   unacknowledged alarms first, otherwise on open calls. */
+function AlertsButton({ active, unacked }) {
+  const S = RT.S, calls = S.calls.filter((c) => c.clearedT == null), sup = calls.filter((c) => c.type === 'SUP').length, mnt = calls.length - sup;
+  const n = active.length + calls.length, open = !!RT.ui.drawer;
+  const tab = unacked.length ? 'active' : calls.length ? 'calls' : 'active';
+  const tip = `${active.length} alarm${active.length === 1 ? '' : 's'} (${unacked.length} unacknowledged), ${calls.length} call${calls.length === 1 ? '' : 's'} (${sup} supervisor, ${mnt} maintenance)`;
+  return html`<button class=${'alarm-pill' + (n ? ' hot' : '') + (unacked.length ? ' ring' : '') + (calls.length && !active.length ? ' calls' : '')} aria-expanded=${open} onClick=${() => setUI({ drawer: open ? null : tab })} aria-label=${`Alerts ${n}: ${tip}`} title=${tip}>
+    <${Icon} n="bell" /><span class="hud-btn-l">Alerts</span>${' '}${calls.length ? html`<span class="lamps" aria-hidden="true">${sup ? html`<span class="lamp sup"></span>` : null}${mnt ? html`<span class="lamp mnt"></span>` : null}</span>` : null}<span class="n">${n}</span></button>`;
 }
 /* The tools (search, scan, x-ray, theme, sound) as one menu when the top bar is narrow. */
 function ToolsMenu({ themeIcon }) {
@@ -75,8 +80,7 @@ export function ActIsland() {
     </div>
     <${ToolsMenu} themeIcon=${themeIcon} />
     <span class="sep"></span>
-    <div class="hud-alerts"><${CallsPill} />
-    <button class=${'alarm-pill' + (active.length ? ' hot' : '') + (unacked.length ? ' ring' : '')} onClick=${() => setUI({ drawer: RT.ui.drawer && RT.ui.drawer !== 'calls' ? null : 'active' })} aria-label=${`Alarms ${active.length}: ${unacked.length} unacknowledged`}><${Icon} n="bell" />ALARMS${' '}<span class="n">${active.length}</span></button></div>
+    <div class="hud-alerts"><${AlertsButton} active=${active} unacked=${unacked} /></div>
     <span class="sep"></span>
     <${UserMenu} />
     <span class="sep"></span>
@@ -100,7 +104,7 @@ export function Strip() {
     <div class="lane-tabs" role="tablist" aria-label="Line">${lanes.map(([k, name]) => html`<button key=${k} role="tab" aria-selected=${stripLane === k} onClick=${() => setUI({ stripLane: k })}>${name}</button>`)}</div>
     <div class="lanes" data-lane=${stripLane}>${lanes.map(([k, name, ids]) => html`<div class="lane" key=${k} data-k=${k} style=${{ '--n': ids.length }}>
       <button class="lane-h" onClick=${() => go(k)}><span class="micro" style=${{ color: RT.ui.view === k ? 'var(--text)' : undefined }}><span class="ln-st">${AREAS[k].station} · </span>${name}${k === 'TRIM' ? html`<span class="xp" title="The URD asks for scans and a display on Trim. Full Trim Andon is shown as an expansion preview (req 34).">PREVIEW</span>` : null}</span>${k === 'CHASSIS' ? html`<${HangerTracker} />` : null}<${LaneStat} area=${k} /></button>
-      <div class="cells ticks">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
+      <div class="cells">${ids.map((id) => html`<${Cell} key=${id} id=${id} sel=${!!(sel && sel.kind === 'pos' && sel.id === id)} />`)}</div>
     </div>`)}</div>
   </section>`;
 }

@@ -582,13 +582,10 @@ svg.plan text { font-family: var(--font-mono); }
 .tag.t-sup { color: var(--ds-n-0); background: var(--call-sup); border-color: var(--call-sup); }
 .tag.t-mnt { color: var(--ds-n-0); background: var(--call-mnt); border-color: var(--call-mnt); }
 .tag.t-sup .k, .tag.t-mnt .k { color: var(--ds-n-0); }
-.calls-pill { display: inline-flex; align-self: stretch; align-items: center; gap: 10px; min-height: 38px; padding: 0 20px; border: 0; background: transparent; color: var(--text-2); font: 600 11px/1 var(--font-ui); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
-.calls-pill:hover { background: var(--fill); color: var(--text); }
-.calls-pill .lamps { display: inline-flex; gap: 4px; }
-.calls-pill .lamp { width: 8px; height: 8px; }
-.calls-pill .n { min-width: 24px; height: 20px; padding: 0 6px; border-radius: var(--ds-radius-md); display: inline-grid; place-items: center; font: 600 12px/1 var(--font-mono); letter-spacing: 0; background: var(--fill-2); color: var(--text); }
-.calls-pill.hot { color: var(--text); background: color-mix(in srgb, var(--call-sup) 12%, transparent); }
-.calls-pill.hot .n { background: var(--call-sup); color: var(--ds-n-0); }
+.alarm-pill .lamps { display: inline-flex; gap: 4px; margin-left: 2px; }
+.alarm-pill .lamp { width: 8px; height: 8px; }
+.alarm-pill.calls { color: var(--text); background: color-mix(in srgb, var(--call-sup) 12%, transparent); }
+.alarm-pill.calls .n { background: var(--call-sup); color: var(--ds-n-0); }
 .andon-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .andon-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
 .andon-state::before { content: ""; width: 10px; height: 10px; background: currentColor; }
@@ -618,9 +615,8 @@ svg.plan text { font-family: var(--font-mono); }
 .ubtn { width: 34px; height: 34px; border-radius: var(--ds-radius-round) !important; border: 0; color: var(--ds-n-0); font: 600 12px/1 var(--font-ui); cursor: pointer; }
 .ubtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .umenu-pop { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; padding: 14px; z-index: var(--ds-z-toast); display: grid; gap: 4px; }
-/* menus open below the top bar, outside its own blur: a nested backdrop-filter only sees the bar, so the menu
-   needs a dense fill of its own or the page shows through and merges with it */
-.umenu-pop, .hud .umenu-pop.glass { background: var(--glass-solid); }
+/* menus are the shared glass with the standard blur (the page screens use a lighter blur for their cards) */
+.umenu-pop { --blur: var(--ds-glass-blur-menu); }
 .um-head { display: flex; gap: 10px; align-items: center; }
 .um-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 8px; background: transparent; border: 0; color: var(--text); font: 500 13px/1.2 var(--font-ui); text-align: left; cursor: pointer; }
 .um-item:hover { background: var(--fill); }

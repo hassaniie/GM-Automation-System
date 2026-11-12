@@ -20,7 +20,7 @@ export const Scene3D = (function () {
       // lifted epoxy-grey floor with a cool bias; production zones read as lighter bays
       bg: 0x0b0e12, floor: 0x12171c, zone: 0x171d24, zoneEdge: 0x3f4a56, grid1: 0x151a20, grid2: 0x1a2027, pad: 0x1c232b, padEdge: 0x4a5562, padEdgeHi: 0xc9d2da,
       steel: 0x8f99a4, steelDark: 0x3a424b, rail: 0x7a8591, column: 0x2a323b, conveyor: 0x2a323b, slat: 0x333c46, equip: 0x3c454f, equipAccent: 0x4f97e0,
-      text: '#e4e8ec', textDim: '#a2acb7', note: '#aab4bf', warnText: '#d6b062', hemi: [0xd8e2ee, 0x1a2027, 0.95], amb: 0.26, key: 1.4, rim: 0.7, fill: 0.5, pools: 1, badge: 0.85, fogNear: 170, fogFar: 330,
+      text: '#e4e8ec', textDim: '#a2acb7', note: '#aab4bf', warnText: '#d6b062', hemi: [0xd8e2ee, 0x1a2027, 0.95], amb: 0.26, key: 1.4, rim: 0.7, fill: 0.5, pools: 1, fogNear: 170, fogFar: 330,
       tone: { muted: 0x5c6670, text: 0xd9dee3, ok: 0x3fc28a, warn: 0xf0a92a, crit: 0xff4d4a, esc: 0xff3d7f, hold: 0x8ea2ff, transit: 0x50c4d8, paused: 0x9aa6b2, sup: 0xb394ff, mnt: 0x4fb4ff },
       xray: 0x9fb4c8, install: 0x6fe3ff, aperture: 0x050607,
     },
@@ -30,7 +30,7 @@ export const Scene3D = (function () {
       steel: 0x8f99a3, steelDark: 0xb4bcc4, rail: 0x7f8992, column: 0xf3f5f7, conveyor: 0xc9cfd5, slat: 0xb9c0c7, equip: 0xc5ccd3, equipAccent: 0x1f6fd1,
       text: '#1f252b', textDim: '#5b6670', note: '#4d5862', warnText: '#9a6f12', hemi: [0xffffff, 0xc2c8cf, 0.62], amb: 0.18, key: 0.72, fogNear: 170, fogFar: 330,
       tone: { muted: 0x9aa3ab, text: 0x2b3239, ok: 0x1f9a66, warn: 0xd08a0b, crit: 0xe23b3b, esc: 0xd01f5e, hold: 0x4a62e0, transit: 0x0f8ea6, paused: 0x7a8794, sup: 0x7a4fe0, mnt: 0x0a7fd6 },
-      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.26, pools: 0, badge: 0.7,
+      xray: 0x3d5875, install: 0x0b84d8, aperture: 0x1a1d21, rim: 0, fill: 0.26, pools: 0,
     },
   };
   let T = THEMES.dark, themeName = 'dark';
@@ -158,16 +158,22 @@ export const Scene3D = (function () {
   }
 
   /* MG branding painted on the open floor north of the Final line (x 33–53, z −22…−2):
-     the official badge as a neutral watermark, faded like real floor paint. Fades further on zoom-in. */
+     the official badge in neutral grey at full strength, untouched by fog (as is the Bolt & Volt mark). */
   function buildFloorBadge() {
     // painted as a neutral watermark (design system: red on the floor means an alarm, never decoration)
-    const tex = new THREE.TextureLoader().load(MG_FLOOR_LOGO, (t) => {
-      const img = t.image, cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
-      const cx = cv.getContext('2d'); cx.filter = 'grayscale(1) brightness(1.25)'; cx.drawImage(img, 0, 0);
-      t.image = cv; t.needsUpdate = true;
-    });
+    // one neutral ink per theme, so the badge reads at full strength on either floor: light grey on the dark
+    // floor, dark grey on the light one
+    const img = new Image(), cv = document.createElement('canvas'); cv.width = cv.height = 400; // sized before the texture: a GPU texture cannot change size
+    const tex = new THREE.CanvasTexture(cv);
+    const draw = () => {
+      if (!img.complete || !img.naturalWidth) return;
+      const cx = cv.getContext('2d'); cx.clearRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+      cx.globalCompositeOperation = 'source-in'; cx.fillStyle = themeName === 'dark' ? '#8d97a2' : '#7a838c'; cx.fillRect(0, 0, cv.width, cv.height);
+      cx.globalCompositeOperation = 'source-over'; tex.needsUpdate = true;
+    };
+    img.onload = draw; img.src = MG_FLOOR_LOGO; badgeRedraw = draw;
     tex.anisotropy = ANISO;
-    floorBadge = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), /* smaller than the lines beside it (audit T5) */ new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: T.badge, depthWrite: false }));
+    floorBadge = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), /* smaller than the lines beside it (audit T5) */ new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
     floorBadge.rotation.x = -Math.PI / 2; floorBadge.position.set(43, 0.013, -12); floorBadge.renderOrder = 1; scene.add(floorBadge);
     floorText('MG MOTORS · GENERAL ASSEMBLY', 33, -0.6, 20, { size: 46, weight: 600, colorKey: 'textDim', letter: 14, w: 1280 });
   }
@@ -188,11 +194,11 @@ export const Scene3D = (function () {
       tex.needsUpdate = true;
     };
     img.onload = draw; img.src = BV_FULL;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(14, 14 * H / W), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(14, 14 * H / W), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
     m.rotation.x = -Math.PI / 2; m.position.set(-55.5, 0.014, -29); m.renderOrder = 1; scene.add(m);
     bvRedraw = draw;
   }
-  let bvRedraw = null;
+  let bvRedraw = null, badgeRedraw = null;
 
   /* Back-wall signage: a slim lit sign board hung on the north column line. */
   function buildSignage() {
@@ -701,7 +707,7 @@ export const Scene3D = (function () {
     Object.values(pads).forEach((p) => { p.corners.material.color.setHex(T.padEdge); p.barBg.material.color.setHex(T.padEdge); });
     PM.install.color.setHex(T.install); PM.install.emissive.setHex(T.install); PM.xray.color.setHex(T.xray); PM.edge.color.setHex(T.xray); PM.sweep.color.setHex(T.install);
     chevrons.material.color.setHex(T.tone.warn);
-    refreshTexts(); if (signRedraw) signRedraw(); if (bvRedraw) bvRedraw();
+    refreshTexts(); if (signRedraw) signRedraw(); if (bvRedraw) bvRedraw(); if (badgeRedraw) badgeRedraw();
   }
 
   /* ── init ── */
@@ -806,7 +812,6 @@ export const Scene3D = (function () {
     viewShift += ((ui.panelWidth || 0) + safe.right - safe.left - viewShift) * 0.12;
     viewShiftY += (safe.bottom - safe.top - viewShiftY) * 0.12;
     const camDist = camera.position.distanceTo(controls.target);
-    if (floorBadge) floorBadge.material.opacity = T.badge * E.clamp((camDist - 30) / 70, 0.75, 1);
     // fog follows the camera, so zooming out never sinks the shop into fog; small floor labels show only when the camera
     // is close enough to read them (audit T2, T5)
     scene.fog.near = camDist + 140; scene.fog.far = camDist + 420;

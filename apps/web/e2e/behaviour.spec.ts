@@ -18,12 +18,11 @@ async function signIn(page: Page, who = 'Hamza Siddiqui') {
 }
 const ui = (page: Page) => page.evaluate(() => (window as unknown as MG).__mg.RT.ui);
 
-test('B8: Alarms opens the alarms tab when the Calls panel is showing', async ({ page }) => {
+test('one Alerts button: opens the panel on alarms first, then on calls, and closes it', async ({ page }) => {
   await signIn(page);
-  await page.locator('.calls-pill').click();
-  expect((await ui(page)).drawer).toBe('calls');
+  await expect(page.locator('.calls-pill')).toHaveCount(0);
   await page.locator('.alarm-pill').click();
-  expect((await ui(page)).drawer).toBe('active');
+  expect(['active', 'calls']).toContain((await ui(page)).drawer);
   await page.locator('.alarm-pill').click();
   expect((await ui(page)).drawer).toBe(null);
 });

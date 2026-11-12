@@ -215,8 +215,12 @@
   .ds-tabs__n { display: inline-grid; place-items: center; min-width: 20px; height: 18px; padding: 0 var(--ds-space-1); border-radius: var(--ds-radius-sm); background: var(--ds-layer-2); color: var(--ds-text-secondary); font: 600 var(--ds-size-11) / 1 var(--ds-font-mono); }
   .ds-tabs button[aria-selected="true"] { font-weight: 600; }
   .ds-tabs button[aria-selected="true"] .ds-tabs__n { color: var(--ds-text-primary); }
-  .drawer-tabs { padding: 0 var(--ds-space-2); gap: 0; }
-  .drawer-tabs button { flex: 1 1 auto; justify-content: center; gap: var(--ds-space-1); padding: 0 var(--ds-space-1); }
+  /* the alarm panel's tabs use the segmented control's look (as the simulator's speed control): one bordered
+     group, equal parts, the open one filled. Weight does not change on selection, so nothing shifts. */
+  .drawer-tabs { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: auto; gap: 0; margin: 0 var(--ds-space-4) var(--ds-space-2); border: var(--ds-border-1) solid var(--ds-border-strong); border-radius: var(--ds-radius-md); overflow: hidden; }
+  .drawer-tabs button { justify-content: center; gap: var(--ds-space-1); height: calc(var(--ds-h-sm) - 2px); padding: 0 var(--ds-space-1); border-radius: 0; border-left: var(--ds-border-1) solid var(--ds-border-subtle); font-weight: 500; }
+  .drawer-tabs button:first-child { border-left: 0; }
+  .drawer-tabs button[aria-selected="true"] { background: var(--ds-layer-2); font-weight: 500; }
   .um-pref { padding: var(--ds-space-1) var(--ds-space-2); }
   .si-go.ds-btn, .si-alt.ds-btn { width: 100%; }
   .cfg-ds { display: grid; gap: var(--ds-space-2); }
@@ -246,7 +250,7 @@
 
   /* ── menu ── */
   .ds-menu { position: relative; display: inline-flex; }
-  .ds-menu__pop { position: absolute; top: calc(100% + var(--ds-space-2)); z-index: var(--ds-z-overlay); display: grid; gap: 2px; padding: var(--ds-space-2); border: var(--ds-border-1) solid var(--ds-glass-edge); border-radius: var(--ds-radius-md); background: var(--ds-layer-solid); box-shadow: var(--ds-glass-shadow); }
+  .ds-menu__pop { position: absolute; top: calc(100% + var(--ds-space-2)); z-index: var(--ds-z-overlay); display: grid; gap: 2px; padding: var(--ds-space-2); border: var(--ds-border-1) solid var(--ds-glass-edge); border-radius: var(--ds-radius-md); background: var(--ds-glass); -webkit-backdrop-filter: var(--ds-glass-blur-menu); backdrop-filter: var(--ds-glass-blur-menu); box-shadow: var(--ds-glass-shadow); }
   .ds-menu__pop--end { right: 0; } .ds-menu__pop--start { left: 0; }
   .ds-menu__item { display: flex; align-items: center; gap: var(--ds-space-3); width: 100%; min-height: var(--ds-h-sm); padding: 0 var(--ds-space-2); border: 0; border-radius: var(--ds-radius-sm); background: transparent; color: var(--ds-text-primary); font: 500 var(--ds-size-13) / 1.2 var(--ds-font-ui); text-align: left; cursor: pointer; }
   .ds-menu__item:hover, .ds-menu__item:focus-visible { outline: none; background: var(--ds-layer-1); }
@@ -320,8 +324,8 @@
     @media (min-width: 768px) { :root { --strip-h: 148px; } }
     .strip .views button { height: 44px; }
     .strip .lane-h { min-height: 44px; }
-    .strip .views button, .lane-h, .hud .linestate, .ubtn, .calls-pill, .alarm-pill, .rep-jump a, .ds-switch { position: relative; }
-    :is(.strip .views button, .lane-h, .hud .linestate, .ubtn, .calls-pill, .alarm-pill, .rep-jump a, .ds-switch)::before {
+    .strip .views button, .lane-h, .hud .linestate, .ubtn, .alarm-pill, .rep-jump a, .ds-switch { position: relative; }
+    :is(.strip .views button, .lane-h, .hud .linestate, .ubtn, .alarm-pill, .rep-jump a, .ds-switch)::before {
       content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
     }
   }
