@@ -23,7 +23,7 @@ import { Horn, Icon } from './lib/ui-kit.js';
 import { ReportsPage } from './reports.js';
 import { DashboardPage, LineDisplay, PowerOverlay } from './screens.js';
 import { Rail } from './ui/nav.js';
-import { goPage, navPages } from './lib/pages.js';
+import { goPage, navPages, pageTitle } from './lib/pages.js';
 
 
 /* Page navigation: the rail under the top bar (tablet and desktop); on phones the pages are in the top bar's menu. */
@@ -32,7 +32,7 @@ function PageRail() {
 }
 /* Non-floor screens share the header and scroll their own body. */
 function PageShell({ children }) {
-  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
+  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
 }
 function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 
@@ -110,6 +110,7 @@ function App() {
       onLost: () => { setWebgl(false); setUI({ view2D: true }); }, // graphics context lost: the 2D plan takes over (audit T4)
     }).then((ok) => { if (!ok) { setWebgl(false); setUI({ view2D: true }); } });
   }, [floor, gate]);
+  useEffect(() => { document.title = gate ? 'Sign in · MG GA Andon' : pageTitle(page, RT.route.sub); }, [page, RT.route.sub, gate]);
   // locking the screen drops any open dialog, so it does not reappear after unlock (audit B7)
   useEffect(() => { if (gate && RT.ui.dialog) setUI({ dialog: null }); }, [gate]);
   return html`<main class=${'stage' + (rail ? ' has-rail' : '')}>

@@ -117,6 +117,10 @@ button { cursor: pointer; }
 .simcon { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(132px + env(safe-area-inset-bottom, 0px)); width: min(400px, calc(100vw - 32px)); border-style: dashed; border-color: color-mix(in srgb, var(--sim) 45%, transparent); z-index: var(--ds-z-floor-console); }
 .simcon-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; }
 .simcon-body { border-top: 1px dashed var(--hair-2); padding: 12px; display: grid; gap: 16px; max-height: min(56vh, 540px); overflow: auto; }
+/* scroll cue (audit U6): the bottom edge fades while there is more below; the fade goes once scrolled to the end */
+.simcon-body { mask-image: linear-gradient(black calc(100% - 28px), transparent); }
+@supports (animation-timeline: scroll()) { .simcon-body { animation: simcon-fade linear both; animation-timeline: scroll(self); } }
+@keyframes simcon-fade { 0%, 96% { mask-image: linear-gradient(black calc(100% - 28px), transparent); } 100% { mask-image: none; } }
 .scn { width: 100%; text-align: left; display: grid; grid-template-columns: 22px 1fr; gap: 2px 8px; padding: 8px; border-radius: var(--ds-radius-md); border: 0; background: transparent; }
 .scn:hover { background: var(--fill); }
 .scn[aria-current="true"] { background: var(--fill-2); }
@@ -708,6 +712,7 @@ svg.plan text { font-family: var(--font-mono); }
 .lc-kpis > div { display: grid; gap: 4px; align-content: start; }
 .lc-kpis .num { font-size: 28px; font-weight: 300; line-height: 1; }
 .lc-kpis .num small { font-size: 14px; color: var(--muted); margin-left: 4px; }
+
 .lc-kpis > div > span:last-child:not(.micro) { font-size: 12px; }
 .lc-prog { position: relative; height: 6px; background: var(--hair); }
 .lc-prog i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text); }

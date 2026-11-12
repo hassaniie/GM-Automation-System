@@ -23,7 +23,7 @@ export function IdIsland() {
             : html`<span class="sim-tag live" title="Live: the plant's PLC and scanners drive what every screen shows."><${Icon} n="link" size=${10} />LIVE</span>`
           : html`<span class="sim-tag edge" title=${RT.conn.mode === 'shadow' ? 'Shadow: the plant devices are connected and logged (Settings → Devices), but the screens show the simulator.' : `Live from the line server (edge ${RT.conn.server || ''}). Every screen shows the same plant. The plant itself is still simulated.`}><${Icon} n="flask" size=${10} />${RT.conn.mode === 'shadow' ? 'SIM · SHADOW' : 'SIM · EDGE'}</span>`
         : html`<span class="sim-tag down" role="status" title="Lost the line server. Showing the last data received; reconnecting."><${Icon} n="wifioff" size=${10} />RECONNECTING</span>`}
-    <div class="shiftbar" title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
+    <div class="shiftbar" role="progressbar" aria-label="Shift progress: productive time elapsed" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(p.frac * 100)} title=${sh.name ? `${sh.name} ${fmtClock(sh.start, false)}–${fmtClock(sh.end, false)} · ${Math.round(p.frac * 100)}% of productive time elapsed` : 'No shift running'}><i style=${{ width: `${p.frac * 100}%` }}></i></div>
   </div>`;
 }
 export function StateIsland() {

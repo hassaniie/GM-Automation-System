@@ -140,3 +140,13 @@ test('phones: the Guide fits the screen and the line display stacks without over
   const gap = await page.evaluate(() => document.querySelector('.lcd-calls')!.getBoundingClientRect().top - document.querySelector('.lcd-st')!.getBoundingClientRect().bottom);
   expect(gap, 'calls panel overlaps the station tiles by').toBeGreaterThanOrEqual(0);
 });
+
+test('dashboard: all three line cards fit above the fold at 1440×900', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page, 'light');
+  await page.evaluate(() => { location.hash = '#/dash'; });
+  await page.locator('.lcard').nth(2).waitFor();
+  await page.waitForTimeout(400);
+  const bottom = await page.evaluate(() => document.querySelectorAll('.lcard')[2].getBoundingClientRect().bottom);
+  expect(bottom).toBeLessThanOrEqual(900);
+});

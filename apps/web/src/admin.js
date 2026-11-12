@@ -255,7 +255,7 @@ function UserAdmin() {
   return html`<${Stack} gap=${4}>
     <${PageHeader} k="Users · URD req 30" title="Users and roles" sub="Everyone signs in individually. Roles decide what each person can do.">
       <${Button} variant="primary" icon="plus" onClick=${() => { setEdit({ name: '', empId: '', email: '', role: 'supervisor', newPw: '' }); setMsg(null); }}>Add user<//></${PageHeader}>
-    <${Grid} min=${240}>${Object.entries(ROLES).map(([k, r]) => html`<${Panel} key=${k} title=${html`<span class=${'av sm r-' + k}>${r.short[0]}</span> ${r.label}`} sub=${r.desc} />`)}</${Grid}>
+    <${Grid} min=${170}>${Object.entries(ROLES).map(([k, r]) => html`<${Panel} key=${k} title=${html`<span class=${'av sm r-' + k}>${r.short[0]}</span> ${r.label}`} sub=${r.desc} />`)}</${Grid}>
     <${DataTable} columns=${cols} rows=${Auth.users} rowKey=${(u) => u.id} rowClass=${(u) => (u.active ? null : 'ds-row-muted')} />
     <${Saved} msg=${edit ? null : msg} />
     ${edit ? html`<${Dialog} k="Users" title=${edit.id ? `Edit ${edit.name}` : 'Add a user'} onClose=${() => setEdit(null)} footer=${html`<${Button} onClick=${() => setEdit(null)}>Cancel<//><${Button} variant="primary" icon="check" type="submit" form="user-form">${edit.id ? 'Save' : 'Add user'}<//>`}>

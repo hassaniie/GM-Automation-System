@@ -274,3 +274,16 @@
     .adm-nav > .note { padding: 0 var(--ds-space-1) !important; margin: 0; }
   }
 }
+
+/* Dashboard on laptop-height screens (≤ 960 px tall): tighter line cards so all three lines fit above the fold
+   (audit U6). Here because the card is a Panel, which the components layer styles. */
+@layer components {
+  @media (min-width: 1100px) and (max-height: 960px) {
+    .dash .ds-panel.lcard { --pad: var(--ds-space-3) var(--ds-space-4); gap: var(--ds-space-2); }
+    .dash .lcard .lc-kpis .num { font-size: var(--ds-size-24, 24px); }
+    .dash .lcard .lc-title { font-size: var(--ds-size-18, 18px); }
+    .page-wrap.dash { padding-top: var(--ds-space-3); }
+    .dash .dash-lines { gap: var(--ds-space-2); }
+    .dash .ds-page-head { margin-bottom: 0; }
+  }
+}

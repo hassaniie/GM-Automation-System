@@ -24,3 +24,10 @@ export function goPage(k) {
   if (k !== cur && !confirmLeave()) return;
   go(k, k === 'display' ? (RT.route.sub && cur === 'display' ? RT.route.sub : 'chassis') : null);
 }
+
+/** The browser tab title for a route (audit U6): the page, then the app. */
+export function pageTitle(page, sub) {
+  const p = NAV.find((x) => x[0] === page);
+  const name = page === 'display' && sub ? `${sub[0].toUpperCase()}${sub.slice(1)} line display` : p ? p[1] : 'Sign in';
+  return `${name} · MG GA Andon`;
+}

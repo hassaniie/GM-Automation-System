@@ -22,6 +22,8 @@
     "@mg/engine": "workspace:*",
     "@mg/reports": "workspace:*",
     "@mg/scene": "workspace:*",
+    "@fontsource/barlow": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@mg/sim": "workspace:*",
     "@mg/sync": "workspace:*",
     "exceljs": "4.4.0",
@@ -31,8 +33,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@fontsource/barlow": "5.3.0",
-    "@fontsource/jetbrains-mono": "5.3.0",
     "@playwright/test": "1.63.0",
     "@storybook/react-vite": "10.6.3",
     "storybook": "10.6.3"
