@@ -57,7 +57,7 @@ export function DataTable({ columns, rows, rowKey = (_r, i) => i, empty = 'Nothi
   const n = columns.length;
   return html`<div class=${cx('ds-table-wrap', cls)}><table class=${cx('ds-table', `ds-table--${density}`)}>
     ${caption ? html`<caption class="ds-vh">${caption}</caption>` : null}
-    <thead><tr>${columns.map((c) => html`<th key=${c.key} scope="col" class=${`ds-a-${ALIGN[c.type] || 'start'}`} style=${{ width: c.width }}>${c.label}</th>`)}</tr></thead>
+    <thead><tr>${columns.map((c) => html`<th key=${c.key} scope="col" class=${`ds-a-${ALIGN[c.type] || 'start'}`} style=${{ width: c.width }}>${c.label || html`<span class="ds-vh">${c.srLabel || (c.type === 'action' ? 'Actions' : 'Chart')}</span>`}</th>`)}</tr></thead>
     <tbody>${error ? html`<tr><td colspan=${n} class="ds-table__msg ds-table__msg--error">${error}</td></tr>`
       : rows == null ? [0, 1, 2].map((i) => html`<tr key=${i}><td colspan=${n}><${Skeleton} /></td></tr>`)
       : !rows.length ? html`<tr><td colspan=${n} class="ds-table__msg">${empty}</td></tr>`
@@ -84,7 +84,7 @@ export function Notice({ kind = 'info', title, children, actions, class: cls, st
 
 /** The top of every page: section label, title, sub-line, actions. */
 export function PageHeader({ k, title, sub, children }) {
-  return html`<div class="ds-page-head"><div class="ds-page-head__titles">${k ? html`<div class="ds-label">${k}</div>` : null}<h2>${title}</h2>${sub ? html`<p class="ds-page-head__sub">${sub}</p>` : null}</div>${children ? html`<div class="ds-page-head__actions">${children}</div>` : null}</div>`;
+  return html`<div class="ds-page-head"><div class="ds-page-head__titles">${k ? html`<div class="ds-label">${k}</div>` : null}<h1 class="ds-page-head__title">${title}</h1>${sub ? html`<p class="ds-page-head__sub">${sub}</p>` : null}</div>${children ? html`<div class="ds-page-head__actions">${children}</div>` : null}</div>`;
 }
 
 /** Nothing here yet: an icon, a sentence and an optional action. */

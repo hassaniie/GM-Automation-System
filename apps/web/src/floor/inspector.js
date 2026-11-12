@@ -192,8 +192,11 @@ function VehicleInspector({ id }) {
 export function Inspector() {
   const sel = RT.ui.selection, ref = useRef(null);
   useEffect(() => { const upd = () => { RT.ui.panelWidth = ref.current && window.innerWidth > 760 ? ref.current.offsetWidth + 16 : 0; }; upd(); window.addEventListener('resize', upd); return () => { window.removeEventListener('resize', upd); RT.ui.panelWidth = 0; }; }, []);
+  // move focus into the panel when it opens, so keyboard and screen-reader users land in it (audit D5)
+  useEffect(() => { if (ref.current) ref.current.focus({ preventScroll: true }); }, []);
   if (!sel) return null;
-  return html`<aside class="glass inspector ticks in" ref=${ref} aria-label="Inspector">${sel.kind === 'pos' ? html`<${StationInspector} id=${sel.id} />` : html`<${VehicleInspector} id=${sel.id} />`}</aside>`;
+  const name = sel.kind === 'pos' ? `Station ${sel.id}` : `Vehicle ${(RT.S.vehicles[sel.id] || {}).vin || ''}`;
+  return html`<aside class="glass inspector ticks in" ref=${ref} tabIndex="-1" role="region" aria-label=${`${name} details`}>${sel.kind === 'pos' ? html`<${StationInspector} id=${sel.id} />` : html`<${VehicleInspector} id=${sel.id} />`}</aside>`;
 }
 
 /* ── anchored tags ── */
@@ -246,8 +249,8 @@ export function Legend() {
     ${row('repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 10px)', 'Chevrons point from waiting bodies to the position holding them')}
     ${row('var(--transit)', 'Bright parts on a car are being installed right now')}
     <p class="note">X-ray (X) makes the body glass so interior and underbody parts are visible. Every state also shows as text with an icon.</p>
-    <p class="note">Keys: <b>0</b> shop · <b>1/2/3</b> lines · <b>/</b> find VIN · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
-    <${Button} size="sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />How it works · URD coverage<//>
+    <p class="note">Keys: <b>0</b> whole shop · <b>1/2/3</b> lines · <b>/</b> find VIN · <b>A</b> alarm · <b>X</b> x-ray · <b>Space</b> pause · <b>Esc</b> close.</p>
+    <${Button} size="sm" onClick=${() => { setUI({ legend: false }); go('how'); }}><${Icon} n="book" />Guide<//>
   </div>`;
 }
 

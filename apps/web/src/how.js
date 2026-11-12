@@ -83,7 +83,7 @@ const COV_COLS = [
 export function HowPage() {
   const all = COVERAGE.flatMap(([, rows]) => rows), demo = all.filter((r) => r[3] === 'demo').length;
   return html`<div class="page-wrap how">
-    <${PageHeader} k="Proposal view · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
+    <${PageHeader} k="Guide · URD “Andon System – General Assembly Shop” (draft 2)" title="How the Andon system meets the requirements" sub=${`All 36 requirements are covered: ${demo} are working in this simulation, and ${all.length - demo} are equipment or deployment items described below. Every “Show me” opens the place in the system where you can see it.`} />
     <${Panel} ticks=${true} title="Architecture" sub="The line server sits on the shop floor, so displays and data collection never depend on the head-office link."><${ArchDiagram} /><//>
     <h3 class="how-h">Points the URD asks the supplier to propose (§6)</h3>
     <div class="six">${SIX.map(([t, a, s, fn], i) => html`<${Panel} key=${i} ticks=${true} title=${html`<span class="ds-label">§6 · ${i + 1}</span><br />${t}`}><p>${a}</p><div class="six-foot"><span class="note">${s}</span>${fn ? html`<${Button} size="sm" icon="target" onClick=${fn}>Show me<//>` : null}</div><//>`)}</div>

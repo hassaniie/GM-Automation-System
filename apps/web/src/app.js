@@ -32,7 +32,7 @@ function PageRail() {
 }
 /* Non-floor screens share the header and scroll their own body. */
 function PageShell({ children }) {
-  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header><div class="page-scroll">${children}</div></div>`;
+  return html`<div class="page-shell"><header class="glass hud ticks in"><${IdIsland} /><${StateIsland} /><${ActIsland} /></header><div class="page-scroll" id="content" tabIndex="-1">${children}</div></div>`;
 }
 function Placeholder({ title }) { return html`<div class="page-wrap"><div class="empty-page"><${Icon} n="info" size=${28} /><h2>${title}</h2><p class="note"><button class="linkish" onClick=${() => go(ROLES[Auth.user.role].home)}>Go to your home screen</button></p></div></div>`; }
 
@@ -113,7 +113,9 @@ function App() {
   useEffect(() => { document.title = gate ? 'Sign in · MG GA Andon' : pageTitle(page, RT.route.sub); }, [page, RT.route.sub, gate]);
   // locking the screen drops any open dialog, so it does not reappear after unlock (audit B7)
   useEffect(() => { if (gate && RT.ui.dialog) setUI({ dialog: null }); }, [gate]);
-  return html`<main class=${'stage' + (rail ? ' has-rail' : '')}>
+  // skip link (audit D5): hash routing owns the URL fragment, so it moves focus instead of following the link
+  const skip = (e) => { e.preventDefault(); const t = document.getElementById('content') || document.querySelector('.strip'); if (t) { if (!t.hasAttribute('tabindex')) t.setAttribute('tabindex', '-1'); t.focus(); } };
+  return html`<${React.Fragment}>${gate ? null : html`<a class="skip-link" href="#content" onClick=${skip}>Skip to content</a>`}<main class=${'stage' + (rail ? ' has-rail' : '')}>
     ${rail ? html`<${PageRail} />` : null}
     ${RT.conn.state === 'down' ? html`<div class="conn-banner" role="alert"><${Icon} n="wifioff" size=${14} /><b>Line server not reachable</b><span>Showing the last data received at ${fmtClock(RT.S.t)} · reconnecting…</span></div>` : null}
     <div id="scene" ref=${sceneRef} style=${{ visibility: floor && !RT.ui.view2D && !gate ? 'visible' : 'hidden' }}></div>
@@ -135,7 +137,7 @@ function App() {
     ${d && d.type === 'correct' ? html`<${CorrectDialog} key=${d.pos} d=${d} />` : null}
     ${d && d.type === 'vin' ? html`<${VinSearchDialog} />` : null}
     ${d && d.type === 'about' ? html`<${AboutDialog} />` : null}</${React.Fragment}>`}
-  </main>`;
+  </main></${React.Fragment}>`;
 }
 /* A TV opened without a valid display link (live screens only). */
 function DisplayNotAuthorised() {

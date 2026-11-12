@@ -3,7 +3,7 @@ import { can } from '../auth.js';
 import { CallRow } from './inspector.js';
 import { Act } from '../lib/act.js';
 import { openAlarm, select } from './scenarios.js';
-import { M, RT, dispId, fmtClock, fmtDur, html, setUI, shortVin } from '../lib/runtime.js';
+import { M, RT, dispId, fmtClock, fmtDur, html, setUI, shortVin, useEffect, useRef } from '../lib/runtime.js';
 import { Icon, LEVEL_TONE, LevelChip, tv } from '../lib/ui-kit.js';
 import { Button, DataTable, Field, IconButton, Select, Tabs } from '../ui/index.js';
 
@@ -26,7 +26,9 @@ export function AlarmDrawer() {
   const off = S.vehOrder.map((id) => S.vehicles[id]).filter((v) => ['OFF_LINE', 'RETURN_QUEUED', 'RETURNING'].includes(v.state)).reverse();
   const filters = [['all', 'All'], ['call', 'Calls'], ['andon', 'Buzzers'], ['alarm', 'Alarms'], ['exception', 'Exceptions'], ['scan', 'Scans'], ['offline', 'Offline'], ['config', 'Changes'], ['shift', 'Shifts'], ['move', 'Movement'], ['sim', 'Simulation']];
   const evs = tab === 'log' ? S.events.filter((e) => RT.ui.logFilter === 'all' || e.cat === RT.ui.logFilter || (RT.ui.logFilter === 'move' && e.cat === 'work')).slice(-200).reverse() : [];
-  return html`<aside class="glass drawer ticks in" aria-label="Alarms and events">
+  const ref = useRef(null);
+  useEffect(() => { if (ref.current) ref.current.focus({ preventScroll: true }); }, []); // focus lands in the panel when it opens (audit D5)
+  return html`<aside class="glass drawer ticks in" ref=${ref} tabIndex="-1" role="region" aria-label="Alarms and events">
     <div class="head"><div style=${{ flex: 1 }}><div class="micro">Exceptions</div><div style=${{ fontWeight: 600, fontSize: 18 }}>Alarms & events</div></div>
       ${tab === 'active' && un.some((a) => a.level !== 'WARNING') ? html`<${Button} size="sm" tone="warning" icon="check" onClick=${() => un.filter((a) => a.level !== 'WARNING').forEach((a) => Act.ackAlarm(a.id))}>Acknowledge all<//>` : null}
       <${IconButton} icon="x" size="sm" label="Close" onClick=${() => setUI({ drawer: null })} /></div>

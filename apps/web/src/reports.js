@@ -112,7 +112,7 @@ function LocalReports() {
       <${Jump} />
     </${Filters}>
     <${ReportBody} d=${d} line=${line} />
-    <p class="note">Built in this browser from this session's records; earlier days are simulated history. On the line server, reports come from its database. See <button class="linkish" onClick=${() => go('how')}>How it works</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
+    <p class="note">Built in this browser from this session's records; earlier days are simulated history. On the line server, reports come from its database. See <button class="linkish" onClick=${() => go('how')}>Guide</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
   </${Stack}>`;
 }
 
@@ -150,7 +150,7 @@ function ServerReports() {
     ${!problem && !d && !err ? html`<div class="note" role="status">Loading the report from the line server…</div>` : null}
     ${d ? html`<${ReportBody} d=${d} line=${line} />` : null}
     <${SavedReports} saved=${saved} />
-    <p class="note">Stored on the line server and kept for the retention period; see <button class="linkish" onClick=${() => go('how')}>How it works</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
+    <p class="note">Stored on the line server and kept for the retention period; see <button class="linkish" onClick=${() => go('how')}>Guide</button>. SIMULATION: no PLC, scanner or sensor is connected.</p>
   </${Stack}>`;
 }
 

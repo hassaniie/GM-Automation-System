@@ -192,7 +192,7 @@
 
   /* ── page header ── */
   .ds-page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--ds-space-4); flex-wrap: wrap; margin-bottom: var(--ds-space-5); }
-  .ds-page-head h2 { margin: var(--ds-space-1) 0 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+  .ds-page-head h1, .ds-page-head h2 { margin: var(--ds-space-1) 0 0; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
   .ds-page-head__sub { margin: var(--ds-space-2) 0 0; color: var(--ds-text-secondary); max-width: 74ch; line-height: 1.5; }
   .ds-page-head__actions { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; }
 
@@ -285,5 +285,27 @@
     .page-wrap.dash { padding-top: var(--ds-space-3); }
     .dash .dash-lines { gap: var(--ds-space-2); }
     .dash .ds-page-head { margin-bottom: 0; }
+  }
+}
+
+/* Skip link (audit D5): hidden until focused with the keyboard, then shown top-left over everything */
+@layer components {
+  .skip-link { position: fixed; top: var(--ds-space-2); left: var(--ds-space-2); z-index: var(--ds-z-power); padding: var(--ds-space-2) var(--ds-space-4); border-radius: var(--ds-radius-sm); background: var(--ds-interactive); color: var(--ds-on-interactive); font-weight: 600; transform: translateY(-200%); }
+  .skip-link:focus-visible { transform: none; outline: 2px solid var(--ds-focus); outline-offset: 2px; }
+  #scene canvas:focus-visible { outline: 2px solid var(--ds-focus); outline-offset: -4px; }
+}
+
+/* Touch screens (audit D4): the floor's small controls get a hit area of at least 44 × 44 px without changing how they
+   look or the layout: an invisible box centred on each control catches the tap. */
+@layer components {
+  @media (pointer: coarse) {
+    /* stacked strip controls are closer than 44 px, so they get the real height; the strip grows to match */
+    @media (min-width: 768px) { :root { --strip-h: 148px; } }
+    .strip .views button { height: 44px; }
+    .strip .lane-h { min-height: 44px; }
+    .strip .views button, .lane-h, .hud .linestate, .ubtn, .calls-pill, .alarm-pill, .rep-jump a, .ds-switch { position: relative; }
+    :is(.strip .views button, .lane-h, .hud .linestate, .ubtn, .calls-pill, .alarm-pill, .rep-jump a, .ds-switch)::before {
+      content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+    }
   }
 }

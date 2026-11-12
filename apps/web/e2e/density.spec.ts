@@ -66,3 +66,29 @@ test('line display: same layout at 1080p and 4K, text twice the size', async ({ 
   const notScaled = Object.keys(hd.text).filter((k) => Math.abs(uhd.text[k] / hd.text[k] - 2) > 0.1);
   expect(notScaled, 'text that does not double on a 4K TV').toEqual([]);
 });
+
+test('touch screen: small floor controls take a tap 21 px around their centre', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await page.goto(FILE);
+  await page.getByText('Hamza Siddiqui').click();
+  await page.locator('.si-go').click();
+  await page.waitForFunction(() => (window as unknown as { __mg?: { RT: { S: unknown } } }).__mg?.RT.S);
+  await page.evaluate(() => { location.hash = '#/floor'; });
+  await page.locator('.strip .views button').first().waitFor();
+  const small = await page.evaluate(() => {
+    const out: string[] = [];
+    for (const sel of ['.strip .views button', '.lane-h', '.ubtn', '.calls-pill', '.alarm-pill']) {
+      for (const el of [...document.querySelectorAll(sel)].slice(0, 2)) {
+        const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        for (const [x, y] of [[cx, cy - 21], [cx, cy + 21], [cx - 21, cy], [cx + 21, cy]]) {
+          const hit = document.elementFromPoint(x, y);
+          if (!hit || !(el === hit || el.contains(hit))) { out.push(`${sel} misses a tap at ${Math.round(x - cx)},${Math.round(y - cy)}`); break; }
+        }
+      }
+    }
+    return out;
+  });
+  expect(small).toEqual([]);
+  await ctx.close();
+});

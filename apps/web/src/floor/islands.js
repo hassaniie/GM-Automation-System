@@ -107,8 +107,8 @@ export function Strip() {
   const top = topAlarm(S), stripLane = RT.ui.stripLane || 'FINAL';
   return html`<section class="glass strip ticks in" aria-label="Line strip">
     <div class="views" role="toolbar" aria-label="Views">
-      <button aria-pressed=${RT.ui.view === 'overview' && !RT.ui.view2D} onClick=${() => go('overview')}><${Icon} n="layers" size=${14} />Shop</button>
-      <button aria-pressed=${RT.ui.view2D} onClick=${() => go('2D')}><${Icon} n="map" size=${14} />Plan</button>
+      <button aria-pressed=${RT.ui.view === 'overview' && !RT.ui.view2D} onClick=${() => go('overview')}><${Icon} n="layers" size=${14} />3D</button>
+      <button aria-pressed=${RT.ui.view2D} onClick=${() => go('2D')}><${Icon} n="map" size=${14} />2D</button>
       <button class=${top ? 'alert' : ''} disabled=${!top} onClick=${() => top && openAlarm(top)} title="Focus the most urgent alarm (A)"><${Icon} n="target" size=${14} />Alarm</button>
       <button aria-pressed=${RT.ui.legend} onClick=${() => setUI({ legend: !RT.ui.legend, simOpen: false })}><${Icon} n="info" size=${14} />Key</button>
     </div>

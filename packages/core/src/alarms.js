@@ -3,21 +3,24 @@ import { POS, ROUTE, WORK_POS, targetFor } from './plant.js';
 import { dispId } from './scans.js';
 import { logEvent, uid } from './state.js';
 
+/** Readable names for alarm levels, used in the activity log and alarm history instead of the codes (audit D7). */
+export const LEVEL_TEXT = { WARNING: 'Warning', ASSIST: 'Assist', CALL_SUP: 'Supervisor call', CALL_MNT: 'Maintenance call', EMERGENCY: 'Emergency', BLOCKED: 'Blocked', OVERDUE: 'Overdue', FAULT: 'Fault', HOLD: 'Quality hold', ESCALATED: 'Escalated' };
+const lv = (l) => LEVEL_TEXT[l] || l;
 export const SEV = { WARNING: 1, ASSIST: 2, CALL_SUP: 2, CALL_MNT: 2, EMERGENCY: 5, BLOCKED: 2, OVERDUE: 3, FAULT: 3, HOLD: 3, ESCALATED: 4 };
 export function raiseOrUpdate(S, key, data) {
   let a = S.alarmByKey[key];
   if (a && a.resolvedT == null) {
     if (data.level && data.level !== a.level && SEV[data.level] > SEV[a.level]) {
-      a.history.push({ t: S.t, text: `${a.level} → ${data.level}` });
+      a.history.push({ t: S.t, text: `${lv(a.level)} → ${lv(data.level)}` });
       a.level = data.level; a.levelT = S.t; a.msg = data.msg || a.msg; a.ackT = null; a.ackBy = null;
-      logEvent(S, 'alarm', `${data.level} · ${dispId(a.pos)} · ${a.msg}`, { vehicleId: a.vehicleId, pos: a.pos });
+      logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(a.pos)} · ${a.msg}`, { vehicleId: a.vehicleId, pos: a.pos });
     }
     return a;
   }
-  a = { id: uid(S, 'al'), key, raisedT: S.t, levelT: S.t, ackT: null, ackBy: null, resolvedT: null, resolution: null, history: [{ t: S.t, text: `Raised as ${data.level}` }], ...data };
+  a = { id: uid(S, 'al'), key, raisedT: S.t, levelT: S.t, ackT: null, ackBy: null, resolvedT: null, resolution: null, history: [{ t: S.t, text: `Raised as ${lv(data.level)}` }], ...data };
   S.alarms.push(a); S.alarmByKey[key] = a;
   if (S.alarms.length > 400) { const old = S.alarms.shift(); if (S.alarmByKey[old.key] === old) delete S.alarmByKey[old.key]; }
-  if (data.level !== 'WARNING') logEvent(S, 'alarm', `${data.level} · ${dispId(data.pos)} · ${data.msg}`, { vehicleId: data.vehicleId, pos: data.pos });
+  if (data.level !== 'WARNING') logEvent(S, 'alarm', `${lv(data.level)} · ${dispId(data.pos)} · ${data.msg}`, { vehicleId: data.vehicleId, pos: data.pos });
   return a;
 }
 export function resolveAlarmsFor(S, pred, resolution) {
@@ -29,7 +32,7 @@ export function resolveAlarmsFor(S, pred, resolution) {
 export function ackAlarm(S, id, by = 'Supervisor') {
   const a = S.alarms.find((x) => x.id === id); if (!a || a.resolvedT != null || a.ackT != null) return;
   a.ackT = S.t; a.ackBy = by; a.history.push({ t: S.t, text: `Acknowledged by ${by} (condition still open)` });
-  logEvent(S, 'alarm', `Acknowledged · ${a.level} · ${dispId(a.pos)} · condition still open`, { vehicleId: a.vehicleId, pos: a.pos });
+  logEvent(S, 'alarm', `Acknowledged · ${lv(a.level)} · ${dispId(a.pos)} · condition still open`, { vehicleId: a.vehicleId, pos: a.pos });
 }
 export const alarmActive = (a) => a.resolvedT == null;
 export const alarmUnacked = (a) => a.resolvedT == null && a.ackT == null;

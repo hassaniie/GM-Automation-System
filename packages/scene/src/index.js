@@ -705,7 +705,17 @@ export const Scene3D = (function () {
     renderer.setPixelRatio(weak ? 1 : Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = true;
     // a lost graphics context (driver reset, GPU memory pressure) hands over to the 2D plan instead of a blank floor
     renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); ok = false; if (opts.onLost) opts.onLost(); }); renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.setClearColor(T.bg);
-    el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label', 'Interactive 3D model of the General Assembly shop'); renderer.domElement.tabIndex = 0;
+    el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label', 'Interactive 3D model of the General Assembly shop. Arrow keys move the view; plus and minus zoom.'); renderer.domElement.tabIndex = 0;
+    // keyboard: arrows pan along the floor, + and − zoom (audit D5)
+    renderer.domElement.addEventListener('keydown', (e) => {
+      const off = camera.position.clone().sub(controls.target);
+      if (e.key === '+' || e.key === '=' || e.key === '-') { e.preventDefault(); const k = e.key === '-' ? 1.15 : 1 / 1.15, d = E.clamp(off.length() * k, controls.minDistance, controls.maxDistance); camera.position.copy(controls.target).add(off.setLength(d)); return; }
+      const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!dir) return;
+      e.preventDefault();
+      const fwd = new THREE.Vector3(off.x, 0, off.z).normalize(), right = new THREE.Vector3(fwd.z, 0, -fwd.x), step = Math.max(2, off.length() * 0.05);
+      const delta = right.multiplyScalar(-dir[0] * step).add(fwd.multiplyScalar(dir[1] * step));
+      camera.position.add(delta); controls.target.add(delta);
+    });
     scene = new THREE.Scene(); scene.fog = new THREE.Fog(T.bg, T.fogNear, T.fogFar);
     camera = new THREE.PerspectiveCamera(28, 1, 0.5, 700);
     hemi = new THREE.HemisphereLight(T.hemi[0], T.hemi[1], T.hemi[2]); scene.add(hemi);

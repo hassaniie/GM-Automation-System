@@ -326,6 +326,7 @@ svg.plan text { font-family: var(--font-mono); }
 .cells.ticks::after { inset: -1px; }
 /* overflow would clip marks drawn on the border, so frames don't clip; their inner bodies scroll */
 .inspector.ticks, .drawer.ticks { overflow: visible; }
+.inspector:focus, .drawer:focus { outline: none; } /* focused on open so screen readers land there; not a keyboard stop */
 .report.ticks { overflow: visible; padding: 0; display: flex; }
 .rep-scroll { flex: 1; min-width: 0; overflow: auto; padding: 22px max(24px, env(safe-area-inset-right, 0px)) 32px max(24px, env(safe-area-inset-left, 0px)); }
 @media (max-width: 1640px) { .metric.opt { display: none; } }
