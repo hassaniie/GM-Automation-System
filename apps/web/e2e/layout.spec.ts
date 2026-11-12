@@ -105,3 +105,38 @@ test('the open simulation console and Key never run under the page rail', async 
   }
   expect(found).toEqual([]);
 });
+
+test('the top bar fits during a long status such as an emergency stop', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page, 'dark');
+  await page.evaluate(() => { location.hash = '#/floor'; (window as unknown as { __mg: { Act: { emergency: (id: string, on: boolean) => void } } }).__mg.Act.emergency('CL2', true); });
+  await page.waitForTimeout(600);
+  const found: string[] = [];
+  for (const w of [1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width: w, height: Math.round(w * 0.6) });
+    await page.waitForTimeout(500);
+    for (const x of await problems(page)) found.push(`${w}px: ${x}`);
+    found.push(...(await page.evaluate((w) => {
+      const isl = document.querySelector('.state-island'); if (!isl) return [];
+      const R = isl.getBoundingClientRect();
+      return [...isl.querySelectorAll('.metric:not([hidden]), .fit-more')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > R.right + 1; })
+        .map((e) => `${w}px: ${e.className} is cut off by the status area`);
+    }, w)));
+  }
+  expect(found).toEqual([]);
+});
+
+test('phones: the Guide fits the screen and the line display stacks without overlaps', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, 'dark');
+  await page.evaluate(() => { location.hash = '#/how'; });
+  await page.locator('.page-scroll .ds-panel').first().waitFor();
+  await page.waitForTimeout(400);
+  const guide = await page.evaluate(() => { const s = document.querySelector('.page-scroll')!; return s.scrollWidth - s.clientWidth; });
+  expect(guide, 'Guide is wider than the phone by').toBeLessThanOrEqual(1);
+  await page.evaluate(() => { location.hash = '#/display/final'; });
+  await page.locator('.lcd-calls').waitFor();
+  await page.waitForTimeout(400);
+  const gap = await page.evaluate(() => document.querySelector('.lcd-calls')!.getBoundingClientRect().top - document.querySelector('.lcd-st')!.getBoundingClientRect().bottom);
+  expect(gap, 'calls panel overlaps the station tiles by').toBeGreaterThanOrEqual(0);
+});

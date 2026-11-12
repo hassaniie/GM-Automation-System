@@ -29,6 +29,6 @@ export const MGE = {
   dateKeyOf, dateKeyAt, dayOf, dayOfDate, shiftsFor, targetsFor, shiftAt, shiftKey, netElapsed, nextBoundary, summarizeShift, areaPaused,
   findVehicleByVin, isActive, logEvent, curSeg, fmtClock, fmtDur, shortVin, clamp, hash01,
 };
-// Exposed for console debugging in the browser.
-if (typeof window !== 'undefined') window.MGE = MGE;
+// Exposed for console debugging in the browser, except in production builds (audit S1).
+if (typeof window !== 'undefined' && import.meta.env?.MODE !== 'production') window.MGE = MGE;
 export default MGE;

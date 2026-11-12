@@ -5,7 +5,7 @@
 import React from 'react';
 import htm from 'htm';
 import { MGE } from '@mg/engine';
-import { Scene3D } from '@mg/scene';
+import { Scene3D } from './scene.js';
 
 
 export const { useState, useEffect, useRef, useReducer } = React;

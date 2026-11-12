@@ -11,6 +11,8 @@
     --ds-text-primary: var(--ds-n-850); --ds-text-secondary: var(--ds-n-700); --ds-text-muted: var(--ds-n-600); --ds-text-disabled: var(--ds-n-300);
     --ds-border-subtle: rgba(16, 22, 28, .10); --ds-border-strong: rgba(16, 22, 28, .18);
     --ds-glass: linear-gradient(180deg, rgba(255,255,255,.74), rgba(244,246,248,.56));
+    /* over the 3D floor: denser, so a red car or sign behind a panel does not tint it (audit D2) */
+    --ds-glass-floor: linear-gradient(180deg, rgba(255,255,255,.9), rgba(244,246,248,.86));
     --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,1), rgba(255,255,255,.35) 38%, rgba(255,255,255,.08) 62%, rgba(255,255,255,.6));
     --ds-glass-edge: rgba(16, 22, 28, .10);
     --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(16,22,28,.04) inset, 0 26px 60px -24px rgba(20, 28, 38, .38), 0 6px 18px -8px rgba(20, 28, 38, .16);
@@ -38,6 +40,7 @@
     --ds-text-primary: var(--ds-n-50); --ds-text-secondary: var(--ds-n-200); --ds-text-muted: var(--ds-n-400); --ds-text-disabled: var(--ds-n-600);
     --ds-border-subtle: rgba(255, 255, 255, .08); --ds-border-strong: rgba(255, 255, 255, .15);
     --ds-glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
+    --ds-glass-floor: linear-gradient(180deg, rgba(30,34,40,.9), rgba(16,18,22,.86));
     --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
     --ds-glass-edge: rgba(0, 0, 0, .45);
     --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);
@@ -56,6 +59,7 @@
     --ds-text-primary: var(--ds-n-50); --ds-text-secondary: var(--ds-n-200); --ds-text-muted: var(--ds-n-400); --ds-text-disabled: var(--ds-n-600);
     --ds-border-subtle: rgba(255, 255, 255, .08); --ds-border-strong: rgba(255, 255, 255, .15);
     --ds-glass: linear-gradient(180deg, rgba(34,38,44,.58), rgba(14,16,19,.46));
+    --ds-glass-floor: linear-gradient(180deg, rgba(30,34,40,.9), rgba(16,18,22,.86));
     --ds-glass-rim: linear-gradient(160deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 36%, rgba(255,255,255,0) 60%, rgba(255,255,255,.14));
     --ds-glass-edge: rgba(0, 0, 0, .45);
     --ds-glass-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 30px 70px -24px rgba(0,0,0,.75), 0 8px 22px -10px rgba(0,0,0,.6);

@@ -689,13 +689,17 @@ export const Scene3D = (function () {
   function init(container, opts) {
     el = container; getState = opts.getState; getUI = opts.getUI; cb = opts; if (opts.theme) T = THEMES[opts.theme] || T, themeName = opts.theme || themeName;
     try { const pr = document.createElement('canvas'); if (!(pr.getContext('webgl2') || pr.getContext('webgl'))) throw new Error('no webgl'); renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' }); } catch (e) { return false; }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.setClearColor(T.bg);
+    // low quality on weak devices (or when asked): pixel ratio 1 and smaller shadows (audit T4)
+    const weak = opts.quality === 'low' || (opts.quality !== 'high' && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4));
+    renderer.setPixelRatio(weak ? 1 : Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = true;
+    // a lost graphics context (driver reset, GPU memory pressure) hands over to the 2D plan instead of a blank floor
+    renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); ok = false; if (opts.onLost) opts.onLost(); }); renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.setClearColor(T.bg);
     el.appendChild(renderer.domElement); renderer.domElement.setAttribute('aria-label', 'Interactive 3D model of the General Assembly shop'); renderer.domElement.tabIndex = 0;
     scene = new THREE.Scene(); scene.fog = new THREE.Fog(T.bg, T.fogNear, T.fogFar);
     camera = new THREE.PerspectiveCamera(28, 1, 0.5, 700);
     hemi = new THREE.HemisphereLight(T.hemi[0], T.hemi[1], T.hemi[2]); scene.add(hemi);
     amb = new THREE.AmbientLight(0xffffff, T.amb); scene.add(amb);
-    key = new THREE.DirectionalLight(0xfff6ea, T.key); key.position.set(40, 70, 40); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+    key = new THREE.DirectionalLight(0xfff6ea, T.key); key.position.set(40, 70, 40); key.castShadow = true; key.shadow.mapSize.set(weak ? 1024 : 2048, weak ? 1024 : 2048);
     Object.assign(key.shadow.camera, { left: -75, right: 75, top: 45, bottom: -45, near: 10, far: 200 }); key.shadow.bias = -0.0006; key.shadow.normalBias = 0.03; key.target.position.set(10, 0, -3); scene.add(key, key.target);
     fill = new THREE.DirectionalLight(0x9ab8d8, T.fill); fill.position.set(-50, 30, -40); scene.add(fill);
     // cool rim from behind the shop: separates bodies, hangers and rails from the floor in dark mode

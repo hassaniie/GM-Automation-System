@@ -3,7 +3,7 @@
    the five points the supplier must propose (§6), and a coverage matrix of
    all 36 requirements with a "Show me" link into the running system.
    ════════════════════════════════════════════════════════════════════════ */
-import { Scene3D } from '@mg/scene';
+import { Scene3D } from './lib/scene.js';
 import { Button, DataTable, PageHeader, Panel, Tag } from './ui/index.js';
 import { Act } from './lib/act.js';
 import { loadScenario, select } from './floor/scenarios.js';

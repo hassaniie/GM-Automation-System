@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════════════════════════════════════
    App shell: signed-in user and permissions, screen router, root and boot.
    ════════════════════════════════════════════════════════════════════════ */
-import { Scene3D } from '@mg/scene';
+import { Scene3D } from './lib/scene.js';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { AdminPage, adminAllowed, persistConfig, savedCfg } from './admin.js';
@@ -40,13 +40,9 @@ function Placeholder({ title }) { return html`<div class="page-wrap"><div class=
 function App() {
   const [, force] = useReducer((x) => x + 1, 0), sceneRef = useRef(null), [webgl, setWebgl] = useState(true);
   useEffect(() => {
-    const ok3d = Scene3D.init(sceneRef.current, {
-      getState: () => RT.S, getUI: () => RT.ui, theme: effectiveTheme(),
-      onHover: (hit, changed) => { if (changed || !hit) setUI({ hover: hit }); else { RT.ui.hover = hit; const n = document.getElementById('hovercard'); if (n) n.style.transform = `translate(${Math.min(hit.x + 16, window.innerWidth - 310)}px, ${hit.y + 16}px)`; } },
-      onSelect: (hit) => select(hit),
-    });
-    if (!ok3d) { setWebgl(false); RT.ui.view2D = true; }
-    let last = performance.now(), lastRev = -1, lastPaint = 0;
+    let last = performance.now(), lastRev = -1, lastPaint = 0, last3d = 0, lastRev3d = -1;
+    const input = () => { RT._inputAt = performance.now(); };
+    for (const ev of ['pointermove', 'pointerdown', 'wheel', 'keydown', 'touchstart']) window.addEventListener(ev, input, { passive: true });
     const loop = (now) => {
       const dt = Math.min(0.25, (now - last) / 1000); last = now;
       if (REMOTE) RT.acc = remoteAcc(now); // the edge server runs the engine; draw between its updates
@@ -60,9 +56,13 @@ function App() {
         if (now - (RT._safeAt || 0) > 500) {
           RT._safeAt = now;
           const hud = document.querySelector('.stage header.hud'), strip = document.querySelector('.strip'), rail = document.querySelector('.ds-rail');
-          Scene3D.setSafeArea({ top: hud ? hud.getBoundingClientRect().bottom : 0, bottom: strip ? window.innerHeight - strip.getBoundingClientRect().top : 0, left: rail ? rail.getBoundingClientRect().right : 0 });
+          // the alarm panel frames the camera like the station panel does (audit U5); the station panel reports its own width
+          const drawer = !RT.ui.selection && window.innerWidth > 760 && document.querySelector('.drawer');
+          Scene3D.setSafeArea({ top: hud ? hud.getBoundingClientRect().bottom : 0, bottom: strip ? window.innerHeight - strip.getBoundingClientRect().top : 0, left: rail ? rail.getBoundingClientRect().right : 0, right: drawer ? window.innerWidth - drawer.getBoundingClientRect().left : 0 });
         }
-        Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now);
+        // render on demand when idle: paused, nothing changed and no input for 3 s → 2 frames a second (audit T4)
+        const idle = !RT.running && RT.rev === lastRev3d && now - (RT._inputAt || 0) > 3000;
+        if (!idle || now - last3d > 500) { last3d = now; lastRev3d = RT.rev; Scene3D.render(RT.S.t + (RT.running ? RT.acc : 0), now); }
       }
       Horn.tick(now);
       const done = RT.S.stats.completed, lastC = done[done.length - 1];
@@ -97,6 +97,16 @@ function App() {
   const d = RT.ui.dialog, page = RT.route.page, floor = page === 'floor';
   const gate = page !== 'display' && (!Auth.user || Auth.locked);
   const rail = !gate && page !== 'display';
+  // the 3D floor loads the first time the Floor opens (audit T3)
+  useEffect(() => {
+    if (!floor || gate || Scene3D.loaded) return;
+    Scene3D.load(sceneRef.current, {
+      getState: () => RT.S, getUI: () => RT.ui, theme: effectiveTheme(),
+      onHover: (hit, changed) => { if (changed || !hit) setUI({ hover: hit }); else { RT.ui.hover = hit; const n = document.getElementById('hovercard'); if (n) n.style.transform = `translate(${Math.min(hit.x + 16, window.innerWidth - 310)}px, ${hit.y + 16}px)`; } },
+      onSelect: (hit) => select(hit),
+      onLost: () => { setWebgl(false); setUI({ view2D: true }); }, // graphics context lost: the 2D plan takes over (audit T4)
+    }).then((ok) => { if (!ok) { setWebgl(false); setUI({ view2D: true }); } });
+  }, [floor, gate]);
   // locking the screen drops any open dialog, so it does not reappear after unlock (audit B7)
   useEffect(() => { if (gate && RT.ui.dialog) setUI({ dialog: null }); }, [gate]);
   return html`<main class=${'stage' + (rail ? ' has-rail' : '')}>

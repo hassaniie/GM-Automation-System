@@ -349,6 +349,7 @@ svg.plan text { font-family: var(--font-mono); }
 .simcon-bar { padding: 6px 8px 6px 12px; }
 .inspector { top: calc(var(--gt) + var(--hud-h) + var(--g)); right: var(--gr); bottom: calc(var(--gb) + var(--strip-h) + var(--g)); width: min(420px, calc(100vw - 2 * var(--g))); padding-right: 0; }
 .drawer { top: calc(var(--gt) + var(--hud-h) + var(--g)); right: var(--gr); bottom: var(--gb); width: min(460px, calc(100vw - 2 * var(--g))); }
+.stage:has(.strip) .drawer { bottom: calc(var(--gb) + var(--strip-h) + var(--g)); } /* on the floor it stops above the strip, like the station panel (audit U5) */
 .report { top: calc(var(--gt) + var(--hud-h) + var(--g)); left: var(--gl); right: var(--gr); bottom: var(--gb); }
 .rep-scroll { padding: 22px 24px 32px; }
 .legend-pop { left: var(--gl); bottom: calc(var(--gb) + var(--strip-h) + 44px + 2 * var(--g)); }
@@ -593,7 +594,7 @@ svg.plan text { font-family: var(--font-mono); }
 .page-shell { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
 .page-shell > .hud { position: relative; flex: none; }
 .page-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-.page-wrap { max-width: 1440px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 60px max(16px, env(safe-area-inset-left, 0px)); }
+.page-wrap { grid-template-columns: minmax(0, 1fr); max-width: 1440px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 60px max(16px, env(safe-area-inset-left, 0px)); }
 .empty-page { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 120px 16px; color: var(--text-2); }
 /* avatars */
 .av { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; font: 600 12px/1 var(--font-ui); letter-spacing: .04em; color: #fff; background: var(--muted); border-radius: var(--ds-radius-round) !important; vertical-align: middle; }
@@ -764,7 +765,8 @@ svg.plan text { font-family: var(--font-mono); }
 .lcd-foot nav { display: flex; gap: 2px; } .lcd-foot nav button, .lcd-act button { background: transparent; border: 1px solid #26303a; color: #8b97a3; padding: .6vh 1.2vw; font: 600 1.5vh/1 var(--font-ui); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
 .lcd-foot nav button[aria-current="page"] { color: #fff; border-color: #8b97a3; }
 .lcd-act { display: flex; gap: 4px; } .lcd-act .ico { width: 2vh; height: 2vh; }
-@media (max-width: 760px) and (orientation: portrait) { .lcd { grid-template-rows: auto auto auto auto auto auto; overflow: auto; } .lcd-top { grid-template-columns: 1fr auto; } .lcd-status { grid-column: 1 / -1; order: 3; } .lcd-kpis { grid-auto-flow: row; grid-template-columns: 1fr 1fr; } .lcd-kpis b { font-size: 5vh; } .lcd-st { grid-template-columns: 1fr 1fr !important; } .lc-cy { font-size: 4vh; } .lcd-calls { grid-auto-flow: row; } }
+/* phones (audit U4): the TV layout stacks and scrolls; the inline row sizes are for TVs, so they are overridden */
+@media (max-width: 760px) and (orientation: portrait) { .lcd { grid-template-rows: none !important; grid-auto-rows: auto; overflow: auto; } .lcd > * { min-height: auto !important; } .lcd-calls { min-height: 10vh !important; } .lcd-foot { flex-wrap: wrap; } .lcd-top { grid-template-columns: 1fr auto; } .lcd-status { grid-column: 1 / -1; order: 3; } .lcd-kpis { grid-auto-flow: row; grid-template-columns: 1fr 1fr; } .lcd-kpis b { font-size: 5vh; } .lcd-st { grid-template-columns: 1fr 1fr !important; } .lc-cy { font-size: 4vh; } .lcd-calls { grid-auto-flow: row; } }
 /* power cut overlay */
 .power-ov { position: absolute; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(4,6,8,.78); }
 .power-ov.off { background: rgba(0,0,0,.92); }
@@ -781,8 +783,8 @@ svg.plan text { font-family: var(--font-mono); }
 /* ═════════ how it works ═════════ */
 .how { display: grid; gap: 16px; }
 .how-h { margin: 14px 0 0; font-size: 18px; font-weight: 600; }
-.six { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
-.six.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+.six { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 12px; }
+.six.two { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
 .six .ds-panel { display: grid; gap: 8px; align-content: start; } .six .ds-panel p { margin: 0; line-height: 1.55; color: var(--text-2); }
 .six-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
 .how-ul { margin: 0; padding-left: 18px; color: var(--text-2); line-height: 1.6; }

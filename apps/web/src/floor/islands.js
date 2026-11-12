@@ -1,6 +1,6 @@
 /* ═════════ islands ═════════ */
 import { downtimeTone, planTone } from '../lib/tone.js';
-import { Scene3D } from '@mg/scene';
+import { Scene3D } from '../lib/scene.js';
 import { BV_FULL, BV_FULL_INK } from '@mg/scene/brand';
 import { UserMenu } from '../auth.js';
 import { openAlarm, select, topAlarm } from './scenarios.js';
@@ -32,20 +32,21 @@ export function StateIsland() {
   const hrs = S.shift && S.shift.name ? M.netElapsed(S.shift, S.shift.end) / 3600 : 0;
   const row = useRef(null), hidden = useFit(row, 120), [more, setMore] = useState(false), moreBtn = useRef(null), pop = useRef(null);
   usePopover(more, setMore, moreBtn, pop);
-  // priority 1 never folds; the rest fold into More from the highest number when the top bar is short of room
+  // only the line state never folds; the rest fold into More from the highest number when the top bar is short of
+  // room, Completed last (audit U2)
   const metrics = [
     { key: 'line', p: 1, body: html`<span class="micro">Line</span>
-      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span>${ls.label}</button>` },
-    { key: 'done', p: 1, title: 'Final line: vehicles completed this shift against the shift target', body: html`<span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span>` },
-    { key: 'remaining', p: 3, body: html`<span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span>` },
-    { key: 'down', p: 2, title: 'Final line downtime this shift: time with at least one station over takt, breaks excluded', body: html`<span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span>` },
-    { key: 'lasthour', p: 4, body: html`<span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span>` },
-    { key: 'wip', p: 5, body: html`<span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span>` },
+      <button class=${'linestate ' + (ls.tone === 'crit' ? 'crit' : '')} style=${{ color: tv(ls.tone) }} onClick=${() => ls.root ? select({ kind: 'pos', id: dispId(ls.root) }) : Scene3D.focusView('overview')}><span class="dot"></span><span class="ls-t">${ls.label}</span></button>` },
+    { key: 'done', p: 2, title: 'Final line: vehicles completed this shift against the shift target', body: html`<span class="micro">Completed / target</span><span class="v">${p.done}<small>/ ${p.target}</small><small style=${{ color: planTone(p.delta) }}>${p.delta === 0 ? 'on plan' : p.delta > 0 ? `+${p.delta}` : p.delta}</small></span>` },
+    { key: 'remaining', p: 4, body: html`<span class="micro">Remaining</span><span class="v">${p.remaining}<small>to target</small></span>` },
+    { key: 'down', p: 3, title: 'Final line downtime this shift: time with at least one station over takt, breaks excluded', body: html`<span class="micro">Downtime</span><span class="v" style=${{ color: downtimeTone(p.down, 'FINAL') }}>${fmtDur(p.down)}<small>Final</small></span>` },
+    { key: 'lasthour', p: 5, body: html`<span class="micro">Last hour</span><span class="v">${p.lastHour}<small>JPH · plan ${hrs ? (p.target / hrs).toFixed(1) : '—'}</small></span>` },
+    { key: 'wip', p: 6, body: html`<span class="micro">In process</span><span class="v">${wip}<small>vehicles</small></span>` },
   ];
   const folded = metrics.filter((m) => hidden.has(m.key));
   return html`<section class="state-island" role="status" aria-live="polite" ref=${row}>
     ${metrics.map((m) => html`<div key=${m.key} class=${'metric' + (m.key === 'line' ? ' lead' : '')} data-fit=${m.key} data-priority=${m.p} title=${m.title} hidden=${hidden.has(m.key)}>${m.body}</div>`)}
-    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} title="More line figures" onClick=${() => setMore(!more)}><span class="hud-btn-l">More</span><span class="fit-n">${folded.length}</span><${Icon} n="down" size=${14} /></button>
+    ${folded.length ? html`<div class="fit-more"><button ref=${moreBtn} class="ibtn" aria-haspopup="true" aria-expanded=${more} title="More line figures" onClick=${() => setMore(!more)}><span class="hud-btn-l">More</span>${' '}<span class="fit-n">${folded.length}</span><${Icon} n="down" size=${14} /></button>
       ${more ? html`<div class="glass fit-pop" ref=${pop} role="dialog" aria-label="More figures">${folded.map((m) => html`<div key=${m.key} class="metric" title=${m.title}>${m.body}</div>`)}</div>` : null}</div>` : null}
   </section>`;
 }
@@ -67,7 +68,7 @@ function ToolsMenu({ themeIcon }) {
     [RT.ui.muted ? 'mute' : 'vol', RT.ui.muted ? 'Alarm sound: muted' : 'Alarm sound: on', () => { setUI({ muted: !RT.ui.muted }); if (!RT.ui.muted) Horn.ensure(); }],
   ];
   // on phones the same menu also lists the pages (the rail is hidden there) and is labelled "Menu"
-  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} title="Search, scan, X-ray, theme and sound" onClick=${() => setOpen(!open)}><span class="hud-btn-l tl-tools">Tools</span><span class="tl-menu"><${Icon} n="menu" size=${18} /><span class="hud-btn-l">Menu</span></span><${Icon} n="down" size=${14} /></button>
+  return html`<div class="tools-menu"><button ref=${btn} class="ibtn" aria-haspopup="menu" aria-expanded=${open} aria-label="Tools" title="Search, scan, X-ray, theme and sound" onClick=${() => setOpen(!open)}><span class="hud-btn-l tl-tools">Tools</span><span class="tl-menu"><${Icon} n="menu" size=${18} /><span class="hud-btn-l">Menu</span></span><${Icon} n="down" size=${14} /></button>
     ${open ? html`<div class="glass umenu-pop tools-pop" role="menu" ref=${pop}>
       <div class="tools-pages"><div class="um-h">Pages</div>${navPages().map((p) => html`<button key=${p.value} class="um-item" role="menuitem" aria-current=${RT.route.page === p.value ? 'page' : null} onClick=${run(() => goPage(p.value))}><${Icon} n=${p.icon} />${p.label}</button>`)}<div class="um-h">Tools</div></div>
       ${items.map(([ic, label, f]) => html`<button key=${label} class="um-item" role="menuitem" onClick=${run(f)}><${Icon} n=${ic} />${label}</button>`)}</div>` : null}</div>`;

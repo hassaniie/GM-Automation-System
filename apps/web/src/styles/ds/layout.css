@@ -24,7 +24,10 @@
 
   /* page status: figures keep their natural width; the row decides what fits */
   .hud .state-island > .metric { flex: none; }
-  .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-20); }
+  .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-20); max-width: 100%; min-width: 0; }
+  .hud .state-island > .metric.lead .ls-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 1279px) { .hud .state-island > .metric.lead .linestate { font-size: var(--ds-size-15, 15px); letter-spacing: .02em; gap: var(--ds-space-2); } }
+  .hud .state-island > .metric.lead { min-width: 0; flex-shrink: 1; }
   .fit-more { flex: none; position: relative; display: flex; align-items: stretch; margin-left: auto; }
   /* labelled fold buttons: "More 4 ▾" for figures, "Tools ▾" for the tool icons */
   .fit-more .ibtn, .tools-menu > .ibtn { width: auto; padding: 0 var(--ds-space-4); gap: var(--ds-space-2); display: inline-flex; align-items: center; color: var(--ds-text-secondary); }
@@ -155,6 +158,14 @@
    ════════════════════════════════════════════════════════════════════════ */
 @layer layout {
   .tl-menu, .tools-pages { display: none; }
+  /* 768–1279 px: More and Tools go compact (count or icon, with a chevron) so the line status keeps its full text (audit U2) */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .fit-more .hud-btn-l { display: none; }
+    .tl-tools { display: none; }
+    .tl-menu { display: inline-flex; align-items: center; }
+    .tl-menu .hud-btn-l { display: none; }
+    .fit-more .ibtn, .tools-menu > .ibtn { padding: 0 var(--ds-space-3); }
+  }
   .um-h { padding: var(--ds-space-2) var(--ds-space-3) var(--ds-space-1); color: var(--ds-text-muted); font: 600 var(--ds-size-11) / 1 var(--ds-font-ui); letter-spacing: var(--ds-tracking-label); text-transform: uppercase; }
   .tools-pages .um-item[aria-current="page"] { background: var(--ds-layer-2); color: var(--ds-text-primary); font-weight: 600; }
 
@@ -239,4 +250,10 @@
     .page-shell { background: none; }
     .page-shell .ds-panel { background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
   }
+}
+
+/* The floor (the screen with the strip): glass panels over the 3D are denser and do not boost colour, so the
+   scene behind shows faintly but a red car or sign never tints the bar, menus or console (audit D2). */
+@layer layout {
+  .stage:has(.strip) { --ds-glass: var(--ds-glass-floor); --ds-glass-blur: blur(26px) saturate(100%); --glass: var(--ds-glass-floor); --blur: blur(26px) saturate(100%); }
 }
