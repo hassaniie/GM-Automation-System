@@ -33,17 +33,23 @@ test.describe('stories', () => {
 });
 
 const FILE = pathToFileURL(resolve(process.cwd(), 'dist-demo/index.html')).href;
+/** Opens the demo, checks the sign-in screen and signs in. */
+async function signInFor(page: Page, theme: string) {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ colorScheme: theme as 'light' | 'dark', reducedMotion: 'reduce' });
+  await stabilise(page);
+  await page.goto(FILE);
+  expect(await serious(page), 'sign-in').toEqual([]);
+  await page.getByText('Hamza Siddiqui').click();
+  await page.locator('.si-go').click();
+  await page.waitForFunction(() => (window as unknown as { __mg?: { RT: { S: unknown } } }).__mg?.RT.S);
+}
 test.describe('screens', () => {
   for (const theme of THEMES) {
+    // two tests per theme (page screens, then the floor's open states), so each stays well inside the time limit
+    // on a slow shared runner; the checks are the same as one long test
     test(`key screens · ${theme}`, async ({ page }) => {
-      await page.setViewportSize({ width: 1440, height: 900 });
-      await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
-      await stabilise(page);
-      await page.goto(FILE);
-      expect(await serious(page), 'sign-in').toEqual([]);
-      await page.getByText('Hamza Siddiqui').click();
-      await page.locator('.si-go').click();
-      await page.waitForFunction(() => (window as unknown as { __mg?: { RT: { S: unknown } } }).__mg?.RT.S);
+      await signInFor(page, theme);
       const found: Record<string, string[]> = {};
       for (const r of ['floor', 'dash', 'display/final', 'reports', 'admin/takt', 'admin/users', 'how']) {
         await page.evaluate((r) => { location.hash = '#/' + r; }, r);
@@ -52,6 +58,11 @@ test.describe('screens', () => {
         const v = await serious(page);
         if (v.length) found[r] = v;
       }
+      expect(found).toEqual({});
+    });
+    test(`floor open states · ${theme}`, async ({ page }) => {
+      await signInFor(page, theme);
+      const found: Record<string, string[]> = {};
       // open states: menus, the station panel, the alarm drawer and a dialog (audit D3)
       await page.evaluate(() => { location.hash = '#/floor'; });
       await page.waitForTimeout(400);

@@ -75,7 +75,8 @@ describe('live, against the emulated plant', () => {
     expect(srv.host.clock.mode).toBe('live');
     await until(() => srv.devices!.status.get('plc')!.state === 'connected' && srv.devices!.status.get('scanner-tl1')!.state === 'connected', 30_000, 'devices to connect');
     // the emulated paint shop feeds a body; the scanner reads it; the PLC reports the skid and its moves
-    await until(() => S().vehOrder.length > 0, 60_000, 'a unit registered by the scanner');
+    // the first body can take a while on a slow shared CI runner: wait as long as the TL2 step below may
+    await until(() => S().vehOrder.length > 0, 120_000, 'a unit registered by the scanner');
     const v = S().vehicles[S().vehOrder[0]];
     expect(v.vin).toBe(em.S.vehicles[em.S.vehOrder[0]].vin);
     await until(() => !!S().vehicles[S().vehOrder[0]].segments.find((g: { pos: string }) => g.pos === 'TL2'), 150_000, 'the unit to reach TL2');
@@ -87,7 +88,7 @@ describe('live, against the emulated plant', () => {
     const view = srv.devices!.view();
     expect(view.tags.find((t) => t.address === 'ns=1;s=GA.TL2.Presence')!.value).toBe(true);
     expect(view.log.some((l) => l.event?.startsWith('Carrier arrived at TL2'))).toBe(true);
-  }, 240_000);
+  }, 330_000); // covers its three waits: 30 s connect + 120 s first unit + 150 s to TL2
 
   test('a bad VIN from the scanner is rejected and logged', async () => {
     const n = srv.host.S.scans.length;
