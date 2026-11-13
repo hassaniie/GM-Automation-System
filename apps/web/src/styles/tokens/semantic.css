@@ -43,7 +43,7 @@
     --ds-glass: rgba(26, 29, 34, .6);
     --ds-glass-floor: rgba(22, 25, 30, .88);
     --ds-glass-rim: rgba(255, 255, 255, .07);
-    --ds-glass-edge: rgba(0, 0, 0, .45);
+    --ds-glass-edge: rgba(255, 255, 255, .09);
     --ds-glass-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 8px 24px -12px rgba(0, 0, 0, .3);
     --ds-interactive: var(--ds-n-50); --ds-on-interactive: var(--ds-n-950); --ds-focus: var(--ds-azure-d);
     --ds-status-normal: var(--ds-green-d); --ds-status-warning: var(--ds-amber-d); --ds-status-critical: var(--ds-red-d);
@@ -62,7 +62,7 @@
     --ds-glass: rgba(26, 29, 34, .6);
     --ds-glass-floor: rgba(22, 25, 30, .88);
     --ds-glass-rim: rgba(255, 255, 255, .07);
-    --ds-glass-edge: rgba(0, 0, 0, .45);
+    --ds-glass-edge: rgba(255, 255, 255, .09);
     --ds-glass-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 8px 24px -12px rgba(0, 0, 0, .3);
     --ds-interactive: var(--ds-n-50); --ds-on-interactive: var(--ds-n-950); --ds-focus: var(--ds-azure-d);
     --ds-status-normal: var(--ds-green-d); --ds-status-warning: var(--ds-amber-d); --ds-status-critical: var(--ds-red-d);
